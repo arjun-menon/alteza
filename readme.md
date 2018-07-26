@@ -1,9 +1,10 @@
 
-README
-------
+Mandrake is a blogging framework in the spirit of [Jekyll](https://jekyllrb.com/), [Hugo](https://gohugo.io/), [Gutenberg](https://www.getgutenberg.io/), etc. I'm building this because I want far more control that what any of the existing options offer.
 
-In the spirit of [Readme Driven Development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html), I'll be writing this readme, to lay out the structure of this project.
+Overview
+--------
 
+In the spirit of [Readme Driven Development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html), this readme provides an overview and lays out the structure of this project.
 
 *General Ideas*
 
