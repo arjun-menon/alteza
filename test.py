@@ -11,28 +11,28 @@ html = md.convert(text)
 
 yaml_frontmatter = str()
 
-for name, lines in md.Meta.iteritems():
+for name, lines in md.Meta.items():
     yaml_frontmatter += '%s : %s \n' % (name, lines[0])
     for line in lines[1:]:
         yaml_frontmatter += ' ' * ( len(name) + 3 ) + line + '\n'
 
-print yaml_frontmatter
+print(yaml_frontmatter)
 
 yaml_metadata = yaml.load(yaml_frontmatter)
 
-print yaml_metadata
+print(yaml_metadata)
 
 class Metadata(object):
     def __init__(self, metadata_dict):
         self.metadata_dict = metadata_dict
-        for k, v in metadata_dict.iteritems():
+        for k, v in metadata_dict.items():
             self.__dict__[k] = v
     def __repr__(self):
-        return '\n'.join('%s : %s' % (k, v) for k, v in yaml_metadata.iteritems())
+        return '\n'.join('%s : %s' % (k, v) for k, v in yaml_metadata.items())
 
 metadata = Metadata(yaml_metadata)
 
-print 
-print metadata
-print 
-print metadata.title
+print() 
+print(metadata)
+print() 
+print(metadata.title)
