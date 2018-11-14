@@ -13,28 +13,23 @@ class DirNode(object):
         self.dirName = dirPathComponents[-1]
         self.fileNames = None
         self.subDirs = None
-
-    def establish(self):
-        print('Directory: ', self.dirPath, end='')
         walkResult = next(os.walk(self.dirPath))
-        print(walkResult)
+        print('Directory: ', *walkResult)
         dirPath, subDirNames, fileNames = walkResult
         assert self.dirPath == dirPath
         self.fileNames = fileNames
         self.subDirs = []
         for subDirName in subDirNames:
             subDir = DirNode(os.path.join(dirPath, subDirName))
-            subDir.establish()
             self.subDirs.append(subDir)
 
     def __repr__(self, indent=0):
         r = (' ' * 4 * indent) + '%s -> %s\n' % (self.dirName, self.fileNames)
         for subDir in self.subDirs:
-            r += subDir.__repr__(1)
+            r += subDir.__repr__(indent + 1)
         return r
 
 root = DirNode('test_content')
-root.establish()
 print(root)
 
 # for dirpath, dirnames, filenames in os.walk('test_content'):
@@ -94,9 +89,11 @@ if __name__ == "__main__":
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
     observer.start()
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
+    # try:
+    #     while True:
+    #         time.sleep(1)
+    # except KeyboardInterrupt:
+    #     observer.stop()
+    time.sleep(2)
+    observer.stop()
     observer.join()
