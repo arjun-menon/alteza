@@ -1,4 +1,29 @@
 
+Flexible Static Site Generator
+==============================
+
+Key Ideas
+---------
+
+* Follow React-like principles of:
+ - Child doesn't know anything about parent
+ - Top-down data flow
+
+* Simple _importable_ `.py` files that are used instead of YAML or JSON configs.
+  - Maybe, let even the front matter be executable Python code.
+
+* By default, no file is public.
+  - Files need to have a `publish` property or something to be copied over.
+  - But we'll need some way of saying everything in this directory and its descendants should all be copied.
+  - We'll also need some reachability algorithm -- to figure out which files should be copied.
+    + Maybe just search a file for string paths? But that wouldn't work for children / files in subdirectories.
+
+* pypage everywhere?
+  - Or maybe paypage is _only activated -- when a `.py` appears before the actual extension?_
+
+
+Older Ideas
+===========
 
 Posts Processing
 ----------------
