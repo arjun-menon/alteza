@@ -29,21 +29,6 @@ class DirNode(object):
             r += subDir.__repr__(indent + 1)
         return r
 
-root = DirNode('test_content')
-print(root)
-
-# for dirpath, dirnames, filenames in os.walk('test_content'):
-#     print('--------------------------------------------')
-#     print(dirpath, dirnames, filenames)
-#
-#     # print path to all subdirectories first.
-#     # for subdirname in dirnames:
-#     #     print(os.path.join(dirpath, subdirname))
-#
-#     # print path to all filenames.
-#     # for filename in filenames:
-#     #     print(os.path.join(dirpath, filename))
-
 class Metadata(object):
     def __init__(self, metadata_dict):
         for k, v in metadata_dict.items():
@@ -78,6 +63,9 @@ print()
 print(metadata.title)
 
 if __name__ == "__main__":
+    root = DirNode('test_content')
+    print(root)
+
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
