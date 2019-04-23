@@ -21,6 +21,11 @@ Key Ideas
 * pypage everywhere?
   - Or maybe paypage is _only activated -- when a `.py` appears before the actual extension?_
 
+Blogging Structure
+------------------
+
+- Use LOTS of categories (folders / sub-sections) while blogging!
+
 
 Older Ideas
 ===========

@@ -10,7 +10,7 @@ In the spirit of [Readme Driven Development](http://tom.preston-werner.com/2010/
 
 Below, the word "public" refers to generated public-facing website.
 
- 1. The directory strucutre is generally mirrored in the public site.
+ 1. The directory structure is generally mirrored in the public site.
 
  2. By default, nothing is public.
  	* A file must explicitly indicate (in some way) that it is to be public.
