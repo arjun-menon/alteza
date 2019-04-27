@@ -7,14 +7,23 @@ from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 
 
+class FileNode(object):
+    def __init__(self, file_name):
+        self.file_name = file_name
+
+    def __repr__(self):
+        return self.file_name
+
+
 class DirNode(object):
     def __init__(self, dir_path):
-        _, sub_dir_names, self.file_names = next(os.walk(dir_path))
+        _, sub_dir_names, file_names = next(os.walk(dir_path))
         self.dir_name = os.path.split(dir_path)[-1]
+        self.files = [FileNode(file_name) for file_name in file_names]
         self.sub_dirs = [DirNode(os.path.join(dir_path, dir_name)) for dir_name in sub_dir_names]
 
     def __repr__(self, indent=0):
-        return (' ' * 4 * indent) + '%s -> %s\n' % (self.dir_name, self.file_names) + ''.join(subDir.__repr__(indent + 1) for subDir in self.sub_dirs)
+        return (' ' * 4 * indent) + '%s -> %s\n' % (self.dir_name, self.files) + ''.join(subDir.__repr__(indent + 1) for subDir in self.sub_dirs)
 
 
 class Metadata(object):
