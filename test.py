@@ -37,6 +37,12 @@ class Metadata(object):
         return '\n'.join('%s : %s' % (k, v) for k, v in self.__dict__.items())
 
 
+def render(content_dir, output_dir):
+    root = DirNode(content_dir)
+    print(root)
+
+###############################################################################
+
 def process_markdown(md_filename):
     with open(md_filename) as f:
         text = f.read()
@@ -55,17 +61,15 @@ def process_markdown(md_filename):
     return metadata, html
 
 
-metadata, html = process_markdown('simple.md')
+def test_markdown_processing():
+    metadata, html = process_markdown('simple.md')
+    print()
+    print(metadata)
+    print()
+    print(metadata.title)
 
-print() 
-print(metadata)
-print() 
-print(metadata.title)
 
-if __name__ == "__main__":
-    root = DirNode('test_content')
-    print(root)
-
+def test_change_monitoring():
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
@@ -82,3 +86,9 @@ if __name__ == "__main__":
     time.sleep(2)
     observer.stop()
     observer.join()
+
+
+if __name__ == "__main__":
+    render('test_content', 'test_output')
+    test_markdown_processing()
+    test_change_monitoring()

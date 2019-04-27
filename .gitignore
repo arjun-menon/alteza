@@ -143,3 +143,5 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+# Test Output
+test_output/
