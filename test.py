@@ -9,26 +9,12 @@ from watchdog.events import LoggingEventHandler
 
 class DirNode(object):
     def __init__(self, dir_path):
-        self.dirPath = dir_path
-        dir_path_components = os.path.split(dir_path)
-        self.dirName = dir_path_components[-1]
-        self.fileNames = None
-        self.subDirs = None
-        walk_result = next(os.walk(self.dirPath))
-        print('Directory: ', *walk_result)
-        dir_path, sub_dir_names, file_names = walk_result
-        assert self.dirPath == dir_path
-        self.fileNames = file_names
-        self.subDirs = []
-        for subDirName in sub_dir_names:
-            subDir = DirNode(os.path.join(dir_path, subDirName))
-            self.subDirs.append(subDir)
+        _, sub_dir_names, self.file_names = next(os.walk(dir_path))
+        self.dir_name = os.path.split(dir_path)[-1]
+        self.sub_dirs = [DirNode(os.path.join(dir_path, dir_name)) for dir_name in sub_dir_names]
 
     def __repr__(self, indent=0):
-        r = (' ' * 4 * indent) + '%s -> %s\n' % (self.dirName, self.fileNames)
-        for subDir in self.subDirs:
-            r += subDir.__repr__(indent + 1)
-        return r
+        return (' ' * 4 * indent) + '%s -> %s\n' % (self.dir_name, self.file_names) + ''.join(subDir.__repr__(indent + 1) for subDir in self.sub_dirs)
 
 
 class Metadata(object):
@@ -92,5 +78,5 @@ def test_change_monitoring():
 
 if __name__ == "__main__":
     render('test_content', 'test_output')
-    test_markdown_processing()
-    test_change_monitoring()
+    # test_markdown_processing()
+    # test_change_monitoring()
