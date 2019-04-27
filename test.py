@@ -6,21 +6,22 @@ from pypage import pypage
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 
+
 class DirNode(object):
-    def __init__(self, dirPath):
-        self.dirPath = dirPath
-        dirPathComponents = os.path.split(dirPath)
-        self.dirName = dirPathComponents[-1]
+    def __init__(self, dir_path):
+        self.dirPath = dir_path
+        dir_path_components = os.path.split(dir_path)
+        self.dirName = dir_path_components[-1]
         self.fileNames = None
         self.subDirs = None
-        walkResult = next(os.walk(self.dirPath))
-        print('Directory: ', *walkResult)
-        dirPath, subDirNames, fileNames = walkResult
-        assert self.dirPath == dirPath
-        self.fileNames = fileNames
+        walk_result = next(os.walk(self.dirPath))
+        print('Directory: ', *walk_result)
+        dir_path, sub_dir_names, file_names = walk_result
+        assert self.dirPath == dir_path
+        self.fileNames = file_names
         self.subDirs = []
-        for subDirName in subDirNames:
-            subDir = DirNode(os.path.join(dirPath, subDirName))
+        for subDirName in sub_dir_names:
+            subDir = DirNode(os.path.join(dir_path, subDirName))
             self.subDirs.append(subDir)
 
     def __repr__(self, indent=0):
@@ -28,6 +29,7 @@ class DirNode(object):
         for subDir in self.subDirs:
             r += subDir.__repr__(indent + 1)
         return r
+
 
 class Metadata(object):
     def __init__(self, metadata_dict):
