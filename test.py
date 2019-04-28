@@ -31,10 +31,9 @@ class DirNode(object):
 
 class Metadata(object):
     def __init__(self, metadata_dict: Dict[str, str]) -> None:
-        for k, v in metadata_dict.items():
-            self.__dict__[k] = v
+        self.metadata_dict = metadata_dict
     def __repr__(self) -> str:
-        return '\n'.join('%s : %s' % (k, v) for k, v in self.__dict__.items())
+        return '\n'.join('%s : %s' % (k, v) for k, v in self.metadata_dict.items())
 
 
 def render(content_dir: str, output_dir: str) -> None:
@@ -51,22 +50,20 @@ def process_markdown(md_filename: str) -> Tuple[Metadata, str]:
     html = md.convert(text)
     yaml_front_matter = ''
 
-    for name, lines in md.Meta.items():
+    for name, lines in md.Meta.items(): # pylint: disable=no-member
         yaml_front_matter += '%s : %s \n' % (name, lines[0])
         for line in lines[1:]:
             yaml_front_matter += ' ' * ( len(name) + 3 ) + line + '\n'
 
-    yaml_metadata = yaml.load(yaml_front_matter)
+    yaml_metadata = yaml.safe_load(yaml_front_matter)
     metadata = Metadata(yaml_metadata)
     return metadata, html
 
 
 def test_markdown_processing() -> None:
+    # pylint: disable=unused-variable
     metadata, html = process_markdown('simple.md')
-    print()
     print(metadata)
-    print()
-    print(metadata.title)
 
 
 def test_change_monitoring() -> None:
@@ -74,7 +71,7 @@ def test_change_monitoring() -> None:
                         format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
     path = sys.argv[1] if len(sys.argv) > 1 else '.'
-    event_handler = LoggingEventHandler()
+    event_handler = LoggingEventHandler() # type: ignore
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)
     observer.start()
@@ -83,7 +80,7 @@ def test_change_monitoring() -> None:
     #         time.sleep(1)
     # except KeyboardInterrupt:
     #     observer.stop()
-    time.sleep(2)
+    time.sleep(1)
     observer.stop()
     observer.join()
 
