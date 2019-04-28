@@ -1,46 +1,49 @@
 #!/usr/bin/env python3
 
-import os, yaml, markdown
-import sys, time, logging
+# pyre-strict
+
+import os, yaml, sys, time, logging
+import markdown # pyre-ignore
 from pypage import pypage
-from watchdog.observers import Observer
-from watchdog.events import LoggingEventHandler
+from watchdog.observers import Observer # pyre-ignore
+from watchdog.events import LoggingEventHandler # pyre-ignore
+from typing import Dict, List, Tuple
 
 
 class FileNode(object):
-    def __init__(self, file_name):
-        self.file_name = file_name
+    def __init__(self, file_name: str) -> None:
+        self.file_name: str = file_name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.file_name
 
 
 class DirNode(object):
-    def __init__(self, dir_path):
+    def __init__(self, dir_path: str) -> None:
         _, sub_dir_names, file_names = next(os.walk(dir_path))
-        self.dir_name = os.path.split(dir_path)[-1]
-        self.files = [FileNode(file_name) for file_name in file_names]
-        self.sub_dirs = [DirNode(os.path.join(dir_path, dir_name)) for dir_name in sub_dir_names]
+        self.dir_name: str = os.path.split(dir_path)[-1]
+        self.files: List[FileNode] = [FileNode(file_name) for file_name in file_names]
+        self.sub_dirs: List[DirNode] = [DirNode(os.path.join(dir_path, dir_name)) for dir_name in sub_dir_names]
 
-    def __repr__(self, indent=0):
+    def __repr__(self, indent: int = 0) -> str:
         return (' ' * 4 * indent) + '%s -> %s\n' % (self.dir_name, self.files) + ''.join(subDir.__repr__(indent + 1) for subDir in self.sub_dirs)
 
 
 class Metadata(object):
-    def __init__(self, metadata_dict):
+    def __init__(self, metadata_dict: Dict[str, str]) -> None:
         for k, v in metadata_dict.items():
             self.__dict__[k] = v
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '\n'.join('%s : %s' % (k, v) for k, v in self.__dict__.items())
 
 
-def render(content_dir, output_dir):
+def render(content_dir: str, output_dir: str) -> None:
     root = DirNode(content_dir)
     print(root)
 
 ###############################################################################
 
-def process_markdown(md_filename):
+def process_markdown(md_filename: str) -> Tuple[Metadata, str]:
     with open(md_filename) as f:
         text = f.read()
 
@@ -58,7 +61,7 @@ def process_markdown(md_filename):
     return metadata, html
 
 
-def test_markdown_processing():
+def test_markdown_processing() -> None:
     metadata, html = process_markdown('simple.md')
     print()
     print(metadata)
@@ -66,7 +69,7 @@ def test_markdown_processing():
     print(metadata.title)
 
 
-def test_change_monitoring():
+def test_change_monitoring() -> None:
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
