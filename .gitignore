@@ -143,6 +143,9 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+# Pyre
+.pyre
+
 # pypage symlink (for personal use)
 pypage.py
 

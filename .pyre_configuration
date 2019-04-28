@@ -1,0 +1,7 @@
+{
+  "binary": "/home/arjun/.local/bin/pyre.bin",
+  "source_directories": [
+    "."
+  ],
+  "typeshed": "/home/arjun/.local/lib/pyre_check/typeshed/"
+}
