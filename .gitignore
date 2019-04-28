@@ -143,5 +143,8 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+# pypage symlink (for personal use)
+pypage.py
+
 # Test Output
 test_output/
