@@ -10,23 +10,28 @@ from watchdog.events import LoggingEventHandler # pyre-ignore
 from typing import Dict, List, Tuple
 
 
-class FileNode(object):
-    def __init__(self, file_name: str) -> None:
-        self.file_name: str = file_name
+class FsNode(object):
+    def __init__(self, dir_path: str, name: str) -> None:
+        self.name: str = name
+        self.dir_path: str = dir_path
+        self.abs_path: str = os.path.abspath(os.path.join(self.dir_path, self.name))
 
     def __repr__(self) -> str:
-        return self.file_name
+        return self.abs_path
 
+class FileNode(FsNode):
+    pass
 
-class DirNode(object):
+class DirNode(FsNode):
     def __init__(self, dir_path: str) -> None:
         _, sub_dir_names, file_names = next(os.walk(dir_path))
-        self.dir_name: str = os.path.split(dir_path)[-1]
-        self.files: List[FileNode] = [FileNode(file_name) for file_name in file_names]
+        dir_name: str = os.path.split(dir_path)[-1]
+        super().__init__(dir_path, dir_name)
+        self.files: List[FileNode] = [FileNode(dir_path, file_name) for file_name in file_names]
         self.sub_dirs: List[DirNode] = [DirNode(os.path.join(dir_path, dir_name)) for dir_name in sub_dir_names]
 
-    def __repr__(self, indent: int = 0) -> str:
-        return (' ' * 4 * indent) + '%s -> %s\n' % (self.dir_name, self.files) + ''.join(subDir.__repr__(indent + 1) for subDir in self.sub_dirs)
+    def display(self, indent: int = 0) -> str:
+        return (' ' * 4 * indent) + '%s -> %s\n' % (self, self.files) + ''.join(subDir.display(indent + 1) for subDir in self.sub_dirs)
 
 
 class Metadata(object):
@@ -38,9 +43,11 @@ class Metadata(object):
 
 def render(content_dir: str, output_dir: str) -> None:
     root = DirNode(content_dir)
-    print(root)
+    print(root.display())
+
 
 ###############################################################################
+
 
 def process_markdown(md_filename: str) -> Tuple[Metadata, str]:
     with open(md_filename) as f:
