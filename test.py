@@ -12,13 +12,13 @@ from typing import Dict, List, Tuple
 
 
 class FsNode(object):
-    def __init__(self, dir_path: str, name: str) -> None:
+    def __init__(self, dir_path: str, name: str, is_dir: bool = False) -> None:
         self.name: str = name
         self.dir_path: str = dir_path
-        self.abs_path: str = os.path.abspath(os.path.join(self.dir_path, self.name))
+        self.full_path: str = self.dir_path if is_dir else os.path.join(self.dir_path, self.name)
 
     def __repr__(self) -> str:
-        return self.name
+        return self.full_path
 
 
 class FileNode(FsNode):
@@ -29,7 +29,7 @@ class DirNode(FsNode):
     def __init__(self, dir_path: str) -> None:
         _, sub_dir_names, file_names = next(os.walk(dir_path))
         dir_name: str = os.path.split(dir_path)[-1]
-        super().__init__(dir_path, dir_name)
+        super().__init__(dir_path, dir_name, True)
         self.files: List[FileNode] = [
             FileNode(dir_path, file_name) for file_name in file_names
         ]
