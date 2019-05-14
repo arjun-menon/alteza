@@ -2,7 +2,8 @@
 # formatted with black
 # pyre-strict
 
-import os, shutil, yaml, sys, time, logging
+from shutil import rmtree
+import os, yaml, sys, time, logging
 import markdown  # pyre-ignore
 from pypage import pypage
 from watchdog.observers import Observer  # pyre-ignore
@@ -52,12 +53,17 @@ class Metadata(object):
         return "\n".join("%s : %s" % (k, v) for k, v in self.metadata_dict.items())
 
 
-def clear_output_dir(output_dir: str) -> None:
-    assert os.path.isdir(output_dir)
+def reset_output_dir(output_dir: str) -> None:
+    if os.path.isfile(output_dir):
+        raise Exception("There is a file named %s." % output_dir)
+    if os.path.isdir(output_dir):
+        print("Deleting directory %s and all of its content..." % output_dir)
+        rmtree(output_dir)
+    os.mkdir(output_dir)
 
 
 def mandrake(content_dir: str, output_dir: str) -> None:
-    clear_output_dir(output_dir)
+    reset_output_dir(output_dir)
 
     root = DirNode(content_dir)
     print(root.display())
