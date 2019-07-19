@@ -7,7 +7,8 @@ import markdown  # pyre-ignore
 from pypage import pypage
 from watchdog.observers import Observer  # pyre-ignore
 from watchdog.events import LoggingEventHandler  # pyre-ignore
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Set, DefaultDict
+from collections import defaultdict
 
 
 class FsNode(object):
@@ -27,15 +28,18 @@ class FileNode(FsNode):
 
 
 class DirNode(FsNode):
-    def __init__(self, dir_path: str) -> None:
+    def __init__(self, dir_path: str, all_files: DefaultDict[str, Set[str]]) -> None:
         _, sub_dir_names, file_names = next(os.walk(dir_path))
         dir_name: str = os.path.split(dir_path)[-1]
         super().__init__(dir_path, dir_name, True)
         self.files: List[FileNode] = [
             FileNode(dir_path, file_name) for file_name in file_names
         ]
+        for file_name in file_names:
+            all_files[file_name].add(os.path.join(dir_path, file_name))
         self.sub_dirs: List[DirNode] = [
-            DirNode(os.path.join(dir_path, dir_name)) for dir_name in sub_dir_names
+            DirNode(os.path.join(dir_path, dir_name), all_files)
+            for dir_name in sub_dir_names
         ]
 
     def display(self, indent: int = 0) -> str:
@@ -46,16 +50,25 @@ class DirNode(FsNode):
         )
 
 
+class Content(object):
+    def __init__(self, content_dir: str) -> None:
+        os.chdir(content_dir)
+        self.all_files: DefaultDict[str, Set[str]] = defaultdict(set)
+        self.root = DirNode(".", self.all_files)
+        print(self.root.display())
+
+    def process(self) -> None:
+        print()
+        print(self.all_files)
+        pass
+
+
 class Metadata(object):
     def __init__(self, metadata_dict: Dict[str, str]) -> None:
         self.metadata_dict = metadata_dict
 
     def __repr__(self) -> str:
         return "\n".join("%s : %s" % (k, v) for k, v in self.metadata_dict.items())
-
-
-def process(content: DirNode, output_dir: str) -> None:
-    pass
 
 
 def reset_output_dir(output_dir: str) -> None:
@@ -70,12 +83,10 @@ def reset_output_dir(output_dir: str) -> None:
 def mandrake(content_dir: str, output_dir: str) -> None:
     reset_output_dir(output_dir)
 
-    os.chdir(content_dir)
-    root = DirNode('.')
-    print(root.display())
+    content = Content(content_dir)
 
     print("Processing...")
-    process(root, output_dir)
+    content.process()
 
 
 ###############################################################################
