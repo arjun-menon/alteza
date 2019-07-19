@@ -2,8 +2,7 @@
 # formatted with black
 # pyre-strict
 
-from shutil import rmtree
-import os, yaml, sys, time, logging
+import os, shutil, yaml, sys, time, logging
 import markdown  # pyre-ignore
 from pypage import pypage
 from watchdog.observers import Observer  # pyre-ignore
@@ -13,9 +12,11 @@ from typing import Dict, List, Tuple
 
 class FsNode(object):
     def __init__(self, dir_path: str, name: str, is_dir: bool = False) -> None:
-        self.name: str = name
         self.dir_path: str = dir_path
-        self.full_path: str = self.dir_path if is_dir else os.path.join(self.dir_path, self.name)
+        self.name: str = name
+        self.full_path: str = self.dir_path if is_dir else os.path.join(
+            self.dir_path, self.name
+        )
 
     def __repr__(self) -> str:
         return self.full_path
@@ -53,20 +54,28 @@ class Metadata(object):
         return "\n".join("%s : %s" % (k, v) for k, v in self.metadata_dict.items())
 
 
+def process(content: DirNode, output_dir: str) -> None:
+    pass
+
+
 def reset_output_dir(output_dir: str) -> None:
     if os.path.isfile(output_dir):
         raise Exception("There is a file named %s." % output_dir)
     if os.path.isdir(output_dir):
         print("Deleting directory %s and all of its content..." % output_dir)
-        rmtree(output_dir)
+        shutil.rmtree(output_dir)
     os.mkdir(output_dir)
 
 
 def mandrake(content_dir: str, output_dir: str) -> None:
     reset_output_dir(output_dir)
 
-    root = DirNode(content_dir)
+    os.chdir(content_dir)
+    root = DirNode('.')
     print(root.display())
+
+    print("Processing...")
+    process(root, output_dir)
 
 
 ###############################################################################
