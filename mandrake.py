@@ -32,11 +32,13 @@ class DirNode(FsNode):
         _, sub_dir_names, file_names = next(os.walk(dir_path))
         dir_name: str = os.path.split(dir_path)[-1]
         super().__init__(dir_path, dir_name, True)
+
         self.files: List[FileNode] = [
             FileNode(dir_path, file_name) for file_name in file_names
         ]
         for file_name in file_names:
             all_files[file_name].add(os.path.join(dir_path, file_name))
+
         self.sub_dirs: List[DirNode] = [
             DirNode(os.path.join(dir_path, dir_name), all_files)
             for dir_name in sub_dir_names
@@ -52,7 +54,8 @@ class DirNode(FsNode):
 
 class Content(object):
     def __init__(self, content_dir: str) -> None:
-        os.chdir(content_dir)
+        self.content_dir_abspath: str = os.path.abspath(content_dir)
+        os.chdir(self.content_dir_abspath)
         self.all_files: DefaultDict[str, Set[str]] = defaultdict(set)
         self.root = DirNode(".", self.all_files)
         print(self.root.display())
