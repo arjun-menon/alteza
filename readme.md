@@ -25,7 +25,7 @@ Below, the word "public" refers to generated public-facing website.
 
 4. There are two kinds of files that are significant to Mandrake: `pypage` content files and Python modules. Both types of files are treated as Python "executables".
 	* Content files are executed by the `pypage` templating engine. In order to determine if a file is an _executable_ `pypage` file, Mandrake runs a set of simple test functions against every file. You can add additional functions to this set. By default, two kinds of files are recognized:
-		* Markdown files containing front matter.
+		* Markdown
 		* HTML
 	* Python source files (ending in `.py3` or `.py`). You are expected to export certain specifically named functions from your module. This will be covered in detail later.If these functions are not present, Mandrake will ignore your module until it is altered. Mandrake won't spwan a new Python processes to execute your modules, but will directly import them (using `importlib`) in the main Mandrake process. The onus is on you, the user, to make sure that your Python modules are _safe and fast_. Mandrake will catch all exceptions (and log them), but nothing prevents you from calling `sys.exit(1)` (and killing the server). If your module causes Python to crash, the whole server will go down. Furthermore, it is your responsibility to ensure that your module does everything very quickly, since you do not want to hog the Mandrake process. The server runs in a different thread from the one running your code, _however_, as Python isn't truly multi-threaded due to the GIL, doing heavy work will likely cause drastic drops in the server's response times. The general principle is: keep these Python modules light and simple.
 
