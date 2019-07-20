@@ -12,7 +12,7 @@ from collections import defaultdict
 
 
 class FsNode(object):
-    def __init__(self, dir_path: str, name: str, is_dir: bool = False) -> None:
+    def __init__(self, dir_path: str, name: str, is_dir: bool) -> None:
         self.dir_path: str = dir_path
         self.name: str = name
         self.full_path: str = self.dir_path if is_dir else os.path.join(
@@ -24,7 +24,12 @@ class FsNode(object):
 
 
 class FileNode(FsNode):
-    pass
+    def __init__(self, dir_path: str, name: str) -> None:
+        super().__init__(dir_path, name, False)
+
+        self.basename: str = ""
+        self.extname: str = ""
+        self.basename, self.extname = os.path.splitext(name)
 
 
 class DirNode(FsNode):
