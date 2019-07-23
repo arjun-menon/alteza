@@ -43,6 +43,7 @@ class DirNode(FsNode):
             FileNode(dirPath, fileName) for fileName in fileNames
         ]
         for fileNode in self.files:
+            allFiles[fileNode.name].add(fileNode)
             allFiles[fileNode.basename].add(fileNode)
 
         self.subDirs: List[DirNode] = [
