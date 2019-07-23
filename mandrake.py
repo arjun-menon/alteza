@@ -18,9 +18,10 @@ class FsNode(object):
         self.full_path: str = self.dir_path if is_dir else os.path.join(
             self.dir_path, self.name
         )
+        self.abs_path: str = os.path.abspath(self.full_path)
 
     def __repr__(self) -> str:
-        return self.full_path
+        return self.abs_path
 
 
 class FileNode(FsNode):
@@ -33,7 +34,7 @@ class FileNode(FsNode):
 
 
 class DirNode(FsNode):
-    def __init__(self, dir_path: str, all_files: DefaultDict[str, Set[str]]) -> None:
+    def __init__(self, dir_path: str, all_files: DefaultDict[str, Set[FileNode]]) -> None:
         _, sub_dir_names, file_names = next(os.walk(dir_path))
         dir_name: str = os.path.split(dir_path)[-1]
         super().__init__(dir_path, dir_name, True)
@@ -41,8 +42,8 @@ class DirNode(FsNode):
         self.files: List[FileNode] = [
             FileNode(dir_path, file_name) for file_name in file_names
         ]
-        for file_name in file_names:
-            all_files[file_name].add(os.path.join(dir_path, file_name))
+        for fileNode in self.files:
+            all_files[fileNode.basename].add(fileNode)
 
         self.sub_dirs: List[DirNode] = [
             DirNode(os.path.join(dir_path, dir_name), all_files)
@@ -61,7 +62,7 @@ class Content(object):
     def __init__(self, content_dir: str) -> None:
         self.content_dir_abspath: str = os.path.abspath(content_dir)
         os.chdir(self.content_dir_abspath)
-        self.all_files: DefaultDict[str, Set[str]] = defaultdict(set)
+        self.all_files: DefaultDict[str, Set[FileNode]] = defaultdict(set)
         self.root = DirNode(".", self.all_files)
         print(self.root.display())
 
