@@ -18,10 +18,11 @@ class FsNode(object):
         self.fullPath: str = self.dirPath if isDir else os.path.join(
             self.dirPath, self.name
         )
-        self.absPath: str = os.path.abspath(self.fullPath)
+        self.dirPathAbs: str = os.path.abspath(self.dirPath)
+        self.fullPathAbs: str = os.path.abspath(self.fullPath)
 
     def __repr__(self) -> str:
-        return self.absPath
+        return self.fullPathAbs
 
 
 class FileNode(FsNode):
@@ -33,6 +34,10 @@ class FileNode(FsNode):
         self.basename, self.extname = os.path.splitext(name)
 
 
+def isHidden(name: str) -> bool:
+    return name.startswith(".")
+
+
 class DirNode(FsNode):
     def __init__(self, dirPath: str, allFiles: DefaultDict[str, Set[FileNode]]) -> None:
         _, subDirNames, fileNames = next(os.walk(dirPath))
@@ -40,14 +45,18 @@ class DirNode(FsNode):
         super().__init__(dirPath, dirName, True)
 
         self.files: List[FileNode] = [
-            FileNode(dirPath, fileName) for fileName in fileNames
+            FileNode(dirPath, fileName)
+            for fileName in fileNames
+            if not isHidden(fileName)
         ]
         for fileNode in self.files:
             allFiles[fileNode.name].add(fileNode)
             allFiles[fileNode.basename].add(fileNode)
 
         self.subDirs: List[DirNode] = [
-            DirNode(os.path.join(dirPath, dirName), allFiles) for dirName in subDirNames
+            DirNode(os.path.join(dirPath, dirName), allFiles)
+            for dirName in subDirNames
+            if not isHidden(dirName)
         ]
 
     def display(self, indent: int = 0) -> str:
