@@ -72,13 +72,20 @@ class Content(object):
         self.contentDirAbsPath: str = os.path.abspath(contentDir)
         os.chdir(self.contentDirAbsPath)
         self.allFiles: DefaultDict[str, Set[FileNode]] = defaultdict(set)
-        self.root = DirNode(".", self.allFiles)
+        self.root: DirNode = DirNode(".", self.allFiles)
         print(self.root.display())
 
+    def walk(self, node: DirNode) -> None:
+        for f in node.files:
+            print(f.basename, "->", f.extname)
+
+        for d in node.subDirs:
+            self.walk(d)
+
     def process(self) -> None:
-        print()
-        print(self.allFiles)
-        pass
+        # print()
+        # print(self.allFiles)
+        self.walk(self.root)
 
 
 class Metadata(object):
