@@ -1,14 +1,8 @@
-#!/usr/bin/env python3
 # formatted with black
 # pyre-strict
 
-import os, shutil, yaml, sys, time, logging
-import markdown  # pyre-ignore
-from pypage import pypage
-from watchdog.observers import Observer  # pyre-ignore
-from watchdog.events import LoggingEventHandler  # pyre-ignore
-from typing import Dict, List, Tuple, Set, DefaultDict
-from collections import defaultdict
+
+from core.ingest_markdown import *
 
 
 class FsNode(object):
@@ -61,9 +55,9 @@ class DirNode(FsNode):
 
     def display(self, indent: int = 0) -> str:
         return (
-            (" " * 4 * indent)
-            + "%s -> %s\n" % (self, self.files)
-            + "".join(subDir.display(indent + 1) for subDir in self.subDirs)
+                (" " * 4 * indent)
+                + "%s -> %s\n" % (self, self.files)
+                + "".join(subDir.display(indent + 1) for subDir in self.subDirs)
         )
 
 
@@ -88,14 +82,6 @@ class Content(object):
         self.walk(self.root)
 
 
-class Metadata(object):
-    def __init__(self, metadataDict: Dict[str, str]) -> None:
-        self.metadataDict = metadataDict
-
-    def __repr__(self) -> str:
-        return "\n".join("%s : %s" % (k, v) for k, v in self.metadataDict.items())
-
-
 def resetOutputDir(outputDir: str) -> None:
     if os.path.isfile(outputDir):
         raise Exception("There is a file named %s." % outputDir)
@@ -105,64 +91,10 @@ def resetOutputDir(outputDir: str) -> None:
     os.mkdir(outputDir)
 
 
-def mandrake(contentDir: str, outputDir: str) -> None:
+def process(contentDir: str, outputDir: str) -> None:
     resetOutputDir(outputDir)
 
     content = Content(contentDir)
 
     print("Processing...")
     content.process()
-
-
-###############################################################################
-
-
-def processMarkdownFile(markdownFileName: str) -> Tuple[Metadata, str]:
-    with open(markdownFileName) as f:
-        text = f.read()
-
-    md = markdown.Markdown(extensions=["meta"])
-    html = md.convert(text)
-    yamlFrontMatter = ""
-
-    for name, lines in md.Meta.items():  # pylint: disable=no-member
-        yamlFrontMatter += "%s : %s \n" % (name, lines[0])
-        for line in lines[1:]:
-            yamlFrontMatter += " " * (len(name) + 3) + line + "\n"
-
-    yamlMetadata = yaml.safe_load(yamlFrontMatter)
-    metadata = Metadata(yamlMetadata)
-    return metadata, html
-
-
-def testMarkdownProcessing() -> None:
-    # pylint: disable=unused-variable
-    metadata, html = processMarkdownFile("simple.md")
-    print(metadata)
-
-
-def testChangeDetectionMonitoring() -> None:
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    path = sys.argv[1] if len(sys.argv) > 1 else "."
-    eventHandler = LoggingEventHandler()  # type: ignore
-    observer = Observer()
-    observer.schedule(eventHandler, path, recursive=True)
-    observer.start()
-    # try:
-    #     while True:
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     observer.stop()
-    time.sleep(1)
-    observer.stop()
-    observer.join()
-
-
-if __name__ == "__main__":
-    mandrake("test_content", "test_output")
-    # testMarkdownProcessing()
-    # testChangeDetectionMonitoring()
