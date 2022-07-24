@@ -32,11 +32,7 @@ class DirNode(FsNode):
         dirName: str = os.path.split(dirPath)[-1]
         super().__init__(dirPath, dirName, True)
 
-        self.files: List[FileNode] = [
-            FileNode(dirPath, fileName)
-            for fileName in fileNames
-            if not isHidden(fileName)
-        ]
+        self.files: List[FileNode] = [FileNode(dirPath, fileName) for fileName in fileNames if not isHidden(fileName)]
         for fileNode in self.files:
             allFiles[fileNode.name].add(fileNode)
             allFiles[fileNode.basename].add(fileNode)
@@ -62,18 +58,7 @@ class Content(object):
         self.root: DirNode = DirNode(".", self.allFiles)
 
 
-def resetOutputDir(outputDir: str) -> None:
-    if os.path.isfile(outputDir):
-        raise Exception('There is a file named %s.' % outputDir)
-    if os.path.isdir(outputDir):
-        print('Deleting directory %s and all of its content...\n' % outputDir)
-        shutil.rmtree(outputDir)
-    os.mkdir(outputDir)
-
-
 def process(contentDir: str, outputDir: str) -> None:
-    resetOutputDir(outputDir)
-
     content = Content(contentDir)
 
     print('Input File Tree View 1:')
