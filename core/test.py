@@ -32,6 +32,6 @@ def testChangeDetectionMonitoring() -> None:
 
 
 def run():
-    # process("test_content", "test_output")
-    testMarkdownProcessing()
+    process("test_content", "test_output")
+    # testMarkdownProcessing()
     # testChangeDetectionMonitoring()

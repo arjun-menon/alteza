@@ -1,7 +1,6 @@
 # formatted with black
 # pyre-strict
 
-
 from core.ingest_markdown import *
 
 
@@ -12,11 +11,11 @@ class FsNode(object):
         self.fullPath: str = self.dirPath if isDir else os.path.join(
             self.dirPath, self.name
         )
-        self.dirPathAbs: str = os.path.abspath(self.dirPath)
-        self.fullPathAbs: str = os.path.abspath(self.fullPath)
+        # self.dirPathAbs: str = os.path.abspath(self.dirPath)
+        # self.fullPathAbs: str = os.path.abspath(self.fullPath)
 
     def __repr__(self) -> str:
-        return self.fullPathAbs
+        return self.fullPath
 
 
 class FileNode(FsNode):
@@ -64,7 +63,7 @@ class DirNode(FsNode):
 class Content(object):
     def __init__(self, contentDir: str) -> None:
         self.contentDirAbsPath: str = os.path.abspath(contentDir)
-        os.chdir(self.contentDirAbsPath)
+        os.chdir(contentDir)
         self.allFiles: DefaultDict[str, Set[FileNode]] = defaultdict(set)
         self.root: DirNode = DirNode(".", self.allFiles)
         print(self.root.display())
