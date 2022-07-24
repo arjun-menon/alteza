@@ -8,11 +8,7 @@ class FsNode(object):
     def __init__(self, dirPath: str, name: str, isDir: bool) -> None:
         self.dirPath: str = dirPath
         self.name: str = name
-        self.fullPath: str = self.dirPath if isDir else os.path.join(
-            self.dirPath, self.name
-        )
-        # self.dirPathAbs: str = os.path.abspath(self.dirPath)
-        # self.fullPathAbs: str = os.path.abspath(self.fullPath)
+        self.fullPath: str = self.dirPath if isDir else os.path.join(self.dirPath, self.name)
 
     def __repr__(self) -> str:
         return self.fullPath
@@ -21,14 +17,13 @@ class FsNode(object):
 class FileNode(FsNode):
     def __init__(self, dirPath: str, name: str) -> None:
         super().__init__(dirPath, name, False)
-
-        self.basename: str = ""
-        self.extname: str = ""
-        self.basename, self.extname = os.path.splitext(name)
+        self.basename: str = ''
+        self.extension: str = ''
+        self.basename, self.extension = os.path.splitext(name)
 
 
 def isHidden(name: str) -> bool:
-    return name.startswith(".")
+    return name.startswith('.')
 
 
 class DirNode(FsNode):
@@ -54,38 +49,24 @@ class DirNode(FsNode):
 
     def display(self, indent: int = 0) -> str:
         return (
-                (" " * 4 * indent)
-                + "%s -> %s\n" % (self, self.files)
-                + "".join(subDir.display(indent + 1) for subDir in self.subDirs)
+                (' ' * 4 * indent)
+                + '%s -> %s\n' % (self, self.files)
+                + ''.join(subDir.display(indent + 1) for subDir in self.subDirs)
         )
 
 
 class Content(object):
     def __init__(self, contentDir: str) -> None:
-        self.contentDirAbsPath: str = os.path.abspath(contentDir)
         os.chdir(contentDir)
         self.allFiles: DefaultDict[str, Set[FileNode]] = defaultdict(set)
         self.root: DirNode = DirNode(".", self.allFiles)
-        print(self.root.display())
-
-    def walk(self, node: DirNode) -> None:
-        for f in node.files:
-            print(f.basename, "->", f.extname)
-
-        for d in node.subDirs:
-            self.walk(d)
-
-    def process(self) -> None:
-        # print()
-        # print(self.allFiles)
-        self.walk(self.root)
 
 
 def resetOutputDir(outputDir: str) -> None:
     if os.path.isfile(outputDir):
-        raise Exception("There is a file named %s." % outputDir)
+        raise Exception('There is a file named %s.' % outputDir)
     if os.path.isdir(outputDir):
-        print("Deleting directory %s and all of its content..." % outputDir)
+        print('Deleting directory %s and all of its content...\n' % outputDir)
         shutil.rmtree(outputDir)
     os.mkdir(outputDir)
 
@@ -95,5 +76,18 @@ def process(contentDir: str, outputDir: str) -> None:
 
     content = Content(contentDir)
 
-    print("Processing...")
-    content.process()
+    print('Input File Tree View 1:')
+    print(content.root.display())
+
+    print('Input File Tree View 2:')
+
+    def walk(node: DirNode) -> None:
+        for f in node.files:
+            print(' ', f.name)
+        for d in node.subDirs:
+            print('Inside %s' % d)
+            walk(d)
+
+    walk(content.root)
+
+    print('\nAll input files:', dict(content.allFiles))
