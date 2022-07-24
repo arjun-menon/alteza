@@ -5,7 +5,7 @@ The differentiator with appletree is that the site author (expected to be fluent
 
 (Note: this is written in the spirit of [Readme Driven Development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html).)
 
-### General Ideas & Goals
+## General Ideas & Goals (WIP)
 
 1. The directory structure is generally mirrored in the generated site.
 
@@ -50,7 +50,7 @@ The differentiator with appletree is that the site author (expected to be fluent
     * If a unique name, anything can be linked to with `link` with just its name. So `link('foobar')` will work, and `link` will automatically determine & return the relative path to `foobar`.
       * Extensions can be omitted for files, if the file name without extension is unique.
 
-### Future Feature Goals
+## Future Feature Goals
 * Config file instead of command-line params.
 * Symlink swapping
   * Have the option to provide the name of a symlink name that will be updated to point to the directory containing the actual output.
