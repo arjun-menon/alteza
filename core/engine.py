@@ -5,10 +5,9 @@ from core.ingest_markdown import *
 
 
 class FsNode(object):
-    def __init__(self, dirPath: str, name: str, isDir: bool) -> None:
-        self.dirPath: str = dirPath
-        self.name: str = name
-        self.fullPath: str = self.dirPath if isDir else os.path.join(self.dirPath, self.name)
+    def __init__(self, dirPath: str, name: str) -> None:
+        self.dirPath, self.name = dirPath, name
+        self.fullPath: str = self.dirPath if isinstance(self, DirNode) else os.path.join(self.dirPath, self.name)
 
     def __repr__(self) -> str:
         return self.fullPath
@@ -16,9 +15,7 @@ class FsNode(object):
 
 class FileNode(FsNode):
     def __init__(self, dirPath: str, name: str) -> None:
-        super().__init__(dirPath, name, False)
-        self.basename: str = ''
-        self.extension: str = ''
+        super().__init__(dirPath, name)
         self.basename, self.extension = os.path.splitext(name)
 
 
@@ -27,35 +24,42 @@ def isHidden(name: str) -> bool:
 
 
 class DirNode(FsNode):
-    def __init__(self, dirPath: str, allFiles: DefaultDict[str, Set[FileNode]]) -> None:
+    def __init__(self, dirPath: str, nameRegistry) -> None:
         _, subDirNames, fileNames = next(os.walk(dirPath))
         dirName: str = os.path.split(dirPath)[-1]
-        super().__init__(dirPath, dirName, True)
+        super().__init__(dirPath, dirName)
 
-        self.files: List[FileNode] = [FileNode(dirPath, fileName) for fileName in fileNames if not isHidden(fileName)]
-        for fileNode in self.files:
-            allFiles[fileNode.name].add(fileNode)
-            allFiles[fileNode.basename].add(fileNode)
-
+        self.files: List[FileNode] = [
+            FileNode(dirPath, fileName) for fileName in fileNames if not isHidden(fileName)
+        ]
+        nameRegistry.addFiles(self)
         self.subDirs: List[DirNode] = [
-            DirNode(os.path.join(dirPath, dirName), allFiles)
-            for dirName in subDirNames
-            if not isHidden(dirName)
+            DirNode(os.path.join(dirPath, dirName), nameRegistry) for dirName in subDirNames if not isHidden(dirName)
         ]
 
     def display(self, indent: int = 0) -> str:
         return (
-                (' ' * 4 * indent)
+                (' ' * 2 * indent)
                 + '%s -> %s\n' % (self, self.files)
                 + ''.join(subDir.display(indent + 1) for subDir in self.subDirs)
         )
 
 
+class NameRegistry(object):
+    def __init__(self):
+        self.allFiles: DefaultDict[str, Set[FileNode]] = defaultdict(set)
+
+    def addFiles(self, dirNode: DirNode):
+        for fileNode in dirNode.files:
+            self.allFiles[fileNode.name].add(fileNode)
+            self.allFiles[fileNode.basename].add(fileNode)
+
+
 class Content(object):
     def __init__(self, contentDir: str) -> None:
         os.chdir(contentDir)
-        self.allFiles: DefaultDict[str, Set[FileNode]] = defaultdict(set)
-        self.root: DirNode = DirNode(".", self.allFiles)
+        self.nameRegistry = NameRegistry()
+        self.root: DirNode = DirNode(".", self.nameRegistry)
 
 
 def process(contentDir: str, outputDir: str) -> None:
@@ -75,4 +79,4 @@ def process(contentDir: str, outputDir: str) -> None:
 
     walk(content.root)
 
-    print('\nAll input files:', dict(content.allFiles))
+    print('\nAll input files:', dict(content.nameRegistry.allFiles))
