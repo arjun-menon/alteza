@@ -3,5 +3,4 @@ pylint
 pyre-check
 Markdown
 pyyaml
-watchdog
 black
