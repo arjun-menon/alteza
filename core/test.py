@@ -6,7 +6,7 @@ from core.engine import *
 
 def testMarkdownProcessing() -> None:
     # pylint: disable=unused-variable
-    metadata, html = processMarkdownFile("simple.md")
+    metadata, html = processMarkdownFile("test_content/sectionY/simple.md")
     print(metadata)
 
 
@@ -32,6 +32,6 @@ def testChangeDetectionMonitoring() -> None:
 
 
 def run():
-    process("test_content", "test_output")
-    # testMarkdownProcessing()
+    # process("test_content", "test_output")
+    testMarkdownProcessing()
     # testChangeDetectionMonitoring()
