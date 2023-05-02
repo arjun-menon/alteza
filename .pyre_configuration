@@ -1,7 +1,10 @@
 {
-  "binary": "/home/arjun/.local/bin/pyre.bin",
+  "strict": true,
+  "site_package_search_strategy": "pep561",
   "source_directories": [
-    "."
-  ],
-  "typeshed": "/home/arjun/.local/lib/pyre_check/typeshed/"
+    {
+      "import_root": ".",
+      "source": "core"
+    }
+  ]
 }
