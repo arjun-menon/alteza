@@ -20,7 +20,6 @@ def testEngineProcessing() -> None:
 
 
 def testMarkdownProcessing() -> None:
-    # pylint: disable=unused-variable
     metadata, html = processMarkdownFile("test_content/sectionY/simple.md")
     print(metadata)
 

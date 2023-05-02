@@ -3,7 +3,6 @@ Markdown
 Pygments
 pyyaml
 
-pylint
 black
 pyre-check
 mypy
