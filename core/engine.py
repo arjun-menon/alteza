@@ -21,6 +21,7 @@ class FsNode(object):
 class FileNode(FsNode):
     def __init__(self, dirPath: str, name: str) -> None:
         super().__init__(dirPath, name)
+        self.name: str = name # for typing
         split_name = os.path.splitext(name)
         self.basename: str = split_name[0]
         self.extension: str = split_name[1]
@@ -57,7 +58,7 @@ def displayDir(dirNode: DirNode, indent: int = 0) -> str:
 
 class NameRegistry(object):
     def __init__(self, root: DirNode) -> None:
-        self.allFiles: DefaultDict[Union[str, None], Set[FileNode]] = defaultdict(set)
+        self.allFiles: DefaultDict[str, Set[FileNode]] = defaultdict(set)
 
         def walk(node: DirNode) -> None:
             for f in node.files:
