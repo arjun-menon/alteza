@@ -5,6 +5,29 @@ The differentiator with appletree is that the site author (expected to be fluent
 
 (Note: this is written in the spirit of [Readme Driven Development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html).)
 
+## Testing
+
+To run, execute the `core` module itself, from the project directory:
+```sh
+python3 -m core
+```
+
+### Depedencies
+
+To install dependencies, run:
+```sh
+python3 -m pip install -r requirements.txt
+```
+
+To use a virtual environment:
+```sh
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install -r requirements.txt
+# ... do some testing ...
+deactive # end the venv
+```
+
 ## General Ideas & Goals (WIP)
 
 1. The directory structure is generally mirrored in the generated site.
