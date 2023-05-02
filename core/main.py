@@ -3,7 +3,7 @@
 from core import test
 
 
-def main():
+def main() -> None:
     test.run()
 
 

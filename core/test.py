@@ -3,9 +3,9 @@ from core.engine import *
 
 def resetOutputDir(outputDir: str) -> None:
     if os.path.isfile(outputDir):
-        raise Exception('There is a file named %s.' % outputDir)
+        raise Exception("There is a file named %s." % outputDir)
     if os.path.isdir(outputDir):
-        print('Deleting directory %s and all of its content...\n' % outputDir)
+        print("Deleting directory %s and all of its content...\n" % outputDir)
         shutil.rmtree(outputDir)
     os.mkdir(outputDir)
 
@@ -25,6 +25,6 @@ def testMarkdownProcessing() -> None:
     print(metadata)
 
 
-def run():
+def run() -> None:
     testEngineProcessing()
     # testMarkdownProcessing()
