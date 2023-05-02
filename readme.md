@@ -11,14 +11,14 @@ To run, execute the `core` module itself, from the project directory:
 python3 -m core
 ```
 
-To run some static analysis and type checks:
+### Type checking & reformatting
+To run some type checks:
 ```sh
-mypy core
-pyre check
-pylint core # lots of errors
+mypy core # should have zero errors
+pyre check # should have zero errors as well
 ```
 
-To re-format the code: `black`.
+To re-format the code, just run: `black core`.
 
 ### Depedencies
 
