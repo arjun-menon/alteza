@@ -1,9 +1,8 @@
 
 appletree will be a static site generator driven by [pypage](https://github.com/arjun-menon/pypage).
 Examples of other static site generator include [Jekyll](https://jekyllrb.com/), [Hugo](https://gohugo.io/), [Gutenberg](https://www.getgutenberg.io/), etc.
-The differentiator with appletree is that the site author (expected to be fluent in Python) will have a lot more fine-grained control over the output, than what any of the existing options offer.
 
-(Note: this is written in the spirit of [Readme Driven Development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html).)
+The differentiator with appletree is that the site author (expected to be fluent in Python) will have a lot more fine-grained control over the output, than what any of the existing options offer.
 
 ## Testing
 
@@ -12,10 +11,20 @@ To run, execute the `core` module itself, from the project directory:
 python3 -m core
 ```
 
+To run some static analysis and type checks:
+```sh
+mypy core
+pyre check
+pylint core # lots of errors
+```
+
+To re-format the code: `black`.
+
 ### Depedencies
 
 To install dependencies, run:
 ```sh
+brew install watchman # on macOS
 python3 -m pip install -r requirements.txt
 ```
 
@@ -29,6 +38,8 @@ deactive # end the venv
 ```
 
 ## General Ideas & Goals (WIP)
+
+(Note: this is written in the spirit of [Readme Driven Development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html).)
 
 1. The directory structure is generally mirrored in the generated site.
 
@@ -68,6 +79,7 @@ deactive # end the venv
         * In `pypage`, one can do `<a href="{{link('foo/bar')}}">`, for example.
       * Reachability of files is determined using this function, and unreachable files will be treated as non-public (as described in point 1).
     * Any non-dynamic content file that has been `link`-ed to is marked for publication (i.e. copying).
+
 5. Name registry for `link`.
     * All files and directories are stored in a name registry (together).
     * If a unique name, anything can be linked to with `link` with just its name. So `link('foobar')` will work, and `link` will automatically determine & return the relative path to `foobar`.
