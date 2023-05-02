@@ -1,6 +1,11 @@
 pypage
-pylint
-pyre-check
 Markdown
+Pygments
 pyyaml
+
+pylint
 black
+pyre-check
+mypy
+types-PyYAML
+types-Markdown
