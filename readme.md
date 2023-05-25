@@ -28,9 +28,8 @@ brew install watchman # on macOS
 python3 -m pip install -r requirements.txt
 ```
 
-To use a virtual environment:
+To use a virtual environment (after creating one with `python3 -m venv venv`):
 ```sh
-python3 -m venv venv
 source venv/bin/activate
 python3 -m pip install -r requirements.txt
 # ... do some testing ...
