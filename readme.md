@@ -53,7 +53,7 @@ deactive # end the venv
       * By default, there are two kinds of dynamic content files: Markdown (`.md`) and HTML (`.htm` and `.html`).
       * Additional dynamic content file types can be specified through configuration.
         * Functions to help process them can also be provided in configuration.
-      * HTML files are directly processed through `pypage`.
+      * HTML files ending with the extension `.pypage.html` are directly processed by `pypage`.
       * Markdown files:
         * Markdown files are first processed to have their "front matter" extracted using [Meta-Data](https://python-markdown.github.io/extensions/meta_data/).
           * The first blank line or `---` ends the front matter section.
