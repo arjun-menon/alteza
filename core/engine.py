@@ -1,5 +1,6 @@
+from typing import Optional
+
 from core.ingest_markdown import *
-from typing import Optional, Union
 
 magic_py: str = "magic.py"
 
@@ -21,7 +22,7 @@ class FsNode(object):
 class FileNode(FsNode):
     def __init__(self, dirPath: str, name: str) -> None:
         super().__init__(dirPath, name)
-        self.name: str = name # for typing
+        self.name: str = name  # for typing
         split_name = os.path.splitext(name)
         self.basename: str = split_name[0]
         self.extension: str = split_name[1]
@@ -77,6 +78,11 @@ class NameRegistry(object):
             self.allFiles[fileNode.name].add(fileNode)
             self.allFiles[fileNode.basename].add(fileNode)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}:\n" + "\n  ".join(
+            f"{k}: {v}" for k, v in self.allFiles.items()
+        )
+
 
 class Content(object):
     def __init__(self, contentDir: str) -> None:
@@ -90,4 +96,4 @@ def process(contentDir: str, outputDir: str) -> None:
 
     print("Input File Tree:")
     print(displayDir(content.root))
-    print("\nAll input files:", dict(content.nameRegistry.allFiles))
+    print(content.nameRegistry)
