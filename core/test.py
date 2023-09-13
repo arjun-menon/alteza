@@ -1,4 +1,5 @@
 from core.engine import *
+from core.ingest_markdown import *
 
 
 def resetOutputDir(outputDir: str) -> None:
