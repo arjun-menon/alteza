@@ -2,6 +2,7 @@ pypage
 Markdown
 Pygments
 pyyaml
+colored
 
 black
 pyre-check

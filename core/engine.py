@@ -3,6 +3,11 @@ from time import time_ns
 from core.common_imports import *
 from core.ingest_markdown import Markdown, processMarkdownFile
 
+# pyre-ignore[21]
+from colored import Fore, Back, Style  # type: ignore [import]
+
+colored_logs = True
+
 
 class FsNode(object):
     def __init__(self, dirPath: str, fileName: Optional[str]) -> None:
@@ -16,7 +21,13 @@ class FsNode(object):
         self.shouldPublish: bool = False
 
     def __repr__(self) -> str:
-        return self.fullPath
+        return self.colorize(self.fullPath)
+
+    def colorize(self, r: str) -> str:
+        if colored_logs:
+            if self.shouldPublish:
+                r = f"{Style.bold}{Fore.spring_green_2b}{r}{Style.reset}"
+        return r
 
 
 class FileNode(FsNode):  # pyre-ignore[13]
@@ -26,7 +37,16 @@ class FileNode(FsNode):  # pyre-ignore[13]
         split_name = os.path.splitext(fileName)
         self.basename: str = split_name[0]
         self.extension: str = split_name[1]
-        self.markdown: Markdown
+        self.markdown: Optional[Markdown] = None
+        self.hmm: str
+
+    def __repr__(self) -> str:
+        r = f"{self.fileName}"
+        if colored_logs:
+            if self.markdown:
+                r = f"{Fore.purple_4b}{r}{Style.reset}"
+        r = super().colorize(r)
+        return r
 
 
 def isHidden(name: str) -> bool:
@@ -119,7 +139,7 @@ class Content(object):
                 if f.extension == ".md":
                     f.markdown = processMarkdownFile(f.fullPath)
                     isPublic = f.markdown.metadata.get("public", False)
-                    print(f.fileName, isPublic, f.markdown.metadata)
+                    # print(f.fileName, isPublic, f.markdown.metadata)
                     if isPublic:
                         f.shouldPublish = True
 
@@ -145,10 +165,9 @@ def process(inputDir: str, outputDir: str) -> None:
     startTime = time_ns()
     resetOutputDir(outputDir)
     content = Content(inputDir)
-    content.printInputFileTreeAndNameRegistry()
-    # content.printInputFileTree()
-
     content.crunch()
+    # content.printInputFileTreeAndNameRegistry()
+    content.printInputFileTree()
 
     endTime = time_ns()
     elapsedNanoseconds = endTime - startTime
