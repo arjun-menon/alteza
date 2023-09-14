@@ -1,5 +1,6 @@
 from typing import Optional
 from core.common_imports import *
+from core.ingest_markdown import Markdown, processMarkdownFile
 
 
 class FsNode(object):
@@ -24,6 +25,7 @@ class FileNode(FsNode):  # pyre-ignore[13]
         self.basename: str = split_name[0]
         self.extension: str = split_name[1]
         self.shouldPublish: bool
+        self.markdown: Markdown
 
 
 def isHidden(name: str) -> bool:
@@ -77,7 +79,7 @@ class NameRegistry(object):
             self.allFiles[fileNode.basename].add(fileNode)
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}:\n" + "\n  ".join(
+        return f"{self.__class__.__name__}:\n  " + "\n  ".join(
             f"{k}: {v}" for k, v in self.allFiles.items()
         )
 
@@ -88,21 +90,41 @@ class Content(object):
         self.root: DirNode = DirNode(".")
         self.nameRegistry = NameRegistry(self.root)
 
+    def printInputFileTree(self):
+        print("Input File Tree:")
+        print(displayDir(self.root))
+
+    def printInputFileTreeAndNameRegistry(self):
+        self.printInputFileTree()
+        print(self.nameRegistry)
+        print()
+
     def processMarkdown(self) -> None:
         def walk(node: DirNode) -> None:
             for f in node.files:
-                pass
+                if f.extension == "md":
+                    f.markdown = processMarkdownFile(f.fullPath)
             for d in node.subDirs:
                 walk(d)
 
         walk(self.root)
 
+    def crunch(self) -> None:
+        print("Processing Markdown...")
+        self.processMarkdown()
+
+
+def resetOutputDir(outputDir: str) -> None:
+    if os.path.isfile(outputDir):
+        raise Exception("There is a file named %s." % outputDir)
+    if os.path.isdir(outputDir):
+        print("Deleting directory %s and all of its content...\n" % outputDir)
+        shutil.rmtree(outputDir)
+    os.mkdir(outputDir)
+
 
 def process(inputDir: str, outputDir: str) -> None:
+    resetOutputDir(outputDir)
     content = Content(inputDir)
-    print("Input File Tree:")
-    print(displayDir(content.root))
-    print(content.nameRegistry)
-    print()
-    print("Processing Markdown...")
-    content.processMarkdown()
+    # content.printInputFileTreeAndNameRegistry()
+    content.printInputFileTree()

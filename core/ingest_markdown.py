@@ -9,7 +9,13 @@ class Metadata(object):
         return "\n".join("%s : %s" % (k, v) for k, v in self.metadataDict.items())
 
 
-def processMarkdownFile(markdownFileName: str) -> tuple[Metadata, str]:
+class Markdown(object):
+    def __init__(self, metadata: Metadata, html: str) -> None:
+        self.metadata = metadata
+        self.html = html
+
+
+def processMarkdownFile(markdownFileName: str) -> Markdown:
     with open(markdownFileName) as f:
         text = f.read()
 
@@ -24,4 +30,4 @@ def processMarkdownFile(markdownFileName: str) -> tuple[Metadata, str]:
 
     yamlMetadata = yaml.safe_load(yamlFrontMatter)
     metadata: Metadata = Metadata(yamlMetadata)
-    return metadata, html
+    return Markdown(metadata, html)
