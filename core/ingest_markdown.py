@@ -1,17 +1,10 @@
+from typing import Optional
 from core.common_imports import *
 
 
-class Metadata(object):
-    def __init__(self, metadataDict: Dict[str, str]) -> None:
-        self.metadataDict = metadataDict
-
-    def __repr__(self) -> str:
-        return "\n".join("%s : %s" % (k, v) for k, v in self.metadataDict.items())
-
-
 class Markdown(object):
-    def __init__(self, metadata: Metadata, html: str) -> None:
-        self.metadata = metadata
+    def __init__(self, metadata: Optional[Dict[str, str]], html: str) -> None:
+        self.metadata: Dict[str, str] = metadata if metadata is not None else dict()
         self.html = html
 
 
@@ -29,5 +22,4 @@ def processMarkdownFile(markdownFileName: str) -> Markdown:
             yamlFrontMatter += " " * (len(name) + 3) + line + "\n"
 
     yamlMetadata = yaml.safe_load(yamlFrontMatter)
-    metadata: Metadata = Metadata(yamlMetadata)
-    return Markdown(metadata, html)
+    return Markdown(yamlMetadata, html)
