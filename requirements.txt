@@ -1,6 +1,6 @@
 pypage
-Markdown
-Pygments
+markdown
+pygments
 pyyaml
 colored
 
