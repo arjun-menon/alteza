@@ -87,9 +87,9 @@ def displayDir(dirNode: DirNode, indent: int = 0) -> str:
 class NameRegistry(object):
     def __init__(self) -> None:
         # Needs to be initialized with .build() later
-        self.allFiles: DefaultDict[str, FileNode] = {}
+        self.allFiles: Dict[str, FileNode] = {}
 
-    def build(self, root: DirNode):
+    def build(self, root: DirNode) -> None:
         allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
 
         def record(fileNode: FileNode) -> None:
@@ -106,7 +106,7 @@ class NameRegistry(object):
 
         traverse(root)
 
-        def errorOut(name: str, fileNodes: Set[FileNode]):
+        def errorOut(name: str, fileNodes: Set[FileNode]) -> None:
             print(
                 f"Error: The name '{name}' has multiple matches:\n"
                 + "  \n".join(f" {fileNode.fullPath}" for fileNode in fileNodes)
@@ -161,7 +161,7 @@ class Content(object):
                 if f.extension == ".md":
                     f.markdown = processMarkdownFile(f.fullPath)
                     f.isPage = True
-                    f.shouldPublish = f.markdown.metadata.get("public", False)
+                    f.shouldPublish = bool(f.markdown.metadata.get("public", False))
                 elif f.extension == ".html":
                     with open(f.fullPath, "r") as htmlFile:
                         f.htmlPage = htmlFile.read()
@@ -172,8 +172,8 @@ class Content(object):
 
         walk(self.root)
 
-    def invokePypage(self):
-        def processWithPypage(fileNode: FileNode):
+    def invokePypage(self) -> None:
+        def processWithPypage(fileNode: FileNode) -> None:
             pass
 
         def walk(node: DirNode) -> None:
