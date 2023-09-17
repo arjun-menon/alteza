@@ -162,13 +162,27 @@ class Content(object):
                     f.markdown = processMarkdownFile(f.fullPath)
                     f.isPage = True
                     f.shouldPublish = f.markdown.metadata.get("public", False)
+                elif f.extension == ".html":
+                    with open(f.fullPath, "r") as htmlFile:
+                        f.htmlPage = htmlFile.read()
+                    f.isPage = True
+                    # f.shouldPublish will be determined later in invokePypage
 
             return node.shouldPublish
 
         walk(self.root)
 
     def invokePypage(self):
-        pass
+        def processWithPypage(fileNode: FileNode):
+            pass
+
+        def walk(node: DirNode) -> None:
+            for f in node.files:
+                processWithPypage(f)
+            for d in node.subDirs:
+                walk(d)
+
+        walk(self.root)
 
     def crunch(self) -> None:
         print("Processing Markdown...\n")
