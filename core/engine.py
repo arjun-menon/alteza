@@ -2,6 +2,7 @@ from typing import Optional
 from time import time_ns
 from core.common_imports import *
 from core.ingest_markdown import Markdown, processMarkdownFile
+from pypage import pypage
 
 # pyre-ignore[21]
 from colored import Fore, Back, Style  # type: ignore [import]
@@ -41,16 +42,21 @@ class FileNode(FsNode):  # pyre-ignore[13]
         self.isPage: bool = False
         self.htmlPage: Optional[str] = None
         self.markdown: Optional[Markdown] = None
+        self.htmlOutput: Optional[str] = None
 
         self.hmm: str
 
-    def __repr__(self) -> str:
-        r = f"{self.fileName}"
+    def colorize(self, r: str) -> str:
         if colored_logs:
-            if self.markdown and self.shouldPublish:
+            if self.isPage and self.shouldPublish:
                 r = f"{Fore.spring_green_1}{r}{Style.reset}"
             elif self.markdown:
                 r = f"{Fore.purple_4b}{r}{Style.reset}"
+        return r
+
+    def __repr__(self) -> str:
+        r = f"{self.fileName}"
+        r = self.colorize(r)
         r = super().colorize(r)
         return r
 
@@ -174,11 +180,27 @@ class Content(object):
 
     def invokePypage(self) -> None:
         def processWithPypage(fileNode: FileNode) -> None:
-            pass
+            assert not (
+                (fileNode.htmlPage is not None) and (fileNode.markdown is not None)
+            )
+            html: str
+            if fileNode.htmlPage is not None:
+                html = fileNode.htmlPage
+            elif fileNode.markdown is not None:
+                html = fileNode.markdown.html
+            else:
+                raise Exception(f"{fileNode} is not a page.")
+
+            # Set PWD
+            # TODO
+
+            # Invoke pypage
+            fileNode.htmlOutput = pypage(html)
 
         def walk(node: DirNode) -> None:
             for f in node.files:
-                processWithPypage(f)
+                if f.isPage:
+                    processWithPypage(f)
             for d in node.subDirs:
                 walk(d)
 
@@ -188,9 +210,9 @@ class Content(object):
         print("Processing Markdown...\n")
         self.readMarkdown()
         self.nameRegistry.build(self.root)
-        self.printInputFileTreeAndNameRegistry()
         print("Processing pypage...\n")
         self.invokePypage()
+        self.printInputFileTreeAndNameRegistry()
 
 
 def process(inputDir: str, outputDir: str) -> None:
