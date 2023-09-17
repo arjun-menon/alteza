@@ -142,7 +142,7 @@ class Content(object):
         print(self.nameRegistry)
         self.printInputFileTree()
 
-    def processMarkdown(self) -> None:
+    def readMarkdown(self) -> None:
         def walk(node: FsNode) -> bool:
             if isinstance(node, DirNode):
                 d: DirNode = node
@@ -167,20 +167,16 @@ class Content(object):
 
         walk(self.root)
 
+    def invokePypage(self):
+        pass
+
     def crunch(self) -> None:
         print("Processing Markdown...\n")
-        self.processMarkdown()
+        self.readMarkdown()
         self.nameRegistry.build(self.root)
         self.printInputFileTreeAndNameRegistry()
-
-
-def resetOutputDir(outputDir: str) -> None:
-    if os.path.isfile(outputDir):
-        raise Exception("There is a file named %s." % outputDir)
-    if os.path.isdir(outputDir):
-        print("Deleting directory %s and all of its content...\n" % outputDir)
-        shutil.rmtree(outputDir)
-    os.mkdir(outputDir)
+        print("Processing pypage...\n")
+        self.invokePypage()
 
 
 def process(inputDir: str, outputDir: str) -> None:
@@ -191,3 +187,12 @@ def process(inputDir: str, outputDir: str) -> None:
 
     elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
+
+
+def resetOutputDir(outputDir: str) -> None:
+    if os.path.isfile(outputDir):
+        raise Exception("There is a file named %s." % outputDir)
+    if os.path.isdir(outputDir):
+        print("Deleting directory %s and all of its content...\n" % outputDir)
+        shutil.rmtree(outputDir)
+    os.mkdir(outputDir)
