@@ -2,7 +2,9 @@ from typing import Optional
 from time import time_ns
 from core.common_imports import *
 from core.ingest_markdown import Markdown, processMarkdownFile
-from pypage import pypage
+
+# pyre-ignore[21]
+from pypage import pypage  # type: ignore [import]
 
 # pyre-ignore[21]
 from colored import Fore, Back, Style  # type: ignore [import]
