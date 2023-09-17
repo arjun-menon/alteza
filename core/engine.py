@@ -37,13 +37,19 @@ class FileNode(FsNode):  # pyre-ignore[13]
         split_name = os.path.splitext(fileName)
         self.basename: str = split_name[0]
         self.extension: str = split_name[1]
+
+        self.isPage: bool = False
+        self.htmlPage: Optional[str] = None
         self.markdown: Optional[Markdown] = None
+
         self.hmm: str
 
     def __repr__(self) -> str:
         r = f"{self.fileName}"
         if colored_logs:
-            if self.markdown:
+            if self.markdown and self.shouldPublish:
+                r = f"{Fore.spring_green_1}{r}{Style.reset}"
+            elif self.markdown:
                 r = f"{Fore.purple_4b}{r}{Style.reset}"
         r = super().colorize(r)
         return r
@@ -79,29 +85,46 @@ def displayDir(dirNode: DirNode, indent: int = 0) -> str:
 
 
 class NameRegistry(object):
-    def __init__(self, root: DirNode) -> None:
-        self.allFiles: DefaultDict[str, Set[FileNode]] = defaultdict(set)
+    def __init__(self) -> None:
+        # Needs to be initialized with .build() later
+        self.allFiles: DefaultDict[str, FileNode] = {}
 
-        def walk(node: DirNode) -> None:
+    def build(self, root: DirNode):
+        allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
+
+        def record(fileNode: FileNode) -> None:
+            if fileNode.isPage:
+                allFilesMulti[fileNode.basename].add(fileNode)
+            else:
+                allFilesMulti[fileNode.fileName].add(fileNode)
+
+        def traverse(node: DirNode) -> None:
             for f in node.files:
-                self.record(f)
+                record(f)
             for d in node.subDirs:
-                walk(d)
+                traverse(d)
 
-        walk(root)
+        traverse(root)
 
-    def record(self, fileNode: FileNode) -> None:
-        self.allFiles[fileNode.fileName].add(fileNode)
-        self.allFiles[fileNode.basename].add(fileNode)
+        def errorOut(name: str, fileNodes: Set[FileNode]):
+            print(
+                f"Error: The name '{name}' has multiple matches:\n"
+                + "  \n".join(f" {fileNode.fullPath}" for fileNode in fileNodes)
+            )
+            sys.exit(1)
 
-    def addFiles(self, dirNode: DirNode) -> None:
-        for fileNode in dirNode.files:
-            self.allFiles[fileNode.fileName].add(fileNode)
-            self.allFiles[fileNode.basename].add(fileNode)
+        for name, fileNodes in allFilesMulti.items():
+            assert len(fileNodes) >= 1
+            if len(fileNodes) > 1:
+                errorOut(name, fileNodes)
+
+            self.allFiles[name] = fileNodes.pop()
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}:\n  " + "\n  ".join(
-            f"{k}: {v}" for k, v in self.allFiles.items()
+        return (
+            f"Name Registry:\n  "
+            + "\n  ".join(f"{k}: {v}" for k, v in self.allFiles.items())
+            + "\n"
         )
 
 
@@ -109,16 +132,15 @@ class Content(object):
     def __init__(self, contentDir: str) -> None:
         os.chdir(contentDir)
         self.root: DirNode = DirNode(".")
-        self.nameRegistry = NameRegistry(self.root)
+        self.nameRegistry = NameRegistry()
 
     def printInputFileTree(self) -> None:
         print("Input File Tree:")
         print(displayDir(self.root))
 
     def printInputFileTreeAndNameRegistry(self) -> None:
-        self.printInputFileTree()
         print(self.nameRegistry)
-        print()
+        self.printInputFileTree()
 
     def processMarkdown(self) -> None:
         def walk(node: FsNode) -> bool:
@@ -138,18 +160,18 @@ class Content(object):
                 f: FileNode = node
                 if f.extension == ".md":
                     f.markdown = processMarkdownFile(f.fullPath)
-                    isPublic = f.markdown.metadata.get("public", False)
-                    # print(f.fileName, isPublic, f.markdown.metadata)
-                    if isPublic:
-                        f.shouldPublish = True
+                    f.isPage = True
+                    f.shouldPublish = f.markdown.metadata.get("public", False)
 
             return node.shouldPublish
 
         walk(self.root)
 
     def crunch(self) -> None:
-        print("Processing Markdown...")
+        print("Processing Markdown...\n")
         self.processMarkdown()
+        self.nameRegistry.build(self.root)
+        self.printInputFileTreeAndNameRegistry()
 
 
 def resetOutputDir(outputDir: str) -> None:
@@ -162,14 +184,10 @@ def resetOutputDir(outputDir: str) -> None:
 
 
 def process(inputDir: str, outputDir: str) -> None:
-    startTime = time_ns()
+    startTimeNs = time_ns()
     resetOutputDir(outputDir)
     content = Content(inputDir)
     content.crunch()
-    # content.printInputFileTreeAndNameRegistry()
-    content.printInputFileTree()
 
-    endTime = time_ns()
-    elapsedNanoseconds = endTime - startTime
-    elapsedMilliseconds = elapsedNanoseconds / 10**6
+    elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
