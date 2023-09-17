@@ -191,8 +191,8 @@ class Content(object):
             if fileNode.htmlPage is not None:
                 html = fileNode.htmlPage
             elif fileNode.markdown is not None:
-                env.update(fileNode.markdown.metadata)
                 html = fileNode.markdown.html
+                env.update(fileNode.markdown.metadata)
             else:
                 raise Exception(f"{fileNode} is not a page.")
 
