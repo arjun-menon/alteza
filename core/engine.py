@@ -198,6 +198,9 @@ class Content(object):
 
             # Set PWD
             # TODO
+            # print(fileNode.dirPath)
+            # os.chdir(fileNode.dirPath)
+            # print(os.curdir)
 
             # Inject `link(name)` lambda
             # TODO
