@@ -40,6 +40,17 @@ deactive # end the venv
 
 (Note: this is written in the spirit of [Readme Driven Development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html).)
 
+### Key Ideas:
+
+1. Recursively go through all directories.
+2. At each directory (descending downward), execute an `__init__.py` file, if one is present. Absorb its `__all__` dict, in a collated `env` dict.
+3. Process all `.md` and `.html` files with `pypage`. Pass the `env` dict to Pypage.
+   1. Pypage is called on the "leaf nodes" (innermost files) first, and then upwards.
+   2. Thus, the `.md` and `.html` files in the parent directory receives a list of objects representing the processed results of all its subdirectories. (And, this is repeated, recursively upwards).
+4. Resultant HTML output is copied to the output directory (and non-HTML output symlinked there).
+
+In more detail:
+
 1. The directory structure is generally mirrored in the generated site.
 
 2. By default, nothing is copied/published to the generated site.
