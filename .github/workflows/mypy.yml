@@ -1,0 +1,29 @@
+name: Mypy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  mypy:
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Mypy Check
+        uses: jpetrucciani/mypy-check@master
+        with:
+          # https://github.com/marketplace/actions/mypy-check
+          path: './core'
