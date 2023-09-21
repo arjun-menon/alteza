@@ -1,5 +1,7 @@
 from typing import Optional
-from core.common_imports import *
+from typing import Dict
+import markdown
+import yaml
 
 
 class Markdown(object):

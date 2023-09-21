@@ -1,7 +1,9 @@
+import os, shutil, sys, logging
 from typing import Optional, Generator
 from time import time_ns
 from contextlib import contextmanager
-from core.common_imports import *
+from typing import Dict, List, Set, DefaultDict
+from collections import defaultdict
 from core.ingest_markdown import Markdown, processMarkdownFile
 
 # pyre-ignore[21]
