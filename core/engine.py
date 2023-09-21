@@ -1,8 +1,10 @@
 import os
 import shutil
+import importlib
+import sys
 from contextlib import contextmanager
 from time import time_ns
-from typing import Generator
+from typing import Generator, Dict, Any
 
 # pyre-ignore[21]
 from pypage import pypage  # type: ignore [import]
@@ -12,9 +14,13 @@ from core.ingest_markdown import processMarkdownFile
 
 
 class Content(object):
+    config_py_file = "__config__.py"
+    config_py_name = "__config__"
+
     def __init__(self, rootDir: DirNode, nameRegistry: NameRegistry) -> None:
         self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
+        self.fixSysPath()
 
     @staticmethod
     def processWithPypage(fileNode: FileNode) -> None:
@@ -37,6 +43,18 @@ class Content(object):
         fileNode.htmlOutput = pypage(html, env)
 
     @staticmethod
+    def fixSysPath() -> None:
+        """
+        This is necessary for importlib to consider the current directory.
+        See: https://stackoverflow.com/questions/57870498/cannot-find-module-after-change-directory
+        """
+        sys.path.insert(0, "")
+
+    @staticmethod
+    def getModuleVars(module: Any) -> Dict[str, Any]:
+        return module.__dict__.copy()
+
+    @staticmethod
     @contextmanager
     def pushDir(newDir: str) -> Generator[None, None, None]:
         # https://stackoverflow.com/a/13847807/908430
@@ -49,6 +67,11 @@ class Content(object):
 
     def invoke(self) -> None:
         def walk(node: DirNode) -> None:
+            if self.config_py_file in (f.fileName for f in node.files):
+                configModule = importlib.import_module(self.config_py_name)
+                configVars = self.getModuleVars(configModule)
+                print(configVars)
+
             for d in node.subDirs:
                 with self.pushDir(d.dirName):
                     walk(d)

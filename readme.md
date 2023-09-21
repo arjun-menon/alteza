@@ -43,7 +43,7 @@ deactive # end the venv
 ### Key Ideas:
 
 1. Recursively go through all directories.
-2. At each directory (descending downward), execute an `__init__.py` file, if one is present. Absorb its `__all__` dict, in a collated `env` dict.
+2. At each directory (descending downward), import an `__config__.py` file, if one is present, and absorb its variables into an `env` dict.
 3. Process all `.md` and `.html` files with `pypage`. Pass the `env` dict to Pypage.
    1. Pypage is called on the "leaf nodes" (innermost files) first, and then upwards.
    2. Thus, the `.md` and `.html` files in the parent directory receives a list of objects representing the processed results of all its subdirectories. (And, this is repeated, recursively upwards).
