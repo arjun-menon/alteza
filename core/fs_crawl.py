@@ -1,12 +1,12 @@
 import os
 import sys
 from collections import defaultdict
-from typing import Optional, List, Dict, DefaultDict, Set
+from typing import Optional, List, Dict, DefaultDict, Set, Tuple
 
 # pyre-ignore[21]
 from colored import Style, Fore  # type: ignore [import]
 
-from core.ingest_markdown import Markdown
+from core.ingest_markdown import Markdown, processMarkdownFile
 
 colored_logs = True
 
@@ -93,11 +93,10 @@ def displayDir(dirNode: DirNode, indent: int = 0) -> str:
 
 
 class NameRegistry(object):
-    def __init__(self) -> None:
+    def __init__(self, root: DirNode) -> None:
         # Needs to be initialized with .build() later
         self.allFiles: Dict[str, FileNode] = {}
 
-    def build(self, root: DirNode) -> None:
         allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
 
         def record(fileNode: FileNode) -> None:
@@ -106,27 +105,28 @@ class NameRegistry(object):
             else:
                 allFilesMulti[fileNode.fileName].add(fileNode)
 
-        def traverse(node: DirNode) -> None:
+        def walk(node: DirNode) -> None:
             for f in node.files:
                 record(f)
             for d in node.subDirs:
-                traverse(d)
+                walk(d)
 
-        traverse(root)
-
-        def errorOut(name: str, fileNodes: Set[FileNode]) -> None:
-            print(
-                f"Error: The name '{name}' has multiple matches:\n"
-                + "  \n".join(f" {fileNode.fullPath}" for fileNode in fileNodes)
-            )
-            sys.exit(1)
+        walk(root)
 
         for name, fileNodes in allFilesMulti.items():
             assert len(fileNodes) >= 1
             if len(fileNodes) > 1:
-                errorOut(name, fileNodes)
+                self.errorOut(name, fileNodes)
 
             self.allFiles[name] = fileNodes.pop()
+
+    @staticmethod
+    def errorOut(name: str, fileNodes: Set[FileNode]) -> None:
+        print(
+            f"Error: The name '{name}' has multiple matches:\n"
+            + "  \n".join(f" {fileNode.fullPath}" for fileNode in fileNodes)
+        )
+        sys.exit(1)
 
     def __repr__(self) -> str:
         return (
@@ -134,3 +134,41 @@ class NameRegistry(object):
             + "\n  ".join(f"{k}: {v}" for k, v in self.allFiles.items())
             + "\n"
         )
+
+
+def readPages(node: FsNode) -> bool:
+    if isinstance(node, DirNode):
+        d: DirNode = node
+        for aDir in node.subDirs:
+            readPages(aDir)
+        for aFile in node.files:
+            readPages(aFile)
+
+        if any(aDir.shouldPublish for aDir in node.subDirs) or any(
+            aFile.shouldPublish for aFile in node.files
+        ):
+            d.shouldPublish = True
+
+    elif isinstance(node, FileNode):
+        f: FileNode = node
+        if f.extension == ".md":
+            f.markdown = processMarkdownFile(f.fullPath)
+            f.isPage = True
+            f.shouldPublish = bool(f.markdown.metadata.get("public", False))
+        elif f.extension == ".html":
+            with open(f.fullPath, "r") as htmlFile:
+                f.htmlPage = htmlFile.read()
+            f.isPage = True
+            # f.shouldPublish will be determined later in invokePypage
+
+    return node.shouldPublish
+
+
+def fs_crawl(dirPath: str) -> Tuple[DirNode, NameRegistry]:
+    rootDir: DirNode = DirNode(dirPath)
+
+    readPages(rootDir)  # This must occur before NameRegistry creation.
+
+    nameRegistry = NameRegistry(rootDir)
+
+    return rootDir, nameRegistry

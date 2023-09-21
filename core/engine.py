@@ -7,26 +7,14 @@ from typing import Generator
 # pyre-ignore[21]
 from pypage import pypage  # type: ignore [import]
 
-from core.fs_crawl import FsNode, FileNode, DirNode, displayDir, NameRegistry
+from core.fs_crawl import FsNode, FileNode, DirNode, displayDir, NameRegistry, fs_crawl
 from core.ingest_markdown import processMarkdownFile
 
 
-@contextmanager
-def pushDir(newDir: str) -> Generator[None, None, None]:
-    # https://stackoverflow.com/a/13847807/908430
-    oldDir = os.getcwd()
-    os.chdir(newDir)
-    try:
-        yield
-    finally:
-        os.chdir(oldDir)
-
-
 class Content(object):
-    def __init__(self, contentDir: str) -> None:
-        os.chdir(contentDir)
-        self.root: DirNode = DirNode(os.curdir)
-        self.nameRegistry = NameRegistry()
+    def __init__(self, rootDir: DirNode, nameRegistry: NameRegistry) -> None:
+        self.root: DirNode = rootDir
+        self.nameRegistry = nameRegistry
 
     def printInputFileTree(self) -> None:
         print("Input File Tree:")
@@ -36,73 +24,51 @@ class Content(object):
         print(self.nameRegistry)
         self.printInputFileTree()
 
-    def readMarkdown(self) -> None:
-        def walk(node: FsNode) -> bool:
-            if isinstance(node, DirNode):
-                d: DirNode = node
-                for aDir in node.subDirs:
-                    walk(aDir)
-                for aFile in node.files:
-                    walk(aFile)
+    @staticmethod
+    def processWithPypage(fileNode: FileNode) -> None:
+        env = dict()
 
-                if any(aDir.shouldPublish for aDir in node.subDirs) or any(
-                    aFile.shouldPublish for aFile in node.files
-                ):
-                    d.shouldPublish = True
+        assert not ((fileNode.htmlPage is not None) and (fileNode.markdown is not None))
+        html: str
+        if fileNode.htmlPage is not None:
+            html = fileNode.htmlPage
+        elif fileNode.markdown is not None:
+            html = fileNode.markdown.html
+            env.update(fileNode.markdown.metadata)
+        else:
+            raise Exception(f"{fileNode} is not a page.")
 
-            elif isinstance(node, FileNode):
-                f: FileNode = node
-                if f.extension == ".md":
-                    f.markdown = processMarkdownFile(f.fullPath)
-                    f.isPage = True
-                    f.shouldPublish = bool(f.markdown.metadata.get("public", False))
-                elif f.extension == ".html":
-                    with open(f.fullPath, "r") as htmlFile:
-                        f.htmlPage = htmlFile.read()
-                    f.isPage = True
-                    # f.shouldPublish will be determined later in invokePypage
+        # Inject `link(name)` lambda
+        # TODO
 
-            return node.shouldPublish
+        # Invoke pypage
+        fileNode.htmlOutput = pypage(html, env)
 
-        walk(self.root)
+    @staticmethod
+    @contextmanager
+    def pushDir(newDir: str) -> Generator[None, None, None]:
+        # https://stackoverflow.com/a/13847807/908430
+        oldDir = os.getcwd()
+        os.chdir(newDir)
+        try:
+            yield
+        finally:
+            os.chdir(oldDir)
 
     def invokePypage(self) -> None:
-        def processWithPypage(fileNode: FileNode) -> None:
-            env = dict()
-
-            assert not (
-                (fileNode.htmlPage is not None) and (fileNode.markdown is not None)
-            )
-            html: str
-            if fileNode.htmlPage is not None:
-                html = fileNode.htmlPage
-            elif fileNode.markdown is not None:
-                html = fileNode.markdown.html
-                env.update(fileNode.markdown.metadata)
-            else:
-                raise Exception(f"{fileNode} is not a page.")
-
-            # Inject `link(name)` lambda
-            # TODO
-
-            # Invoke pypage
-            fileNode.htmlOutput = pypage(html, env)
-
         def walk(node: DirNode) -> None:
+            for d in node.subDirs:
+                with self.pushDir(d.dirName):
+                    walk(d)
+
             for f in node.files:
                 if f.isPage:
-                    processWithPypage(f)
-            for d in node.subDirs:
-                with pushDir(d.dirName):
-                    walk(d)
+                    self.processWithPypage(f)
 
         walk(self.root)
 
     def crunch(self) -> None:
-        print("Processing markdown...\n")
-        self.readMarkdown()
-        self.nameRegistry.build(self.root)
-        print("Processing pypage...\n")
+        print("Processing...\n")
         self.invokePypage()
         self.printInputFileTreeAndNameRegistry()
 
@@ -110,7 +76,9 @@ class Content(object):
 def process(inputDir: str, outputDir: str) -> None:
     startTimeNs = time_ns()
     resetOutputDir(outputDir)
-    content = Content(inputDir)
+    os.chdir(inputDir)
+    rootDir, nameRegistry = fs_crawl(os.curdir)
+    content = Content(rootDir, nameRegistry)
     content.crunch()
 
     elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
