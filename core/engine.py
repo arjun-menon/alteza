@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import Optional, Generator
 from time import time_ns
+from contextlib import contextmanager
 from core.common_imports import *
 from core.ingest_markdown import Markdown, processMarkdownFile
 
@@ -14,13 +15,13 @@ colored_logs = True
 
 class FsNode(object):
     def __init__(self, dirPath: str, fileName: Optional[str]) -> None:
-        self.dirPath: str = dirPath
         self.fileName: Optional[str] = fileName
         self.fullPath: str = (
-            self.dirPath
+            (os.curdir if dirPath == "" else dirPath)
             if isinstance(self, DirNode) or type(fileName) is not str
-            else os.path.join(self.dirPath, fileName)
+            else os.path.join(dirPath, fileName)
         )
+        self.dirName: str = os.path.basename(dirPath)
         self.shouldPublish: bool = False
 
     def __repr__(self) -> str:
@@ -70,6 +71,7 @@ def isHidden(name: str) -> bool:
 class DirNode(FsNode):
     def __init__(self, dirPath: str) -> None:
         _, subDirNames, fileNames = next(os.walk(dirPath))
+        dirPath = "" if dirPath == os.curdir else dirPath
         super().__init__(dirPath, None)
 
         self.files: List[FileNode] = [
@@ -136,10 +138,21 @@ class NameRegistry(object):
         )
 
 
+@contextmanager
+def pushDir(newDir: str) -> Generator[None, None, None]:
+    # https://stackoverflow.com/a/13847807/908430
+    oldDir = os.getcwd()
+    os.chdir(newDir)
+    try:
+        yield
+    finally:
+        os.chdir(oldDir)
+
+
 class Content(object):
     def __init__(self, contentDir: str) -> None:
         os.chdir(contentDir)
-        self.root: DirNode = DirNode(".")
+        self.root: DirNode = DirNode(os.curdir)
         self.nameRegistry = NameRegistry()
 
     def printInputFileTree(self) -> None:
@@ -196,12 +209,6 @@ class Content(object):
             else:
                 raise Exception(f"{fileNode} is not a page.")
 
-            # Set PWD
-            # TODO
-            # print(fileNode.dirPath)
-            # os.chdir(fileNode.dirPath)
-            # print(os.curdir)
-
             # Inject `link(name)` lambda
             # TODO
 
@@ -213,7 +220,8 @@ class Content(object):
                 if f.isPage:
                     processWithPypage(f)
             for d in node.subDirs:
-                walk(d)
+                with pushDir(d.dirName):
+                    walk(d)
 
         walk(self.root)
 
