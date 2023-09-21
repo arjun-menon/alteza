@@ -14,12 +14,12 @@ colored_logs = True
 class FsNode(object):
     def __init__(self, dirPath: str, fileName: Optional[str]) -> None:
         self.fileName: Optional[str] = fileName
+        self.dirName: str = os.path.basename(dirPath)
         self.fullPath: str = (
             (os.curdir if dirPath == "" else dirPath)
             if isinstance(self, DirNode) or type(fileName) is not str
             else os.path.join(dirPath, fileName)
         )
-        self.dirName: str = os.path.basename(dirPath)
         self.shouldPublish: bool = False
 
     def __repr__(self) -> str:
@@ -130,12 +130,15 @@ class NameRegistry(object):
     def __repr__(self) -> str:
         return (
             f"Name Registry:\n  "
-            + "\n  ".join(f"{k}: {v}" for k, v in self.allFiles.items())
+            + "\n  ".join(
+                f"{k}: {v} {Fore.grey_39}@ {v.fullPath}{Style.reset}"
+                for k, v in self.allFiles.items()
+            )
             + "\n"
         )
 
 
-def readPages(node: FsNode) -> bool:
+def readPages(node: FsNode) -> None:
     if isinstance(node, DirNode):
         d: DirNode = node
         for aDir in node.subDirs:
@@ -160,10 +163,12 @@ def readPages(node: FsNode) -> bool:
             f.isPage = True
             # f.shouldPublish will be determined later in invokePypage
 
-    return node.shouldPublish
 
-
-def fs_crawl(dirPath: str) -> Tuple[DirNode, NameRegistry]:
+def fs_crawl() -> Tuple[DirNode, NameRegistry]:
+    """
+    Crawl the current directory. Construct & return an FsNode tree and NameRegistry.
+    """
+    dirPath: str = os.curdir
     rootDir: DirNode = DirNode(dirPath)
 
     readPages(rootDir)  # This must occur before NameRegistry creation.

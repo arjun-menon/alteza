@@ -76,8 +76,9 @@ class Content(object):
 def process(inputDir: str, outputDir: str) -> None:
     startTimeNs = time_ns()
     resetOutputDir(outputDir)
+
     os.chdir(inputDir)
-    rootDir, nameRegistry = fs_crawl(os.curdir)
+    rootDir, nameRegistry = fs_crawl()
     content = Content(rootDir, nameRegistry)
     content.crunch()
 
