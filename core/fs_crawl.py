@@ -1,7 +1,7 @@
 import os
 import sys
 from collections import defaultdict
-from typing import Optional, List, Dict, DefaultDict, Set, Tuple
+from typing import Optional, List, Dict, DefaultDict, Set, Tuple, Callable
 
 # pyre-ignore[21]
 from colored import Style, Fore  # type: ignore [import]
@@ -62,12 +62,13 @@ class FileNode(FsNode):  # pyre-ignore[13]
         return r
 
 
-def isHidden(name: str) -> bool:
-    return name.startswith(".")
-
-
 class DirNode(FsNode):
-    def __init__(self, dirPath: str) -> None:
+    def __init__(
+        self,
+        dirPath: str,
+        # shouldIgnore(name: str, isDir: bool) -> bool
+        shouldIgnore: Callable[[str, bool], bool],
+    ) -> None:
         _, subDirNames, fileNames = next(os.walk(dirPath))
         dirPath = "" if dirPath == os.curdir else dirPath
         super().__init__(dirPath, None)
@@ -75,12 +76,12 @@ class DirNode(FsNode):
         self.files: List[FileNode] = [
             FileNode(dirPath, fileName)
             for fileName in fileNames
-            if not isHidden(fileName)
+            if not shouldIgnore(fileName, False)
         ]
         self.subDirs: List[DirNode] = [
-            DirNode(os.path.join(dirPath, subDirName))
+            DirNode(os.path.join(dirPath, subDirName), shouldIgnore)
             for subDirName in subDirNames
-            if not isHidden(subDirName)
+            if not shouldIgnore(subDirName, True)
         ]
 
 
@@ -157,19 +158,36 @@ def readPages(node: FsNode) -> None:
             f.markdown = processMarkdownFile(f.fullPath)
             f.isPage = True
             f.shouldPublish = bool(f.markdown.metadata.get("public", False))
+            # f.shouldPublish could be overriden during pypage invocation
         elif f.extension == ".html":
             with open(f.fullPath, "r") as htmlFile:
                 f.htmlPage = htmlFile.read()
             f.isPage = True
-            # f.shouldPublish will be determined later in invokePypage
+            # f.shouldPublish will be determined later after pypage invocation
 
 
-def fs_crawl() -> Tuple[DirNode, NameRegistry]:
+def isHidden(name: str) -> bool:
+    return name.startswith(".")
+
+
+def defaultShouldIgnore(name: str, isDir: bool) -> bool:
+    if isHidden(name):
+        return True
+    basename, fileExt = os.path.splitext(name)
+    if fileExt == ".pyc":
+        return True
+    return False
+
+
+def fs_crawl(
+    # Signature -- shouldIgnore(name: str, isDir: bool) -> bool
+    shouldIgnore: Callable[[str, bool], bool] = defaultShouldIgnore
+) -> Tuple[DirNode, NameRegistry]:
     """
     Crawl the current directory. Construct & return an FsNode tree and NameRegistry.
     """
     dirPath: str = os.curdir
-    rootDir: DirNode = DirNode(dirPath)
+    rootDir: DirNode = DirNode(dirPath, shouldIgnore)
 
     readPages(rootDir)  # This must occur before NameRegistry creation.
 
