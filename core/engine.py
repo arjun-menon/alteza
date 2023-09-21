@@ -51,8 +51,21 @@ class Content(object):
         sys.path.insert(0, "")
 
     @staticmethod
+    # pyre-ignore[2]
     def getModuleVars(module: Any) -> Dict[str, Any]:
-        return module.__dict__.copy()
+        limitTo = None
+        if "__all__" in module.__dict__:
+            names = module.__dict__["__all__"]
+            if not (isinstance(names, list) and all(isinstance(k, str) for k in names)):
+                raise Exception(f"{module}'s __all__ is not a list of strings.")
+            limitTo = names
+
+        return {
+            k: v
+            for k, v in module.__dict__.items()
+            if not k.startswith("_")
+            and ((k in limitTo) if limitTo is not None else True)
+        }
 
     @staticmethod
     @contextmanager
