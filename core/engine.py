@@ -13,12 +13,12 @@ from core.ingest_markdown import processMarkdownFile
 
 class Content(object):
     def __init__(self, rootDir: DirNode, nameRegistry: NameRegistry) -> None:
-        self.root: DirNode = rootDir
+        self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
 
     def printInputFileTree(self) -> None:
         print("Input File Tree:")
-        print(displayDir(self.root))
+        print(displayDir(self.rootDir))
 
     def printInputFileTreeAndNameRegistry(self) -> None:
         print(self.nameRegistry)
@@ -65,7 +65,7 @@ class Content(object):
                 if f.isPage:
                     self.processWithPypage(f)
 
-        walk(self.root)
+        walk(self.rootDir)
 
     def crunch(self) -> None:
         print("Processing...\n")

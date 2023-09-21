@@ -94,7 +94,6 @@ def displayDir(dirNode: DirNode, indent: int = 0) -> str:
 
 class NameRegistry(object):
     def __init__(self, root: DirNode) -> None:
-        # Needs to be initialized with .build() later
         self.allFiles: Dict[str, FileNode] = {}
 
         allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
