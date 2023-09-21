@@ -16,14 +16,6 @@ class Content(object):
         self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
 
-    def printInputFileTree(self) -> None:
-        print("Input File Tree:")
-        print(displayDir(self.rootDir))
-
-    def printInputFileTreeAndNameRegistry(self) -> None:
-        print(self.nameRegistry)
-        self.printInputFileTree()
-
     @staticmethod
     def processWithPypage(fileNode: FileNode) -> None:
         env = dict()
@@ -55,7 +47,7 @@ class Content(object):
         finally:
             os.chdir(oldDir)
 
-    def invokePypage(self) -> None:
+    def invoke(self) -> None:
         def walk(node: DirNode) -> None:
             for d in node.subDirs:
                 with self.pushDir(d.dirName):
@@ -68,9 +60,7 @@ class Content(object):
         walk(self.rootDir)
 
     def crunch(self) -> None:
-        print("Processing...\n")
-        self.invokePypage()
-        self.printInputFileTreeAndNameRegistry()
+        self.invoke()
 
 
 def process(inputDir: str, outputDir: str) -> None:
@@ -79,7 +69,12 @@ def process(inputDir: str, outputDir: str) -> None:
 
     os.chdir(inputDir)
     rootDir, nameRegistry = fs_crawl()
+    print(nameRegistry)
+    print("Input File Tree:")
+    print(displayDir(rootDir))
     content = Content(rootDir, nameRegistry)
+
+    print("Processing...\n")
     content.crunch()
 
     elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
