@@ -1,16 +1,19 @@
-import os, shutil, sys, logging
-from typing import Optional, Generator
-from time import time_ns
-from contextlib import contextmanager
-from typing import Dict, List, Set, DefaultDict
+import os
+import sys
+import shutil
 from collections import defaultdict
-from core.ingest_markdown import Markdown, processMarkdownFile
+from contextlib import contextmanager
+from time import time_ns
+from typing import Dict, List, Set, DefaultDict
+from typing import Optional, Generator
+
+# pyre-ignore[21]
+from colored import Fore, Style  # type: ignore [import]
 
 # pyre-ignore[21]
 from pypage import pypage  # type: ignore [import]
 
-# pyre-ignore[21]
-from colored import Fore, Back, Style  # type: ignore [import]
+from core.ingest_markdown import Markdown, processMarkdownFile
 
 colored_logs = True
 
@@ -228,7 +231,7 @@ class Content(object):
         walk(self.root)
 
     def crunch(self) -> None:
-        print("Processing Markdown...\n")
+        print("Processing markdown...\n")
         self.readMarkdown()
         self.nameRegistry.build(self.root)
         print("Processing pypage...\n")
