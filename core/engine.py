@@ -1,7 +1,7 @@
 import os
-import shutil
-import importlib
 import sys
+import types
+import shutil
 from contextlib import contextmanager
 from time import time_ns
 from typing import Generator, Dict, Any, Set
@@ -9,14 +9,17 @@ from typing import Generator, Dict, Any, Set
 # pyre-ignore[21]
 from pypage import pypage  # type: ignore [import]
 
-from core.fs_crawl import FsNode, FileNode, DirNode, displayDir, NameRegistry, fs_crawl
-from core.ingest_markdown import processMarkdownFile
+from core.fs_crawl import (
+    FileNode,
+    DirNode,
+    displayDir,
+    NameRegistry,
+    fs_crawl,
+    config_py_file,
+)
 
 
 class Content(object):
-    config_py_file = "__config__.py"
-    config_py_name = "__config__"
-
     def __init__(self, rootDir: DirNode, nameRegistry: NameRegistry) -> None:
         self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
@@ -49,20 +52,11 @@ class Content(object):
         sys.path.insert(0, "")
 
     @staticmethod
-    # pyre-ignore[2]
-    def getModuleVars(module: Any) -> Dict[str, Any]:
-        limitTo = None
-        if "__all__" in module.__dict__:
-            names = module.__dict__["__all__"]
-            if not (isinstance(names, list) and all(isinstance(k, str) for k in names)):
-                raise Exception(f"{module}'s __all__ is not a list of strings.")
-            limitTo = names
-
+    def getModuleVars(env: Dict[str, Any]) -> Dict[str, Any]:
         return {
             k: v
-            for k, v in module.__dict__.items()
-            if not k.startswith("_")
-            and ((k in limitTo) if limitTo is not None else True)
+            for k, v in env.items()
+            if (not k.startswith("_") and not isinstance(v, types.ModuleType))
         }
 
     @staticmethod
@@ -76,37 +70,24 @@ class Content(object):
         finally:
             os.chdir(oldDir)
 
-    @staticmethod
-    def warnAboutOverrides(
-        existingVals: Dict[str, Any], newVals: Dict[str, Any], filePath: str
-    ) -> None:
-        for v in newVals:
-            if v in existingVals:
-                print(
-                    f"Value `{v}` is being overriden by {filePath} for this directory..."
-                )
-
     def invoke(self) -> None:
         def walk(node: DirNode, env: dict[str, Any]) -> None:
             env = env.copy()
 
             # Check for a config, and update env.
-            configVals = {}
-            if self.config_py_file in (f.fileName for f in node.files):
-                # configModule = importlib.import_module(self.config_py_name)
-                configModule = __import__(self.config_py_name)
-                configVals = self.getModuleVars(configModule)
+            configEnv = env.copy()
+            if config_py_file in (f.fileName for f in node.files):
+                with open(config_py_file) as configFile:
+                    lines = configFile.readlines()
+                    exec("\n".join(lines), configEnv)
 
-                cF = [f for f in node.files if f.fileName == self.config_py_file][0]
-                print(configVals, cF.fullPath)
-                self.warnAboutOverrides(env, configVals, cF.fullPath)
             # Note that `|=` doesn't create a copy unlike `x = x | y`.
-            env |= configVals
+            env |= self.getModuleVars(configEnv)
 
             # Ordering Note: We must recurse into the subdirectories first.
             for d in node.subDirs:
                 with self.pushDir(d.dirName):
-                    walk(d, env.copy())
+                    walk(d, env)
 
             # Ordering Note: Files in the current directory must be processed after
             # all subdirectories have been processed so that they have access to

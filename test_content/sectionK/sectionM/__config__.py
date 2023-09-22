@@ -2,4 +2,8 @@ x = 5
 z = 7
 y = 9
 
-__all__ = ["x", "z"]
+n = __name__
+
+import os
+
+cwd = os.getcwd()

@@ -10,6 +10,9 @@ from core.ingest_markdown import Markdown, processMarkdownFile
 
 colored_logs = True
 
+config_py_name = "__config__"
+config_py_file = "__config__.py"
+
 
 class FsNode(object):
     def __init__(self, dirPath: str, fileName: Optional[str]) -> None:
@@ -94,7 +97,7 @@ def displayDir(dirNode: DirNode, indent: int = 0) -> str:
 
 
 class NameRegistry(object):
-    def __init__(self, root: DirNode) -> None:
+    def __init__(self, root: DirNode, skipForRegistry: Callable[[str], bool]) -> None:
         self.allFiles: Dict[str, FileNode] = {}
 
         allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
@@ -107,7 +110,8 @@ class NameRegistry(object):
 
         def walk(node: DirNode) -> None:
             for f in node.files:
-                record(f)
+                if not defaultSkipForRegistry(f.fileName):
+                    record(f)
             for d in node.subDirs:
                 walk(d)
 
@@ -181,18 +185,29 @@ def defaultShouldIgnore(name: str, isDir: bool) -> bool:
     return False
 
 
+def defaultSkipForRegistry(name: str) -> bool:
+    if name == config_py_file:
+        return True
+    return False
+
+
 def fs_crawl(
     # Signature -- shouldIgnore(name: str, isDir: bool) -> bool
-    shouldIgnore: Callable[[str, bool], bool] = defaultShouldIgnore
+    shouldIgnore: Callable[[str, bool], bool] = defaultShouldIgnore,
+    skipForRegistry: Callable[[str], bool] = defaultSkipForRegistry,
 ) -> Tuple[DirNode, NameRegistry]:
     """
     Crawl the current directory. Construct & return an FsNode tree and NameRegistry.
     """
     dirPath: str = os.curdir
-    rootDir: DirNode = DirNode(dirPath, shouldIgnore)
+    rootDir: DirNode = DirNode(
+        dirPath, lambda s, b: shouldIgnore(s, b) or defaultShouldIgnore(s, b)
+    )
 
     readPages(rootDir)  # This must occur before NameRegistry creation.
 
-    nameRegistry = NameRegistry(rootDir)
+    nameRegistry = NameRegistry(
+        rootDir, lambda s: skipForRegistry(s) and defaultSkipForRegistry(s)
+    )
 
     return rootDir, nameRegistry
