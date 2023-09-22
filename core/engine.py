@@ -4,7 +4,7 @@ import importlib
 import sys
 from contextlib import contextmanager
 from time import time_ns
-from typing import Generator, Dict, Any
+from typing import Generator, Dict, Any, Set
 
 # pyre-ignore[21]
 from pypage import pypage  # type: ignore [import]
@@ -23,9 +23,7 @@ class Content(object):
         self.fixSysPath()
 
     @staticmethod
-    def processWithPypage(fileNode: FileNode) -> None:
-        env = dict()
-
+    def processWithPypage(fileNode: FileNode, env: dict[str, Any]) -> None:
         assert not ((fileNode.htmlPage is not None) and (fileNode.markdown is not None))
         html: str
         if fileNode.htmlPage is not None:
@@ -78,22 +76,46 @@ class Content(object):
         finally:
             os.chdir(oldDir)
 
-    def invoke(self) -> None:
-        def walk(node: DirNode) -> None:
-            if self.config_py_file in (f.fileName for f in node.files):
-                configModule = importlib.import_module(self.config_py_name)
-                configVars = self.getModuleVars(configModule)
-                print(configVars)
+    @staticmethod
+    def warnAboutOverrides(
+        existingVals: Dict[str, Any], newVals: Dict[str, Any], filePath: str
+    ) -> None:
+        for v in newVals:
+            if v in existingVals:
+                print(
+                    f"Value `{v}` is being overriden by {filePath} for this directory..."
+                )
 
+    def invoke(self) -> None:
+        def walk(node: DirNode, env: dict[str, Any]) -> None:
+            env = env.copy()
+
+            # Check for a config, and update env.
+            configVals = {}
+            if self.config_py_file in (f.fileName for f in node.files):
+                # configModule = importlib.import_module(self.config_py_name)
+                configModule = __import__(self.config_py_name)
+                configVals = self.getModuleVars(configModule)
+
+                cF = [f for f in node.files if f.fileName == self.config_py_file][0]
+                print(configVals, cF.fullPath)
+                self.warnAboutOverrides(env, configVals, cF.fullPath)
+            # Note that `|=` doesn't create a copy unlike `x = x | y`.
+            env |= configVals
+
+            # Ordering Note: We must recurse into the subdirectories first.
             for d in node.subDirs:
                 with self.pushDir(d.dirName):
-                    walk(d)
+                    walk(d, env.copy())
 
+            # Ordering Note: Files in the current directory must be processed after
+            # all subdirectories have been processed so that they have access to
+            # information about the subdirectories.
             for f in node.files:
                 if f.isPage:
-                    self.processWithPypage(f)
+                    self.processWithPypage(f, env)
 
-        walk(self.rootDir)
+        walk(self.rootDir, dict())
 
     def crunch(self) -> None:
         self.invoke()
