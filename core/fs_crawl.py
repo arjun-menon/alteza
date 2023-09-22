@@ -173,6 +173,8 @@ def isHidden(name: str) -> bool:
 def defaultShouldIgnore(name: str, isDir: bool) -> bool:
     if isHidden(name):
         return True
+    if name in {"__pycache__"}:
+        return True
     basename, fileExt = os.path.splitext(name)
     if fileExt == ".pyc":
         return True
