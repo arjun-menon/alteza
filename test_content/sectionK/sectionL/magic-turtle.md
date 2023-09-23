@@ -7,6 +7,9 @@ mood: joy
 
 Magic Turtle
 ------------
-The magic turtle flew around {{3 ** 3}} times.
+The magic turtle flew around {{3 ** three}} times.
+
+    :::python
+    print('Hello world!')
 
 And had a happy {{mood + 'ful'}} day.

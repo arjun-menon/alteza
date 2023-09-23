@@ -164,7 +164,7 @@ def readPages(node: FsNode) -> None:
             f.isPage = True
             f.shouldPublish = bool(f.markdown.metadata.get("public", False))
             # f.shouldPublish could be overriden during pypage invocation
-        elif f.extension == ".html":
+        elif f.extension == ".py.html":
             with open(f.fullPath, "r") as htmlFile:
                 f.htmlPage = htmlFile.read()
             f.isPage = True

@@ -1,5 +1,4 @@
 import os
-import sys
 import types
 import shutil
 from contextlib import contextmanager
@@ -40,7 +39,20 @@ class Content(object):
         # TODO
 
         # Invoke pypage
-        fileNode.htmlOutput = pypage(html, env)
+        pageHtmlOutput = pypage(html, env)
+        default_template = Content.getDefaultTemplate(env)
+        fileNode.htmlOutput = pypage(default_template, env | {"body": pageHtmlOutput})
+
+    @staticmethod
+    def getDefaultTemplate(env: dict[str, Any]) -> str:
+        if "default_template" not in env:
+            raise Exception(
+                "You must define a `default_template` in some ancestral `__config__.py` file."
+            )
+        default_template = env["default_template"]
+        if not isinstance(default_template, str):
+            raise Exception("The `default_template` must be a string.")
+        return default_template
 
     @staticmethod
     def getModuleVars(env: Dict[str, Any]) -> Dict[str, Any]:
@@ -50,6 +62,10 @@ class Content(object):
             if (not k.startswith("_") and not isinstance(v, types.ModuleType))
         }
 
+    @staticmethod
+    def getBasicHelpers() -> Dict[str, Any]:
+        return {"readfile": readfile}
+
     def process(self) -> None:
         def walk(node: DirNode, env: dict[str, Any]) -> None:
             env = env.copy()
@@ -57,8 +73,7 @@ class Content(object):
             # Run a __config__.py file, if one exists.
             configEnv = env.copy()
             if config_py_file in (f.fileName for f in node.files):
-                with open(config_py_file) as configFile:
-                    exec("\n".join(configFile.readlines()), configEnv)
+                exec(readfile(config_py_file), configEnv)
 
             # Note that `|=` doesn't create a copy unlike `x = x | y`.
             env |= self.getModuleVars(configEnv)
@@ -73,9 +88,15 @@ class Content(object):
             # information about the subdirectories.
             for f in node.files:
                 if f.isPage:
-                    self.processWithPyPage(f, env)
+                    self.processWithPyPage(f, env.copy())
 
-        walk(self.rootDir, dict())
+        initial_env = self.getBasicHelpers()
+        walk(self.rootDir, initial_env)
+
+
+def readfile(file_path: str) -> str:
+    with open(file_path, "r") as a_file:
+        return a_file.read()
 
 
 @contextmanager
@@ -94,7 +115,7 @@ def process(inputDir: str, outputDir: str) -> None:
 
     with enterDir(inputDir):
         rootDir, nameRegistry = fs_crawl()
-        print(nameRegistry)
+        # print(nameRegistry)
         print("Input File Tree:")
         print(displayDir(rootDir))
         content = Content(rootDir, nameRegistry)
@@ -121,6 +142,7 @@ def copyContent(outputDir: str, content: Content) -> None:
                     os.mkdir(fileNode.basename)
                     with enterDir(fileNode.basename):
                         with open("index.html", "w") as pageHtml:
+                            assert isinstance(fileNode.htmlOutput, str)
                             pageHtml.write(fileNode.htmlOutput)
                 else:
                     pass

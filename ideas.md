@@ -2,6 +2,12 @@
 Flexible Static Site Generator
 ------------------------------
 
+Maybe:
+* Limit pypage processing to `.py.html` (and `.md`) files.
+  * (In the far future:) Perhaps add pypage processing (plus front matter) support for RST as well. 
+* GitHub action to publish a website to `gh-pages`-like branch of the same repo (the branch as configured).
+  * Minor: Optional Canonical URL addition, in case the website is being published in multiple places. 
+
 Older Ideas 2
 =============
 (Note: this is written in the spirit of [Readme Driven Development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html).)
