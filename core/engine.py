@@ -12,6 +12,7 @@ from core.fs_crawl import (
     FileNode,
     DirNode,
     displayDir,
+    runOnFsNodeAndAscendantNodes,
     NameRegistry,
     fs_crawl,
     config_py_file,
@@ -25,14 +26,17 @@ class Content(object):
         self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
 
-    def link(self, name):
+    def link(self, name: str) -> str:
         if name not in self.nameRegistry.allFiles:
             print(
                 f"Link error: `{name}` was not found in the name registry."
                 f" The {self.nameRegistry}"
             )
             raise Exception(f"Link error: {name}")
+
         fileNode: FileNode = self.nameRegistry.allFiles[name]
+        fileNode.shouldPublish = True
+        runOnFsNodeAndAscendantNodes(fileNode, lambda fsNode: fsNode.makePublic())
 
         relativePath = fileNode.absoluteFilePath  # TODO + FIXME
 
@@ -131,21 +135,21 @@ def process(inputDir: str, outputDir: str) -> None:
 
     with enterDir(inputDir):
         rootDir, nameRegistry = fs_crawl()
-        # print(nameRegistry)
-        print("Input File Tree:")
-        print(displayDir(rootDir))
         content = Content(rootDir, nameRegistry)
         print("Processing...\n")
         content.process()
         print("\nSuccessfully completed processing.\n")
 
-    copyContent(outputDir, content)
+    print("File Tree:")
+    print(displayDir(rootDir))
+
+    generate(outputDir, content)
 
     elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
 
 
-def copyContent(outputDir: str, content: Content) -> None:
+def generate(outputDir: str, content: Content) -> None:
     def walk(curDir: DirNode) -> None:
         for subDir in curDir.subDirs:
             if subDir.shouldPublish:
@@ -162,10 +166,12 @@ def copyContent(outputDir: str, content: Content) -> None:
                             assert isinstance(fileNode.htmlOutput, str)
                             pageHtml.write(fileNode.htmlOutput)
                 else:
-                    pass
+                    os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
 
     resetOutputDir(outputDir)
-    print("Copying content...")
+
+    print("Generating...")
+
     with enterDir(outputDir):
         walk(content.rootDir)
 

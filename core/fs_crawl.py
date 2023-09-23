@@ -1,7 +1,7 @@
 import os
 import sys
 from collections import defaultdict
-from typing import Optional, List, Dict, DefaultDict, Set, Tuple, Callable
+from typing import Optional, List, Dict, DefaultDict, Set, Tuple, Callable, Any
 
 # pyre-ignore[21]
 from colored import Style, Fore  # type: ignore [import]
@@ -14,7 +14,10 @@ config_py_file = "__config__.py"
 
 
 class FsNode(object):
-    def __init__(self, dirPath: str, fileName: Optional[str]) -> None:
+    def __init__(
+        self, parent: Optional["FsNode"], dirPath: str, fileName: Optional[str]
+    ) -> None:
+        self.parent = parent
         self.fileName: Optional[str] = fileName
         self.dirName: str = os.path.basename(dirPath)
         self.fullPath: str = (
@@ -33,10 +36,13 @@ class FsNode(object):
                 r = f"{Style.bold}{Fore.spring_green_2b}{r}{Style.reset}"
         return r
 
+    def makePublic(self) -> None:
+        self.shouldPublish = True
+
 
 class FileNode(FsNode):  # pyre-ignore[13]
-    def __init__(self, dirPath: str, fileName: str) -> None:
-        super().__init__(dirPath, fileName)
+    def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
+        super().__init__(parent, dirPath, fileName)
         self.fileName: str = fileName  # for typing
         split_name = os.path.splitext(fileName)
         self.basename: str = split_name[0]
@@ -68,21 +74,22 @@ class FileNode(FsNode):  # pyre-ignore[13]
 class DirNode(FsNode):
     def __init__(
         self,
+        parent: Optional[FsNode],
         dirPath: str,
         # shouldIgnore(name: str, isDir: bool) -> bool
         shouldIgnore: Callable[[str, bool], bool],
     ) -> None:
         _, subDirNames, fileNames = next(os.walk(dirPath))
         dirPath = "" if dirPath == os.curdir else dirPath
-        super().__init__(dirPath, None)
+        super().__init__(parent, dirPath, None)
 
         self.files: List[FileNode] = [
-            FileNode(dirPath, fileName)
+            FileNode(self, dirPath, fileName)
             for fileName in fileNames
             if not shouldIgnore(fileName, False)
         ]
         self.subDirs: List[DirNode] = [
-            DirNode(os.path.join(dirPath, subDirName), shouldIgnore)
+            DirNode(self, os.path.join(dirPath, subDirName), shouldIgnore)
             for subDirName in subDirNames
             if not shouldIgnore(subDirName, True)
         ]
@@ -170,6 +177,17 @@ def readPages(node: FsNode) -> None:
             # f.shouldPublish will be determined later after pypage invocation
 
 
+def runOnFsNodeAndAscendantNodes(
+    startingNode: FsNode, fn: Callable[[FsNode], None]
+) -> None:
+    def walk(node: FsNode) -> None:
+        fn(node)
+        if node.parent is not None:
+            walk(node.parent)
+
+    walk(startingNode)
+
+
 def isHidden(name: str) -> bool:
     return name.startswith(".")
 
@@ -201,7 +219,7 @@ def fs_crawl(
     """
     dirPath: str = os.curdir
     rootDir: DirNode = DirNode(
-        dirPath, lambda s, b: shouldIgnore(s, b) or defaultShouldIgnore(s, b)
+        None, dirPath, lambda s, b: shouldIgnore(s, b) or defaultShouldIgnore(s, b)
     )
 
     readPages(rootDir)  # This must occur before NameRegistry creation.
