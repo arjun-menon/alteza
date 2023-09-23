@@ -26,7 +26,7 @@ class Content(object):
         self.fixSysPath()
 
     @staticmethod
-    def processWithPypage(fileNode: FileNode, env: dict[str, Any]) -> None:
+    def processWithPyPage(fileNode: FileNode, env: dict[str, Any]) -> None:
         assert not ((fileNode.htmlPage is not None) and (fileNode.markdown is not None))
         html: str
         if fileNode.htmlPage is not None:
@@ -59,18 +59,7 @@ class Content(object):
             if (not k.startswith("_") and not isinstance(v, types.ModuleType))
         }
 
-    @staticmethod
-    @contextmanager
-    def pushDir(newDir: str) -> Generator[None, None, None]:
-        # https://stackoverflow.com/a/13847807/908430
-        oldDir = os.getcwd()
-        os.chdir(newDir)
-        try:
-            yield
-        finally:
-            os.chdir(oldDir)
-
-    def invoke(self) -> None:
+    def process(self) -> None:
         def walk(node: DirNode, env: dict[str, Any]) -> None:
             env = env.copy()
 
@@ -86,7 +75,7 @@ class Content(object):
 
             # Ordering Note: We must recurse into the subdirectories first.
             for d in node.subDirs:
-                with self.pushDir(d.dirName):
+                with enterDir(d.dirName):
                     walk(d, env)
 
             # Ordering Note: Files in the current directory must be processed after
@@ -94,30 +83,50 @@ class Content(object):
             # information about the subdirectories.
             for f in node.files:
                 if f.isPage:
-                    self.processWithPypage(f, env)
+                    self.processWithPyPage(f, env)
 
         walk(self.rootDir, dict())
 
-    def crunch(self) -> None:
-        self.invoke()
+
+@contextmanager
+def enterDir(newDir: str) -> Generator[None, None, None]:
+    # https://stackoverflow.com/a/13847807/908430
+    oldDir = os.getcwd()
+    os.chdir(newDir)
+    try:
+        yield
+    finally:
+        os.chdir(oldDir)
 
 
 def process(inputDir: str, outputDir: str) -> None:
     startTimeNs = time_ns()
     resetOutputDir(outputDir)
 
-    os.chdir(inputDir)
-    rootDir, nameRegistry = fs_crawl()
-    print(nameRegistry)
-    print("Input File Tree:")
-    print(displayDir(rootDir))
-    content = Content(rootDir, nameRegistry)
+    with enterDir(inputDir):
+        rootDir, nameRegistry = fs_crawl()
+        print(nameRegistry)
+        print("Input File Tree:")
+        print(displayDir(rootDir))
+        content = Content(rootDir, nameRegistry)
+        print("Processing...\n")
+        content.process()
 
-    print("Processing...\n")
-    content.crunch()
+    copyContent(outputDir, content)
 
     elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
+
+
+def copyContent(outputDir: str, content: Content) -> None:
+    def walk(node: DirNode) -> None:
+        for subDirNode in node.subDirs:
+            walk(subDirNode)
+        for fileNode in node.files:
+            outputPath = os.path.join(outputDir, fileNode.fullPath)
+            print(outputPath)
+
+    walk(content.rootDir)
 
 
 def resetOutputDir(outputDir: str) -> None:
