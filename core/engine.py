@@ -23,7 +23,6 @@ class Content(object):
     def __init__(self, rootDir: DirNode, nameRegistry: NameRegistry) -> None:
         self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
-        self.fixSysPath()
 
     @staticmethod
     def processWithPyPage(fileNode: FileNode, env: dict[str, Any]) -> None:
@@ -42,14 +41,6 @@ class Content(object):
 
         # Invoke pypage
         fileNode.htmlOutput = pypage(html, env)
-
-    @staticmethod
-    def fixSysPath() -> None:
-        """
-        This is necessary for importlib to consider the current directory.
-        See: https://stackoverflow.com/questions/57870498/cannot-find-module-after-change-directory
-        """
-        sys.path.insert(0, "")
 
     @staticmethod
     def getModuleVars(env: Dict[str, Any]) -> Dict[str, Any]:
