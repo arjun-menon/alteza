@@ -42,6 +42,7 @@ class FileNode(FsNode):  # pyre-ignore[13]
         split_name = os.path.splitext(fileName)
         self.basename: str = split_name[0]
         self.extension: str = split_name[1]
+        self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
 
         self.isPage: bool = False
         self.htmlPage: Optional[str] = None

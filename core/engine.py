@@ -54,12 +54,11 @@ class Content(object):
         def walk(node: DirNode, env: dict[str, Any]) -> None:
             env = env.copy()
 
-            # Check for a config, and update env.
+            # Run a __config__.py file, if one exists.
             configEnv = env.copy()
             if config_py_file in (f.fileName for f in node.files):
                 with open(config_py_file) as configFile:
-                    lines = configFile.readlines()
-                    exec("\n".join(lines), configEnv)
+                    exec("\n".join(configFile.readlines()), configEnv)
 
             # Note that `|=` doesn't create a copy unlike `x = x | y`.
             env |= self.getModuleVars(configEnv)
@@ -92,7 +91,6 @@ def enterDir(newDir: str) -> Generator[None, None, None]:
 
 def process(inputDir: str, outputDir: str) -> None:
     startTimeNs = time_ns()
-    resetOutputDir(outputDir)
 
     with enterDir(inputDir):
         rootDir, nameRegistry = fs_crawl()
@@ -110,14 +108,26 @@ def process(inputDir: str, outputDir: str) -> None:
 
 
 def copyContent(outputDir: str, content: Content) -> None:
-    def walk(node: DirNode) -> None:
-        for subDirNode in node.subDirs:
-            walk(subDirNode)
-        for fileNode in node.files:
-            outputPath = os.path.join(outputDir, fileNode.fullPath)
-            print(outputPath)
+    def walk(curDir: DirNode) -> None:
+        for subDir in curDir.subDirs:
+            if subDir.shouldPublish:
+                os.mkdir(subDir.dirName)
+                with enterDir(subDir.dirName):
+                    walk(subDir)
 
-    walk(content.rootDir)
+        for fileNode in curDir.files:
+            if fileNode.shouldPublish:
+                if fileNode.isPage:
+                    os.mkdir(fileNode.basename)
+                    with enterDir(fileNode.basename):
+                        with open("index.html", "w") as pageHtml:
+                            pageHtml.write(fileNode.htmlOutput)
+                else:
+                    pass
+
+    resetOutputDir(outputDir)
+    with enterDir(outputDir):
+        walk(content.rootDir)
 
 
 def resetOutputDir(outputDir: str) -> None:
