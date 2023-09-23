@@ -14,7 +14,7 @@ def processMarkdownFile(markdownFileName: str) -> Markdown:
     with open(markdownFileName) as f:
         text = f.read()
 
-    md = markdown.Markdown(extensions=["meta"])
+    md = markdown.Markdown(extensions=["meta", "codehilite"])
     html: str = md.convert(text)
     yamlFrontMatter = ""
 
