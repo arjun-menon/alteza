@@ -3,7 +3,7 @@ import types
 import shutil
 from contextlib import contextmanager
 from time import time_ns
-from typing import Generator, Dict, Any, Set
+from typing import Generator, Dict, Any
 
 # pyre-ignore[21]
 from pypage import pypage  # type: ignore [import]
@@ -15,6 +15,8 @@ from core.fs_crawl import (
     NameRegistry,
     fs_crawl,
     config_py_file,
+    Fore,
+    Style,
 )
 
 
@@ -23,8 +25,22 @@ class Content(object):
         self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
 
+    def link(self, name):
+        if name not in self.nameRegistry.allFiles:
+            print(
+                f"Link error: `{name}` was not found in the name registry."
+                f" The {self.nameRegistry}"
+            )
+            raise Exception(f"Link error: {name}")
+        fileNode: FileNode = self.nameRegistry.allFiles[name]
+
+        relativePath = fileNode.absoluteFilePath  # TODO + FIXME
+
+        return relativePath
+
     @staticmethod
     def processWithPyPage(fileNode: FileNode, env: dict[str, Any]) -> None:
+        print(f"{Fore.grey_42}Processing:{Style.reset}", fileNode.fullPath)
         assert not ((fileNode.htmlPage is not None) and (fileNode.markdown is not None))
         html: str
         if fileNode.htmlPage is not None:
@@ -34,9 +50,6 @@ class Content(object):
             env.update(fileNode.markdown.metadata)
         else:
             raise Exception(f"{fileNode} is not a page.")
-
-        # Inject `link(name)` lambda
-        # TODO
 
         # Invoke pypage
         pageHtmlOutput = pypage(html, env)
@@ -62,9 +75,8 @@ class Content(object):
             if (not k.startswith("_") and not isinstance(v, types.ModuleType))
         }
 
-    @staticmethod
-    def getBasicHelpers() -> Dict[str, Any]:
-        return {"readfile": readfile}
+    def getBasicHelpers(self) -> Dict[str, Any]:
+        return {"link": self.link, "readfile": readfile}
 
     def process(self) -> None:
         def walk(node: DirNode, env: dict[str, Any]) -> None:
@@ -73,6 +85,10 @@ class Content(object):
             # Run a __config__.py file, if one exists.
             configEnv = env.copy()
             if config_py_file in (f.fileName for f in node.files):
+                print(
+                    f"{Fore.dark_red_2}Running:{Style.reset}",
+                    os.path.join(node.fullPath, config_py_file),
+                )
                 exec(readfile(config_py_file), configEnv)
 
             # Note that `|=` doesn't create a copy unlike `x = x | y`.
@@ -121,6 +137,7 @@ def process(inputDir: str, outputDir: str) -> None:
         content = Content(rootDir, nameRegistry)
         print("Processing...\n")
         content.process()
+        print("\nSuccessfully completed processing.\n")
 
     copyContent(outputDir, content)
 
@@ -148,6 +165,7 @@ def copyContent(outputDir: str, content: Content) -> None:
                     pass
 
     resetOutputDir(outputDir)
+    print("Copying content...")
     with enterDir(outputDir):
         walk(content.rootDir)
 

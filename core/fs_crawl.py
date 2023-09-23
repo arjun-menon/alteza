@@ -10,7 +10,6 @@ from core.ingest_markdown import Markdown, processMarkdownFile
 
 colored_logs = True
 
-config_py_name = "__config__"
 config_py_file = "__config__.py"
 
 

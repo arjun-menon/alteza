@@ -10,6 +10,8 @@ Maybe:
 * A function called `after(dirNode)`, if defined in `__config.py__`, gets called after the directory has been 
   completely processed (i.e. including pypage, template application, etc). The final resultant HTML output will
   be available (for page `FileNode`s) from the optional `htmlOutput` field in `FileNode`.
+* Allow name registry to refer to any file without an extension, as long as that file name w/o extension is unique.
+  If not, require the extension to be specified.
 
 Older Ideas 2
 =============
