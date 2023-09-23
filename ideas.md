@@ -7,6 +7,9 @@ Maybe:
   * (In the far future:) Perhaps add pypage processing (plus front matter) support for RST as well. 
 * GitHub action to publish a website to `gh-pages`-like branch of the same repo (the branch as configured).
   * Minor: Optional Canonical URL addition, in case the website is being published in multiple places. 
+* A function called `after(dirNode)`, if defined in `__config.py__`, gets called after the directory has been 
+  completely processed (i.e. including pypage, template application, etc). The final resultant HTML output will
+  be available (for page `FileNode`s) from the optional `htmlOutput` field in `FileNode`.
 
 Older Ideas 2
 =============
