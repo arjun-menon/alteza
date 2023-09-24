@@ -16,7 +16,11 @@ Maybe:
 
 Older Ideas 2
 =============
+### General Ideas & Goals (WIP)
+
 (Note: this is written in the spirit of [Readme Driven Development](http://tom.preston-werner.com/2010/08/23/readme-driven-development.html).)
+
+#### Key Ideas:
 
 1. The directory structure is generally mirrored in the generated site.
 
