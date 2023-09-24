@@ -12,7 +12,6 @@ from core.fs_crawl import (
     FileNode,
     DirNode,
     displayDir,
-    runOnFsNodeAndAscendantNodes,
     NameRegistry,
     fs_crawl,
     config_py_file,
@@ -35,8 +34,7 @@ class Content(object):
             raise Exception(f"Link error: {name}")
 
         fileNode: FileNode = self.nameRegistry.allFiles[name]
-        fileNode.shouldPublish = True
-        runOnFsNodeAndAscendantNodes(fileNode, lambda fsNode: fsNode.makePublic())
+        fileNode.makePublic()
 
         relativePath = fileNode.absoluteFilePath  # TODO + FIXME
 
@@ -45,23 +43,33 @@ class Content(object):
     @staticmethod
     def processWithPyPage(fileNode: FileNode, env: dict[str, Any]) -> None:
         print(f"{Fore.grey_42}Processing:{Style.reset}", fileNode.fullPath)
-        assert not ((fileNode.htmlPage is not None) and (fileNode.markdown is not None))
-        html: str
-        if fileNode.htmlPage is not None:
-            html = fileNode.htmlPage
+        env = env.copy()
+        assert not ((fileNode.pyPage is not None) and (fileNode.markdown is not None))
+        toProcessFurther: str
+
+        if fileNode.pyPage is not None:
+            toProcessFurther = fileNode.pyPage
         elif fileNode.markdown is not None:
-            html = fileNode.markdown.html
+            toProcessFurther = fileNode.markdown.html
             env.update(fileNode.markdown.metadata)
         else:
             raise Exception(f"{fileNode} is not a page.")
 
         # Invoke pypage
-        pageHtmlOutput = pypage(html, env)
-        default_template = Content.getDefaultTemplate(env)
-        fileNode.htmlOutput = pypage(default_template, env | {"body": pageHtmlOutput})
+        pyPageOutput = pypage(toProcessFurther, env)
+
+        if "public" in env and env["public"] is True:
+            fileNode.makePublic()
+
+        if fileNode.markdown is not None:
+            defaultHtmlTemplate = Content.getDefaultHtmlTemplate(env)
+            # Re-process against `defaultHtmlTemplate` with PyPage:
+            pyPageOutput = pypage(defaultHtmlTemplate, env | {"body": pyPageOutput})
+
+        fileNode.pyPageOutput = pyPageOutput
 
     @staticmethod
-    def getDefaultTemplate(env: dict[str, Any]) -> str:
+    def getDefaultHtmlTemplate(env: dict[str, Any]) -> str:
         if "default_template" not in env:
             raise Exception(
                 "You must define a `default_template` in some ancestral `__config__.py` file."
@@ -163,8 +171,8 @@ def generate(outputDir: str, content: Content) -> None:
                     os.mkdir(fileNode.basename)
                     with enterDir(fileNode.basename):
                         with open("index.html", "w") as pageHtml:
-                            assert isinstance(fileNode.htmlOutput, str)
-                            pageHtml.write(fileNode.htmlOutput)
+                            assert isinstance(fileNode.pyPageOutput, str)
+                            pageHtml.write(fileNode.pyPageOutput)
                 else:
                     os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
 

@@ -36,8 +36,11 @@ class FsNode(object):
                 r = f"{Style.bold}{Fore.spring_green_2b}{r}{Style.reset}"
         return r
 
-    def makePublic(self) -> None:
+    def _setAsPublic(self) -> None:
         self.shouldPublish = True
+
+    def makePublic(self) -> None:
+        runOnFsNodeAndAscendantNodes(self, lambda fsNode: fsNode._setAsPublic())
 
 
 class FileNode(FsNode):  # pyre-ignore[13]
@@ -49,12 +52,11 @@ class FileNode(FsNode):  # pyre-ignore[13]
         self.extension: str = split_name[1]
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
 
+        # Todo: Collapse these into self.pyPage: Optional[Union[str, Markdown]]
         self.isPage: bool = False
-        self.htmlPage: Optional[str] = None
+        self.pyPage: Optional[str] = None
         self.markdown: Optional[Markdown] = None
-        self.htmlOutput: Optional[str] = None
-
-        self.hmm: str
+        self.pyPageOutput: Optional[str]  # to be generated (by pypage) & set later
 
     def colorize(self, r: str) -> str:
         if colored_logs:
@@ -150,6 +152,15 @@ class NameRegistry(object):
         )
 
 
+def isNonMdPyPageFile(f: FileNode) -> bool:
+    if ".py." in f.fileName:
+        pySubExtPos = f.fileName.find(".py.")
+        remainingExt = f.fileName[pySubExtPos:]
+        expectedRemainingExt = ".py" + f.extension
+        return remainingExt == expectedRemainingExt
+    return False
+
+
 def readPages(node: FsNode) -> None:
     if isinstance(node, DirNode):
         d: DirNode = node
@@ -169,12 +180,16 @@ def readPages(node: FsNode) -> None:
             f.markdown = processMarkdownFile(f.fullPath)
             f.isPage = True
             f.shouldPublish = bool(f.markdown.metadata.get("public", False))
-            # f.shouldPublish could be overriden during pypage invocation
-        elif f.extension == ".py.html":
-            with open(f.fullPath, "r") as htmlFile:
-                f.htmlPage = htmlFile.read()
+            # f.shouldPublish could be overwritten during pypage invocation
+        elif isNonMdPyPageFile(f):
+            f.pyPage = readfile(f.fullPath)
             f.isPage = True
             # f.shouldPublish will be determined later after pypage invocation
+
+
+def readfile(file_path: str) -> str:
+    with open(file_path, "r") as a_file:
+        return a_file.read()
 
 
 def runOnFsNodeAndAscendantNodes(
