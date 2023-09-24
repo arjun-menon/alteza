@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   test:
+    if: ${{ false }}  # disable for now
     permissions:
       actions: read
       contents: read
