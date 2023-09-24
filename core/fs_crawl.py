@@ -43,7 +43,7 @@ class FsNode(object):
         runOnFsNodeAndAscendantNodes(self, lambda fsNode: fsNode._setAsPublic())
 
 
-class FileNode(FsNode):  # pyre-ignore[13]
+class FileNode(FsNode):
     def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
         self.fileName: str = fileName  # for typing
@@ -53,7 +53,7 @@ class FileNode(FsNode):  # pyre-ignore[13]
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
 
         self.pyPage: Optional[Union[Md, NonMd]] = None
-        self.pyPageOutput: Optional[str]  # to be generated (by pypage) & set later
+        self.pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
     def colorize(self, r: str) -> str:
         if colored_logs:

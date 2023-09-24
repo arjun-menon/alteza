@@ -165,13 +165,22 @@ def generate(outputDir: str, content: Content) -> None:
 
         for fileNode in curDir.files:
             if fileNode.shouldPublish:
-                # TODO: Handle non-Md differently
                 if fileNode.pyPage is not None:
-                    os.mkdir(fileNode.basename)
-                    with enterDir(fileNode.basename):
-                        with open("index.html", "w") as pageHtml:
-                            assert isinstance(fileNode.pyPageOutput, str)
-                            pageHtml.write(fileNode.pyPageOutput)
+                    assert fileNode.pyPageOutput is not None
+                    assert isinstance(fileNode.pyPageOutput, str)
+
+                    if isinstance(fileNode.pyPage, Md):
+                        os.mkdir(fileNode.basename)
+                        with enterDir(fileNode.basename):
+                            with open("index.html", "w") as pageHtml:
+                                pageHtml.write(fileNode.pyPageOutput)
+                    elif isinstance(fileNode.pyPage, NonMd):
+                        with open(fileNode.pyPage.rectifiedFileName, "w") as nonMdFile:
+                            nonMdFile.write(fileNode.pyPageOutput)
+
+                    else:
+                        raise Exception(f"{fileNode} pyPage attribute is invalid.")
+
                 else:
                     os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
 
