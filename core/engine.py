@@ -15,6 +15,7 @@ from core.fs_crawl import (
     NameRegistry,
     fs_crawl,
     Md,
+    NonMd,
     readfile,
     config_py_file,
     Fore,
@@ -49,8 +50,8 @@ class Content(object):
         env = env.copy()
         toProcessFurther: str
 
-        if isinstance(fileNode.pyPage, str):
-            toProcessFurther = fileNode.pyPage
+        if isinstance(fileNode.pyPage, NonMd):
+            toProcessFurther = fileNode.pyPage.fileContent
         elif isinstance(fileNode.pyPage, Md):
             toProcessFurther = fileNode.pyPage.html
             env.update(fileNode.pyPage.metadata)

@@ -52,7 +52,7 @@ class FileNode(FsNode):  # pyre-ignore[13]
         self.extension: str = split_name[1]
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
 
-        self.pyPage: Optional[Union[str, Md]] = None
+        self.pyPage: Optional[Union[Md, NonMd]] = None
         self.pyPageOutput: Optional[str]  # to be generated (by pypage) & set later
 
     def colorize(self, r: str) -> str:
@@ -149,13 +149,25 @@ class NameRegistry(object):
         )
 
 
-def isNonMdPyPageFile(f: FileNode) -> bool:
-    if ".py." in f.fileName:
-        pySubExtPos = f.fileName.find(".py.")
-        remainingExt = f.fileName[pySubExtPos:]
-        expectedRemainingExt = ".py" + f.extension
-        return remainingExt == expectedRemainingExt
-    return False
+class NonMd(object):
+    def __init__(self, f: FileNode, rectifiedFileName: str) -> None:
+        self.fileContent: str = readfile(f.fullPath)
+        self.rectifiedFileName: str = rectifiedFileName
+
+    @staticmethod
+    def isNonMdPyPageFile(fileNode: FileNode) -> Optional["NonMd"]:
+        """Check if fileNode is a non-Md page (that needs to be processed with pypage).
+        If is a non-Md page, we return a NonMd object.
+        If it is not, we return None."""
+        if ".py." in fileNode.fileName:
+            pySubExtPos = fileNode.fileName.find(".py.")
+            remainingExt = fileNode.fileName[pySubExtPos:]
+            expectedRemainingExt = ".py" + fileNode.extension
+            if remainingExt == expectedRemainingExt:
+                # The condition above passing indicates this is a NonMd page file.
+                rectifiedFileName = fileNode.fileName[:pySubExtPos] + fileNode.extension
+                return NonMd(fileNode, rectifiedFileName)
+        return None
 
 
 def readPages(node: FsNode) -> None:
@@ -177,8 +189,8 @@ def readPages(node: FsNode) -> None:
             f.pyPage = processMarkdownFile(f.fullPath)
             f.shouldPublish = bool(f.pyPage.metadata.get("public", False))
             # f.shouldPublish could be overwritten during pypage invocation
-        elif isNonMdPyPageFile(f):
-            f.pyPage = readfile(f.fullPath)
+        else:
+            f.pyPage = NonMd.isNonMdPyPageFile(f)
             # f.shouldPublish will be determined later after pypage invocation
 
 
