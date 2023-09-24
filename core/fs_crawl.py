@@ -1,5 +1,5 @@
+import re
 import os
-import sys
 import yaml
 import markdown
 import sh  # type: ignore
@@ -120,10 +120,7 @@ class NameRegistry(object):
 
         def record(fileNode: FileNode) -> None:
             if fileNode.pyPage is not None:
-                if isinstance(fileNode.pyPage, NonMd):
-                    allFilesMulti[fileNode.pyPage.realBasename].add(fileNode)
-                else:
-                    allFilesMulti[fileNode.basename].add(fileNode)
+                allFilesMulti[fileNode.pyPage.realBasename].add(fileNode)
             else:
                 allFilesMulti[fileNode.fileName].add(fileNode)
 
@@ -145,11 +142,10 @@ class NameRegistry(object):
 
     @staticmethod
     def errorOut(name: str, fileNodes: Set[FileNode]) -> None:
-        print(
+        raise Exception(
             f"Error: The name '{name}' has multiple matches:\n"
             + "  \n".join(f" {fileNode.fullPath}" for fileNode in fileNodes)
         )
-        sys.exit(1)
 
     def __repr__(self) -> str:
         return (
@@ -166,6 +162,7 @@ class Page(object):
     def __init__(self, f: FileNode) -> None:
         self.fileContent: str = readfile(f.fullPath)
         self.lastUpdated: datetime = self.getLastUpdated(f.fullPath)
+        self.realBasename: str = f.basename  # overriden
 
     @staticmethod
     def getLastUpdated(path: str) -> datetime:
@@ -192,16 +189,24 @@ class Page(object):
                     ["git", "log", "-n", "1", "--pretty=format:%aI", path]
                 ).decode()
             )
-        except CalledProcessError as e:
+        except Exception as e:
             return None
 
 
 class Md(Page):
     def __init__(self, f: FileNode) -> None:
         super().__init__(f)
+        self.draftDate: Optional[date] = None
 
         # Handle file names that start with a date
-        # TODO
+        dateFragmentLength = len("YYYY-MM-DD-")
+        if len(f.basename) > dateFragmentLength:
+            dateFragment_ = f.basename[:dateFragmentLength]
+            remainingBasename = f.basename[dateFragmentLength:]
+            if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}-$", dateFragment_):
+                dateFragment = dateFragment_[:-1]
+                self.draftDate = date.fromisoformat(dateFragment)
+                self.realBasename = remainingBasename
 
     class Result(NamedTuple):
         metadata: Dict[str, str]

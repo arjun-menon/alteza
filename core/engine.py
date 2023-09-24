@@ -50,7 +50,10 @@ class Content(object):
         if isinstance(dstFile.pyPage, NonMd):
             dstFileName = dstFile.pyPage.rectifiedFileName
         elif isinstance(dstFile.pyPage, Md):
-            dstFileName = dstFile.basename  # todo: maybe pass an arg to + "/"
+            dstFileName = (
+                # todo: maybe pass an arg to pass in a "/" trailing slash
+                dstFile.pyPage.realBasename
+            )
 
         srcPath = splitPath(srcFile.fullPath)[:-1]
         dstPath = splitPath(dstFile.fullPath)[:-1]
@@ -93,6 +96,8 @@ class Content(object):
 
         if isinstance(fileNode.pyPage, Page):
             env |= {"lastUpdated": fileNode.pyPage.lastUpdated}
+        if isinstance(fileNode.pyPage, Md) and fileNode.pyPage.draftDate is not None:
+            env |= {"draftDate": fileNode.pyPage.draftDate}
 
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)
@@ -225,8 +230,8 @@ def generate(outputDir: str, content: Content) -> None:
                     assert isinstance(fileNode.pyPageOutput, str)
 
                     if isinstance(fileNode.pyPage, Md):
-                        os.mkdir(fileNode.basename)
-                        with enterDir(fileNode.basename):
+                        os.mkdir(fileNode.pyPage.realBasename)
+                        with enterDir(fileNode.pyPage.realBasename):
                             with open("index.html", "w") as pageHtml:
                                 pageHtml.write(fileNode.pyPageOutput)
                     elif isinstance(fileNode.pyPage, NonMd):
