@@ -117,7 +117,10 @@ class NameRegistry(object):
 
         def record(fileNode: FileNode) -> None:
             if fileNode.pyPage is not None:
-                allFilesMulti[fileNode.basename].add(fileNode)
+                if isinstance(fileNode.pyPage, NonMd):
+                    allFilesMulti[fileNode.pyPage.realBasename].add(fileNode)
+                else:
+                    allFilesMulti[fileNode.basename].add(fileNode)
             else:
                 allFilesMulti[fileNode.fileName].add(fileNode)
 
@@ -226,8 +229,6 @@ def readPages(node: FsNode) -> None:
             f.pyPage = Md(f)
         else:
             f.pyPage = NonMd.isNonMdPyPageFile(f)
-            if isinstance(f.pyPage, NonMd):
-                f.basename = f.pyPage.realBasename
 
 
 def readfile(file_path: str) -> str:
