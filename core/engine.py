@@ -14,6 +14,7 @@ from core.fs_crawl import (
     NameRegistry,
     fs_crawl,
     Md,
+    Page,
     NonMd,
     readfile,
     config_py_file,
@@ -89,6 +90,9 @@ class Content(object):
             return self.link(fileNode, name)
 
         env |= {"link": link}
+
+        if isinstance(fileNode.pyPage, Page):
+            env |= {"lastUpdated": fileNode.pyPage.lastUpdated}
 
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)

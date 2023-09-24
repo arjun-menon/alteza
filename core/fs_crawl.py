@@ -2,7 +2,10 @@ import os
 import sys
 import yaml
 import markdown
+import sh  # type: ignore
 from collections import defaultdict
+from datetime import date, datetime
+from subprocess import check_output, CalledProcessError, STDOUT
 from typing import (
     Optional,
     List,
@@ -159,9 +162,46 @@ class NameRegistry(object):
         )
 
 
-class Md(object):
+class Page(object):
     def __init__(self, f: FileNode) -> None:
         self.fileContent: str = readfile(f.fullPath)
+        self.lastUpdated: datetime = self.getLastUpdated(f.fullPath)
+
+    @staticmethod
+    def getLastUpdated(path: str) -> datetime:
+        """Get last modified date from: (a) git history, or (b) system modified time."""
+        if Page.isGitRepo():
+            lastUpdated = Page.getGitFileLastAuthDate(path)
+            if lastUpdated is not None:
+                return lastUpdated
+        return datetime.fromtimestamp(os.path.getmtime(path))
+
+    @staticmethod
+    def isGitRepo() -> bool:
+        try:
+            check_output(["git", "status"], stderr=STDOUT).decode()
+            return True
+        except CalledProcessError as e:
+            return False
+
+    @staticmethod
+    def getGitFileLastAuthDate(path: str) -> Optional[datetime]:
+        try:
+            return datetime.fromisoformat(
+                check_output(
+                    ["git", "log", "-n", "1", "--pretty=format:%aI", path]
+                ).decode()
+            )
+        except CalledProcessError as e:
+            return None
+
+
+class Md(Page):
+    def __init__(self, f: FileNode) -> None:
+        super().__init__(f)
+
+        # Handle file names that start with a date
+        # TODO
 
     class Result(NamedTuple):
         metadata: Dict[str, str]
@@ -187,9 +227,10 @@ class Md(object):
         return Md.Result(metadata=metadata, html=html)
 
 
-class NonMd(object):
+class NonMd(Page):
     def __init__(self, f: FileNode, rectifiedFileName: str, realBasename: str) -> None:
-        self.fileContent: str = readfile(f.fullPath)
+        super().__init__(f)
+
         self.rectifiedFileName: str = rectifiedFileName
         self.realBasename: str = realBasename
 
