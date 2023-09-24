@@ -42,14 +42,38 @@ class Content(object):
         dstFile: FileNode = self.nameRegistry.allFiles[name]
         dstFile.makePublic()
 
-        srcPath = splitPath(srcFile.fullPath)
-        dstPath = splitPath(dstFile.fullPath)
+        dstFileName = dstFile.fileName
+        if isinstance(dstFile.pyPage, NonMd):
+            dstFileName = dstFile.pyPage.rectifiedFileName
+        elif isinstance(dstFile.pyPage, Md):
+            dstFileName = dstFile.basename
+
+        srcPath = splitPath(srcFile.fullPath)[:-1]
+        dstPath = splitPath(dstFile.fullPath)[:-1]
         print("srcPath:", srcPath)
         print("dstPath:", dstPath)
+        commonLevel = 0
+        for i in range(min(len(srcPath), len(dstPath))):
+            if srcPath[i] == dstPath[i]:
+                commonLevel += 1
+        remainingPath = dstPath[commonLevel:] + [dstFileName]
+        print("Remaining Path:", remainingPath)
+        print("Common Level:", commonLevel)
 
-        relativePath = dstFile.absoluteFilePath  # TODO + FIXME
+        relativePath: List[str] = []
+        if commonLevel < len(srcPath):
+            stepsDown = len(srcPath) - commonLevel
+            for _ in range(stepsDown):
+                relativePath.append("..")
+        for p in remainingPath:
+            relativePath.append(p)
+        if isinstance(srcFile.pyPage, Md):
+            relativePath = [".."] + relativePath
 
-        return relativePath
+        relativePathStr = os.path.join("", *relativePath)
+        print("relativePath", relativePathStr)
+
+        return relativePathStr
 
     def processWithPyPage(self, fileNode: FileNode, env: dict[str, Any]) -> None:
         assert fileNode.pyPage is not None
@@ -73,6 +97,8 @@ class Content(object):
 
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)
+
+        # TODO: Do Markdown processing here. And perhaps NonMd reading as well.
 
         if "public" in env and env["public"] is True:
             fileNode.makePublic()
