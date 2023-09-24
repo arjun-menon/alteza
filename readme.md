@@ -14,9 +14,11 @@ python3 -m core
 ### Type checking & reformatting
 To run some type checks:
 ```sh
-mypy core # should have zero errors
-pyre check # should have zero errors as well
+mypy core  # should have zero errors
+pyre check  # should have zero errors as well
+pyright core  # should have zero errors too
 ```
+Or all at once with: `mypy core ; pyre check ; pyright core`.
 
 To re-format the code, just run: `black core`.
 

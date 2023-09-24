@@ -8,5 +8,6 @@ sh
 black
 pyre-check
 mypy
+pyright
 types-PyYAML
 types-Markdown
