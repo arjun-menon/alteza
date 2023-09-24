@@ -43,7 +43,7 @@ class Content(object):
             raise Exception(f"Link error: {name}")
 
         dstFile: FileNode = self.nameRegistry.allFiles[name]
-        dstFile.makePublic()
+        dstFile.makePublic()  # FixMe: Circular links can make pages public.
 
         dstFileName = dstFile.fileName
         if isinstance(dstFile.pyPage, NonMd):
@@ -79,11 +79,11 @@ class Content(object):
         env = env.copy()
         toProcessFurther: str
 
-        if isinstance(fileNode.pyPage, NonMd):
+        if isinstance(fileNode.pyPage, NonMd) or isinstance(fileNode.pyPage, Md):
             toProcessFurther = fileNode.pyPage.fileContent
-        elif isinstance(fileNode.pyPage, Md):
-            toProcessFurther = fileNode.pyPage.html
-            env.update(fileNode.pyPage.metadata)
+        # elif isinstance(fileNode.pyPage, Md):
+        #     toProcessFurther = fileNode.pyPage.html
+        #     env.update(fileNode.pyPage.metadata)
         else:
             raise Exception(f"{fileNode} pyPage attribute is invalid.")
 
@@ -96,10 +96,17 @@ class Content(object):
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)
 
-        # TODO: Do Markdown processing here. And perhaps NonMd reading as well.
+        # Perform Markdown processing
+        if isinstance(fileNode.pyPage, Md):
+            mdResult = Md.processMarkdown(pyPageOutput)
+            env.update(mdResult.metadata)
+            pyPageOutput = mdResult.html
 
-        if "public" in env and env["public"] is True:
-            fileNode.makePublic()
+        if "public" in env:
+            if env["public"] is True:
+                fileNode.makePublic()
+            elif env["public"] is False:
+                fileNode.shouldPublish = False
 
         if isinstance(fileNode.pyPage, Md):
             defaultHtmlTemplate = Content.getDefaultHtmlTemplate(env)

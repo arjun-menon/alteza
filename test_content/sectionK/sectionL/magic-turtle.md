@@ -2,7 +2,6 @@
 title: A Magic Turtle
 draft: true
 public: true
-mood: joy
 ---
 
 Magic Turtle

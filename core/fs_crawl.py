@@ -1,9 +1,20 @@
 import os
 import sys
+import yaml
+import markdown
 from collections import defaultdict
-from typing import Optional, List, Dict, DefaultDict, Set, Tuple, Callable, Union
+from typing import (
+    Optional,
+    List,
+    Dict,
+    DefaultDict,
+    Set,
+    Tuple,
+    Callable,
+    Union,
+    NamedTuple,
+)
 from colored import Style, Fore  # type: ignore
-from core.ingest_markdown import Md, processMarkdownFile
 
 colored_logs = True
 config_py_file = "__config__.py"
@@ -32,11 +43,11 @@ class FsNode(object):
                 r = f"{Style.bold}{Fore.spring_green_2b}{r}{Style.reset}"
         return r
 
-    def _setAsPublic(self) -> None:
+    def setNodeAsPublic(self) -> None:
         self.shouldPublish = True
 
     def makePublic(self) -> None:
-        runOnFsNodeAndAscendantNodes(self, lambda fsNode: fsNode._setAsPublic())
+        runOnFsNodeAndAscendantNodes(self, lambda fsNode: fsNode.setNodeAsPublic())
 
 
 class FileNode(FsNode):
@@ -145,6 +156,34 @@ class NameRegistry(object):
         )
 
 
+class Md(object):
+    def __init__(self, f: FileNode) -> None:
+        self.fileContent: str = readfile(f.fullPath)
+
+    class Result(NamedTuple):
+        metadata: Dict[str, str]
+        html: str
+
+    @staticmethod
+    def processMarkdown(text: str) -> Result:
+        md = markdown.Markdown(extensions=["meta", "codehilite"])
+        html: str = md.convert(text)
+        yamlFrontMatter: str = ""
+
+        for name, lines in md.Meta.items():  # type: ignore
+            yamlFrontMatter += "%s : %s \n" % (name, lines[0])
+            for line in lines[1:]:
+                yamlFrontMatter += " " * (len(name) + 3) + line + "\n"
+
+        metadata = yaml.safe_load(yamlFrontMatter)
+        if metadata is None:
+            metadata = dict()
+        if not isinstance(metadata, dict):
+            raise Exception("Expected yaml.safe_load to return a dict or None.")
+
+        return Md.Result(metadata=metadata, html=html)
+
+
 class NonMd(object):
     def __init__(self, f: FileNode, rectifiedFileName: str, realBasename: str) -> None:
         self.fileContent: str = readfile(f.fullPath)
@@ -184,8 +223,9 @@ def readPages(node: FsNode) -> None:
     elif isinstance(node, FileNode):
         f: FileNode = node
         if f.extension == ".md":
-            f.pyPage = processMarkdownFile(f.fullPath)
-            f.shouldPublish = bool(f.pyPage.metadata.get("public", False))
+            f.pyPage = Md(f)
+            # f.pyPage = processMarkdownFile(f.fullPath)
+            # f.shouldPublish = bool(f.pyPage.metadata.get("public", False))
             # f.shouldPublish could be overwritten during pypage invocation
         else:
             f.pyPage = NonMd.isNonMdPyPageFile(f)
