@@ -44,18 +44,18 @@ class Content(object):
 
     @staticmethod
     def processWithPyPage(fileNode: FileNode, env: dict[str, Any]) -> None:
+        assert fileNode.pyPage is not None
         print(f"{Fore.grey_42}Processing:{Style.reset}", fileNode.fullPath)
         env = env.copy()
-        assert not ((fileNode.pyPage is not None) and (fileNode.markdown is not None))
         toProcessFurther: str
 
-        if fileNode.pyPage is not None:
+        if isinstance(fileNode.pyPage, str):
             toProcessFurther = fileNode.pyPage
-        elif fileNode.markdown is not None:
-            toProcessFurther = fileNode.markdown.html
-            env.update(fileNode.markdown.metadata)
+        elif isinstance(fileNode.pyPage, Md):
+            toProcessFurther = fileNode.pyPage.html
+            env.update(fileNode.pyPage.metadata)
         else:
-            raise Exception(f"{fileNode} is not a page.")
+            raise Exception(f"{fileNode} pyPage attribute is invalid.")
 
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)
@@ -63,7 +63,7 @@ class Content(object):
         if "public" in env and env["public"] is True:
             fileNode.makePublic()
 
-        if fileNode.markdown is not None:
+        if isinstance(fileNode.pyPage, Md):
             defaultHtmlTemplate = Content.getDefaultHtmlTemplate(env)
             # Re-process against `defaultHtmlTemplate` with PyPage:
             pyPageOutput = pypage(defaultHtmlTemplate, env | {"body": pyPageOutput})
@@ -117,7 +117,7 @@ class Content(object):
             # all subdirectories have been processed so that they have access to
             # information about the subdirectories.
             for f in node.files:
-                if f.isPage:
+                if f.pyPage is not None:
                     self.processWithPyPage(f, env.copy())
 
         initial_env = self.getBasicHelpers()
@@ -165,7 +165,7 @@ def generate(outputDir: str, content: Content) -> None:
         for fileNode in curDir.files:
             if fileNode.shouldPublish:
                 # TODO: Handle non-Md differently
-                if fileNode.isPage:
+                if fileNode.pyPage is not None:
                     os.mkdir(fileNode.basename)
                     with enterDir(fileNode.basename):
                         with open("index.html", "w") as pageHtml:

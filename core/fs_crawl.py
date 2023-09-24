@@ -52,17 +52,14 @@ class FileNode(FsNode):  # pyre-ignore[13]
         self.extension: str = split_name[1]
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
 
-        # Todo: Collapse these into self.pyPage: Optional[Union[str, Md]]
-        self.isPage: bool = False
-        self.pyPage: Optional[str] = None
-        self.markdown: Optional[Md] = None
+        self.pyPage: Optional[Union[str, Md]] = None
         self.pyPageOutput: Optional[str]  # to be generated (by pypage) & set later
 
     def colorize(self, r: str) -> str:
         if colored_logs:
-            if self.isPage and self.shouldPublish:
+            if self.pyPage is not None and self.shouldPublish:
                 r = f"{Fore.spring_green_1}{r}{Style.reset}"
-            elif self.markdown:
+            elif isinstance(self.pyPage, Md):
                 r = f"{Fore.purple_4b}{r}{Style.reset}"
         return r
 
@@ -112,7 +109,7 @@ class NameRegistry(object):
         allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
 
         def record(fileNode: FileNode) -> None:
-            if fileNode.isPage:
+            if fileNode.pyPage is not None:
                 allFilesMulti[fileNode.basename].add(fileNode)
             else:
                 allFilesMulti[fileNode.fileName].add(fileNode)
@@ -177,13 +174,11 @@ def readPages(node: FsNode) -> None:
     elif isinstance(node, FileNode):
         f: FileNode = node
         if f.extension == ".md":
-            f.markdown = processMarkdownFile(f.fullPath)
-            f.isPage = True
-            f.shouldPublish = bool(f.markdown.metadata.get("public", False))
+            f.pyPage = processMarkdownFile(f.fullPath)
+            f.shouldPublish = bool(f.pyPage.metadata.get("public", False))
             # f.shouldPublish could be overwritten during pypage invocation
         elif isNonMdPyPageFile(f):
             f.pyPage = readfile(f.fullPath)
-            f.isPage = True
             # f.shouldPublish will be determined later after pypage invocation
 
 
