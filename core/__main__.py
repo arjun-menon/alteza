@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from core import engine
+from core.engine import run, Args
 
-if __name__ == "__main__":
-    engine.run(engine.Args().parse_args())
+run(Args().parse_args())
