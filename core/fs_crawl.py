@@ -206,7 +206,7 @@ class Md(Page):
             if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}-$", dateFragment_):
                 dateFragment = dateFragment_[:-1]
                 self.draftDate = date.fromisoformat(dateFragment)
-                self.realBasename = remainingBasename
+                self.realBasename: str = remainingBasename
 
     class Result(NamedTuple):
         metadata: Dict[str, str]
