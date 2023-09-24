@@ -3,10 +3,13 @@ Flexible Static Site Generator
 ------------------------------
 
 #### Ideas...
+* Support for this: https://python-markdown.github.io/extensions/wikilinks/ ?
+  * Use `build_url` to talk to `link` to return the correct url?
 * Watch option `--watch` that rebuilds automatically.
 * Simple built-in HTTP server option `--serve` that serves the output directory.
 * Development `--dev` options which turns on both `--watch` and `--serve`.
   * Maybe a WebSocket that tells the listener if a site rebuild is _in progress_.
+* Obsidian Vault internal links recognition?
 * Fix the `link` circular issue by tracing links after processing, from every `public` node.
   * Use some graph visualization library to draw a visual map of the website.
 * Limit pypage processing to `.py.html` (and `.md`) files.
