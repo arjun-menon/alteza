@@ -224,14 +224,10 @@ def readPages(node: FsNode) -> None:
         f: FileNode = node
         if f.extension == ".md":
             f.pyPage = Md(f)
-            # f.pyPage = processMarkdownFile(f.fullPath)
-            # f.shouldPublish = bool(f.pyPage.metadata.get("public", False))
-            # f.shouldPublish could be overwritten during pypage invocation
         else:
             f.pyPage = NonMd.isNonMdPyPageFile(f)
             if isinstance(f.pyPage, NonMd):
                 f.basename = f.pyPage.realBasename
-            # f.shouldPublish will be determined later after pypage invocation
 
 
 def readfile(file_path: str) -> str:

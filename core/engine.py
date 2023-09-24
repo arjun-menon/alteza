@@ -81,9 +81,6 @@ class Content(object):
 
         if isinstance(fileNode.pyPage, NonMd) or isinstance(fileNode.pyPage, Md):
             toProcessFurther = fileNode.pyPage.fileContent
-        # elif isinstance(fileNode.pyPage, Md):
-        #     toProcessFurther = fileNode.pyPage.html
-        #     env.update(fileNode.pyPage.metadata)
         else:
             raise Exception(f"{fileNode} pyPage attribute is invalid.")
 
