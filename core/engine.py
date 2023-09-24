@@ -46,7 +46,7 @@ class Content(object):
         if isinstance(dstFile.pyPage, NonMd):
             dstFileName = dstFile.pyPage.rectifiedFileName
         elif isinstance(dstFile.pyPage, Md):
-            dstFileName = dstFile.basename
+            dstFileName = dstFile.basename + "/"
 
         srcPath = splitPath(srcFile.fullPath)[:-1]
         dstPath = splitPath(dstFile.fullPath)[:-1]
