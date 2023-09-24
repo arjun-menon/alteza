@@ -1,12 +1,12 @@
 import os
 import sys
 from collections import defaultdict
-from typing import Optional, List, Dict, DefaultDict, Set, Tuple, Callable, Any
+from typing import Optional, List, Dict, DefaultDict, Set, Tuple, Callable, Union
 
 # pyre-ignore[21]
 from colored import Style, Fore  # type: ignore [import]
 
-from core.ingest_markdown import Markdown, processMarkdownFile
+from core.ingest_markdown import Md, processMarkdownFile
 
 colored_logs = True
 
@@ -52,10 +52,10 @@ class FileNode(FsNode):  # pyre-ignore[13]
         self.extension: str = split_name[1]
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
 
-        # Todo: Collapse these into self.pyPage: Optional[Union[str, Markdown]]
+        # Todo: Collapse these into self.pyPage: Optional[Union[str, Md]]
         self.isPage: bool = False
         self.pyPage: Optional[str] = None
-        self.markdown: Optional[Markdown] = None
+        self.markdown: Optional[Md] = None
         self.pyPageOutput: Optional[str]  # to be generated (by pypage) & set later
 
     def colorize(self, r: str) -> str:

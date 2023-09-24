@@ -167,6 +167,7 @@ def generate(outputDir: str, content: Content) -> None:
 
         for fileNode in curDir.files:
             if fileNode.shouldPublish:
+                # TODO: Handle non-Md differently
                 if fileNode.isPage:
                     os.mkdir(fileNode.basename)
                     with enterDir(fileNode.basename):

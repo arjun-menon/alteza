@@ -4,13 +4,13 @@ import markdown
 import yaml
 
 
-class Markdown(object):
+class Md(object):
     def __init__(self, metadata: Optional[Dict[str, str]], html: str) -> None:
         self.metadata: Dict[str, str] = metadata if metadata is not None else dict()
         self.html = html
 
 
-def processMarkdownFile(markdownFileName: str) -> Markdown:
+def processMarkdownFile(markdownFileName: str) -> Md:
     with open(markdownFileName) as f:
         text = f.read()
 
@@ -24,4 +24,4 @@ def processMarkdownFile(markdownFileName: str) -> Markdown:
             yamlFrontMatter += " " * (len(name) + 3) + line + "\n"
 
     yamlMetadata = yaml.safe_load(yamlFrontMatter)
-    return Markdown(yamlMetadata, html)
+    return Md(yamlMetadata, html)
