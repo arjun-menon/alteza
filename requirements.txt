@@ -1,14 +1,14 @@
-pypage
-markdown
-pygments
-pyyaml
-colored
-sh
-typed-argument-parser
+pypage>=2.0.7
+markdown>=3.4.4
+pygments>=2.16.1
+pyyaml>=6.0.1
+colored>=2.2.3
+sh>=2.0.6
+typed-argument-parser>=1.8.1
 
 black
 pyre-check
 mypy
 pyright
-types-PyYAML
-types-Markdown
+types-PyYAML>=6.0.12.12
+types-Markdown>=3.4.2.10
