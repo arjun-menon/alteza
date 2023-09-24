@@ -1,1 +1,1 @@
-{{ sh.pygmentize(S="default", f="html", a=".codehilite") }}
+{{ sh.pygmentize(S=pygments_style, f="html", a=".codehilite") }}
