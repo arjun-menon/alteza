@@ -14,6 +14,8 @@ from core.fs_crawl import (
     displayDir,
     NameRegistry,
     fs_crawl,
+    Md,
+    readfile,
     config_py_file,
     Fore,
     Style,
@@ -120,11 +122,6 @@ class Content(object):
 
         initial_env = self.getBasicHelpers()
         walk(self.rootDir, initial_env)
-
-
-def readfile(file_path: str) -> str:
-    with open(file_path, "r") as a_file:
-        return a_file.read()
 
 
 @contextmanager
