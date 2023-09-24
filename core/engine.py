@@ -1,8 +1,9 @@
 import os
 import types
 import shutil
-from contextlib import contextmanager
 from time import time_ns
+from argparse import Namespace
+from contextlib import contextmanager
 from typing import Generator, List, Dict, Any
 
 # pyre-ignore[21]
@@ -179,7 +180,8 @@ def enterDir(newDir: str) -> Generator[None, None, None]:
         os.chdir(oldDir)
 
 
-def process(inputDir: str, outputDir: str) -> None:
+# todo: change args to an Options dataclass
+def process(args: Namespace, inputDir: str, outputDir: str) -> None:
     startTimeNs = time_ns()
 
     with enterDir(inputDir):
