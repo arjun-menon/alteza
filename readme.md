@@ -1,7 +1,6 @@
 
-appletree will be a static site generator driven by [pypage](https://github.com/arjun-menon/pypage).
-Examples of other static site generator [can be found here](https://github.com/collections/static-site-generators), and 
-include [Jekyll](https://jekyllrb.com/), [Hugo](https://gohugo.io/), [Gutenberg](https://www.getgutenberg.io/), etc.
+appletree is a static site generator driven by [PyPage](https://github.com/arjun-menon/pypage).
+Examples of other static site generators can be [found here](https://github.com/collections/static-site-generators).
 
 The differentiator with appletree is that the site author (if familiar with Python) will have a lot more 
 fine-grained control over the output, than what any of the existing options offer.
