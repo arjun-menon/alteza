@@ -3,7 +3,7 @@ import types
 import shutil
 from contextlib import contextmanager
 from time import time_ns
-from typing import Generator, Dict, Any
+from typing import Generator, List, Dict, Any
 
 # pyre-ignore[21]
 import sh  # type: ignore [import]
@@ -31,7 +31,7 @@ class Content(object):
         self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
 
-    def link(self, fromFile: FileNode, name: str) -> str:
+    def link(self, srcFile: FileNode, name: str) -> str:
         if name not in self.nameRegistry.allFiles:
             print(
                 f"Link error: `{name}` was not found in the name registry."
@@ -39,10 +39,15 @@ class Content(object):
             )
             raise Exception(f"Link error: {name}")
 
-        fileNode: FileNode = self.nameRegistry.allFiles[name]
-        fileNode.makePublic()
+        dstFile: FileNode = self.nameRegistry.allFiles[name]
+        dstFile.makePublic()
 
-        relativePath = fileNode.absoluteFilePath  # TODO + FIXME
+        srcPath = splitPath(srcFile.fullPath)
+        dstPath = splitPath(dstFile.fullPath)
+        print("srcPath:", srcPath)
+        print("dstPath:", dstPath)
+
+        relativePath = dstFile.absoluteFilePath  # TODO + FIXME
 
         return relativePath
 
@@ -132,6 +137,14 @@ class Content(object):
 
         initial_env = self.getBasicHelpers()
         walk(self.rootDir, initial_env)
+
+
+def splitPath(path: str) -> List[str]:
+    head, tail = os.path.split(path)
+    if head == "":
+        return [path]
+    else:
+        return splitPath(head) + [tail]
 
 
 @contextmanager
