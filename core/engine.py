@@ -6,6 +6,9 @@ from time import time_ns
 from typing import Generator, Dict, Any
 
 # pyre-ignore[21]
+import sh  # type: ignore [import]
+
+# pyre-ignore[21]
 from pypage import pypage  # type: ignore [import]
 
 from core.fs_crawl import (
@@ -91,7 +94,7 @@ class Content(object):
         }
 
     def getBasicHelpers(self) -> Dict[str, Any]:
-        return {"link": self.link, "readfile": readfile}
+        return {"link": self.link, "readfile": readfile, "sh": sh}
 
     def process(self) -> None:
         def walk(node: DirNode, env: dict[str, Any]) -> None:
@@ -141,6 +144,7 @@ def process(inputDir: str, outputDir: str) -> None:
 
     with enterDir(inputDir):
         rootDir, nameRegistry = fs_crawl()
+        print(nameRegistry)
         content = Content(rootDir, nameRegistry)
         print("Processing...\n")
         content.process()
@@ -175,7 +179,12 @@ def generate(outputDir: str, content: Content) -> None:
                             with open("index.html", "w") as pageHtml:
                                 pageHtml.write(fileNode.pyPageOutput)
                     elif isinstance(fileNode.pyPage, NonMd):
-                        with open(fileNode.pyPage.rectifiedFileName, "w") as nonMdFile:
+                        fileName = fileNode.pyPage.rectifiedFileName
+                        if os.path.exists(fileName):
+                            raise Exception(
+                                f"File {fileName} already exists, and conflicts with {fileNode}."
+                            )
+                        with open(fileName, "w") as nonMdFile:
                             nonMdFile.write(fileNode.pyPageOutput)
 
                     else:

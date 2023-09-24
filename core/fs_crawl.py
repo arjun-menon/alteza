@@ -150,9 +150,10 @@ class NameRegistry(object):
 
 
 class NonMd(object):
-    def __init__(self, f: FileNode, rectifiedFileName: str) -> None:
+    def __init__(self, f: FileNode, rectifiedFileName: str, realBasename: str) -> None:
         self.fileContent: str = readfile(f.fullPath)
         self.rectifiedFileName: str = rectifiedFileName
+        self.realBasename: str = realBasename
 
     @staticmethod
     def isNonMdPyPageFile(fileNode: FileNode) -> Optional["NonMd"]:
@@ -165,8 +166,9 @@ class NonMd(object):
             expectedRemainingExt = ".py" + fileNode.extension
             if remainingExt == expectedRemainingExt:
                 # The condition above passing indicates this is a NonMd page file.
-                rectifiedFileName = fileNode.fileName[:pySubExtPos] + fileNode.extension
-                return NonMd(fileNode, rectifiedFileName)
+                realBasename = fileNode.fileName[:pySubExtPos]
+                rectifiedFileName = realBasename + fileNode.extension
+                return NonMd(fileNode, rectifiedFileName, realBasename)
         return None
 
 
@@ -191,6 +193,8 @@ def readPages(node: FsNode) -> None:
             # f.shouldPublish could be overwritten during pypage invocation
         else:
             f.pyPage = NonMd.isNonMdPyPageFile(f)
+            if isinstance(f.pyPage, NonMd):
+                f.basename = f.pyPage.realBasename
             # f.shouldPublish will be determined later after pypage invocation
 
 

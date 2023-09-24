@@ -3,6 +3,7 @@ markdown
 pygments
 pyyaml
 colored
+sh
 
 black
 pyre-check
