@@ -5,6 +5,6 @@ Here's a joyful squirrel.
 
 <img src="{{link("squirrel.png")}}">
 
-Want to learn about a <a href="{{link("magic-turtle")}}">magic turtle</a>?
+Want to learn about a [magic turtle]({{link("magic-turtle")}})?
 
-This is <a href="{{link("just_a_test")}}">just a test</a>.
+This is [just a test]({{link("just_a_test")}}).
