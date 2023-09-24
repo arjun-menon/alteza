@@ -1,4 +1,4 @@
-pypage >= 2.0.7
+pypage >= 2.0.8
 markdown >= 3.4.4
 pygments >= 2.16.1
 pyyaml >= 6.0.1
