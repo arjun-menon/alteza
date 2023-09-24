@@ -2,14 +2,10 @@ import os
 import sys
 from collections import defaultdict
 from typing import Optional, List, Dict, DefaultDict, Set, Tuple, Callable, Union
-
-# pyre-ignore[21]
-from colored import Style, Fore  # type: ignore [import]
-
+from colored import Style, Fore  # type: ignore
 from core.ingest_markdown import Md, processMarkdownFile
 
 colored_logs = True
-
 config_py_file = "__config__.py"
 
 

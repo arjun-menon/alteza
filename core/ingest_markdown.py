@@ -18,7 +18,7 @@ def processMarkdownFile(markdownFileName: str) -> Md:
     html: str = md.convert(text)
     yamlFrontMatter = ""
 
-    for name, lines in md.Meta.items():  # type: ignore [attr-defined]
+    for name, lines in md.Meta.items():  # type: ignore
         yamlFrontMatter += "%s : %s \n" % (name, lines[0])
         for line in lines[1:]:
             yamlFrontMatter += " " * (len(name) + 3) + line + "\n"

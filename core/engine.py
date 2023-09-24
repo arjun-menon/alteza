@@ -1,17 +1,12 @@
 import os
 import types
 import shutil
+import sh  # type: ignore
 from tap import Tap
 from time import time_ns
 from contextlib import contextmanager
 from typing import Generator, List, Dict, Any
-
-# pyre-ignore[21]
-import sh  # type: ignore [import]
-
-# pyre-ignore[21]
-from pypage import pypage  # type: ignore [import]
-
+from pypage import pypage  # type: ignore
 from core.fs_crawl import (
     FileNode,
     DirNode,

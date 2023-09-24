@@ -16,9 +16,13 @@ To run some type checks:
 ```sh
 mypy core  # should have zero errors
 pyre check  # should have zero errors as well
-pyright core  # should have zero errors too
+pyright core  # should have zero errors also
+pytype core  # should have zero errors too
 ```
-Or all at once with: `mypy core ; pyre check ; pyright core`.
+Or all at once with:
+```sh
+mypy core ; pyre check ; pyright core ; pytype core
+````
 
 To re-format the code, just run: `black core`.
 
