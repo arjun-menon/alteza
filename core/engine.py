@@ -50,15 +50,11 @@ class Content(object):
 
         srcPath = splitPath(srcFile.fullPath)[:-1]
         dstPath = splitPath(dstFile.fullPath)[:-1]
-        print("srcPath:", srcPath)
-        print("dstPath:", dstPath)
         commonLevel = 0
         for i in range(min(len(srcPath), len(dstPath))):
             if srcPath[i] == dstPath[i]:
                 commonLevel += 1
         remainingPath = dstPath[commonLevel:] + [dstFileName]
-        print("Remaining Path:", remainingPath)
-        print("Common Level:", commonLevel)
 
         relativePath: List[str] = []
         if commonLevel < len(srcPath):
@@ -71,7 +67,6 @@ class Content(object):
             relativePath = [".."] + relativePath
 
         relativePathStr = os.path.join("", *relativePath)
-        print("relativePath", relativePathStr)
 
         return relativePathStr
 
@@ -189,7 +184,7 @@ def process(inputDir: str, outputDir: str) -> None:
 
     with enterDir(inputDir):
         rootDir, nameRegistry = fs_crawl()
-        print(nameRegistry)
+        # print(nameRegistry)
         content = Content(rootDir, nameRegistry)
         print("Processing...\n")
         content.process()
