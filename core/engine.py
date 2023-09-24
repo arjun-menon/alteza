@@ -1,8 +1,8 @@
 import os
 import types
 import shutil
+from tap import Tap
 from time import time_ns
-from argparse import Namespace
 from contextlib import contextmanager
 from typing import Generator, List, Dict, Any
 
@@ -25,6 +25,13 @@ from core.fs_crawl import (
     Fore,
     Style,
 )
+
+
+class Args(Tap):
+    copy_assets: bool = False  # Copy assets instead of symlinking to them
+    trailing_slash: bool = False  # Include a trailing slash in links to markdown pages
+    content_dir: str = "test_content"  # Directory to read the input content from.
+    output_dir: str = "test_output"  # Directory to send the output. WARNING: This will be deleted first.
 
 
 class Content(object):
@@ -180,11 +187,10 @@ def enterDir(newDir: str) -> Generator[None, None, None]:
         os.chdir(oldDir)
 
 
-# todo: change args to an Options dataclass
-def process(args: Namespace, inputDir: str, outputDir: str) -> None:
+def run(args: Args) -> None:
     startTimeNs = time_ns()
 
-    with enterDir(inputDir):
+    with enterDir(args.content_dir):
         rootDir, nameRegistry = fs_crawl()
         # print(nameRegistry)
         content = Content(rootDir, nameRegistry)
@@ -195,7 +201,7 @@ def process(args: Namespace, inputDir: str, outputDir: str) -> None:
     print("File Tree:")
     print(displayDir(rootDir))
 
-    generate(outputDir, content)
+    generate(args.output_dir, content)
 
     elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)

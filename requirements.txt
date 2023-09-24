@@ -4,6 +4,7 @@ pygments
 pyyaml
 colored
 sh
+typed-argument-parser
 
 black
 pyre-check
