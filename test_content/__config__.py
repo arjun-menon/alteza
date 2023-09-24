@@ -1,6 +1,7 @@
 three = 3
 
-pygments_style = "default"
+# See: https://pygments.org/styles/
+pygments_style = "sas"
 
 mood = "joy"
 
