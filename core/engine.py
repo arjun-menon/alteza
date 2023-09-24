@@ -31,7 +31,7 @@ class Content(object):
         self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
 
-    def link(self, name: str) -> str:
+    def link(self, fromFile: FileNode, name: str) -> str:
         if name not in self.nameRegistry.allFiles:
             print(
                 f"Link error: `{name}` was not found in the name registry."
@@ -46,8 +46,7 @@ class Content(object):
 
         return relativePath
 
-    @staticmethod
-    def processWithPyPage(fileNode: FileNode, env: dict[str, Any]) -> None:
+    def processWithPyPage(self, fileNode: FileNode, env: dict[str, Any]) -> None:
         assert fileNode.pyPage is not None
         print(f"{Fore.grey_42}Processing:{Style.reset}", fileNode.fullPath)
         env = env.copy()
@@ -60,6 +59,12 @@ class Content(object):
             env.update(fileNode.pyPage.metadata)
         else:
             raise Exception(f"{fileNode} pyPage attribute is invalid.")
+
+        # Inject link
+        def link(name: str) -> str:
+            return self.link(fileNode, name)
+
+        env |= {"link": link}
 
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)
@@ -93,8 +98,9 @@ class Content(object):
             if (not k.startswith("_") and not isinstance(v, types.ModuleType))
         }
 
-    def getBasicHelpers(self) -> Dict[str, Any]:
-        return {"link": self.link, "readfile": readfile, "sh": sh}
+    @staticmethod
+    def getBasicHelpers() -> Dict[str, Any]:
+        return {"readfile": readfile, "sh": sh}
 
     def process(self) -> None:
         def walk(node: DirNode, env: dict[str, Any]) -> None:
