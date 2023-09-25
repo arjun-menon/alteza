@@ -5,6 +5,11 @@ Flexible Static Site Generator
 #### Ideas...
 * Support for this: https://python-markdown.github.io/extensions/wikilinks/ ?
   * Use `build_url` to talk to `link` to return the correct url?
+* Changing Name Registry to allow is to handle multiple files with the same basename. (Low Priority)
+  * I'll need some sort of algorithm/approach to handle these.
+  * Modify name registry so that if there are names with multiple matches, we just
+    print a warning listing the multiple matches for each name, and print a message
+    recommending using unique names.
 * Watch option `--watch` that rebuilds automatically.
 * Simple built-in HTTP server option `--serve` that serves the output directory.
 * Development `--dev` options which turns on both `--watch` and `--serve`.
