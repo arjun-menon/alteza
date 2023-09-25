@@ -209,13 +209,15 @@ def run(args: Args) -> None:
     print("File Tree:")
     print(displayDir(rootDir))
 
-    generate(args.output_dir, content)
+    generate(args, content)
 
     elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
 
 
-def generate(outputDir: str, content: Content) -> None:
+def generate(args: Args, content: Content) -> None:
+    outputDir = args.output_dir
+
     def walk(curDir: DirNode) -> None:
         for subDir in curDir.subDirs:
             if subDir.shouldPublish:
@@ -247,7 +249,10 @@ def generate(outputDir: str, content: Content) -> None:
                         raise Exception(f"{fileNode} pyPage attribute is invalid.")
 
                 else:
-                    os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
+                    if args.copy_assets:
+                        shutil.copyfile(fileNode.absoluteFilePath, fileNode.fileName)
+                    else:
+                        os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
 
     resetOutputDir(outputDir)
 
