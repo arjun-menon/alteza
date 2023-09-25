@@ -67,8 +67,25 @@ course means that you must run Alteza with trusted code, or in an isolated conta
 
 To run, execute the `core` module itself, from the project directory:
 ```sh
-python3 -m core
+python3 -m core -h
 ```
+The `-h` argument above will print the available options:
+```
+(venv) python3 -m core -h
+usage: __main__.py [--copy_assets] [--trailing_slash] [--content_dir CONTENT_DIR] [--output_dir OUTPUT_DIR] [-h]
+
+options:
+  --copy_assets         (bool, default=False) Copy assets instead of symlinking to them
+  --trailing_slash      (bool, default=False) Include a trailing slash in links to markdown pages
+  --content_dir CONTENT_DIR
+                        (str, default=test_content) Directory to read the input content from.
+  --output_dir OUTPUT_DIR
+                        (str, default=test_output) Directory to send the output. WARNING: This will be deleted first.
+  -h, --help            show this help message and exit
+```
+As might be obvious above, you set the `content_dir` to your content directory. The output directory will be deleted entirely, before being written to.
+
+To just run the standard test suite (`test_content`), just run it without any argument (`python3 -m core`).
 
 ### Type checking & reformatting
 To run some type checks:
@@ -100,5 +117,4 @@ deactive # end the venv
 ---
 
 #### License
-This project is licensed under the AGPL v3, but I'm reserving the right to re-license it under a license with fewer
-restriction, e.g. the Apache License 2.0, and any PRs constitute consent to re-license as such.
+This project is licensed under the AGPL v3, but I'm reserving the right to re-license it under a license with fewer restrictions, e.g. the Apache License 2.0, and any PRs constitute consent to re-license as such.
