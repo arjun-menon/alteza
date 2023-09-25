@@ -200,7 +200,7 @@ def run(args: Args) -> None:
 
     with enterDir(args.content_dir):
         rootDir, nameRegistry = fs_crawl()
-        # print(nameRegistry)
+        print(nameRegistry)
         content = Content(rootDir, nameRegistry)
         print("Processing...\n")
         content.process()

@@ -20,15 +20,48 @@ course means that you must run Alteza with trusted code, or in an isolated conta
 
 ## User Guide
 
-### Basic Operation
+1. The directory structure is generally mirrored in the generated site.
 
-1. First, we recursively go through all directories.
-2. At each directory (descending downward), we execute an `__config__.py` file, if one is present. After
-   execution, we absorb any variables in it that do not start with a `_` into an `env` dict.
-3. Process all `.md` files and any file with a `.py` before its actual extension with `pypage`. Pass the `env` dict to Pypage.
-   1. Pypage is called on the "leaf nodes" (innermost files) first, and then upwards.
-   2. Thus, the `.md` and `.html` files in the parent directory receives a list of objects representing the processed results of all its subdirectories. (And, this is repeated, recursively upwards).
-4. Resultant HTML output is copied to the output directory (and non-HTML output symlinked there).
+2. By default, nothing is copied/published to the generated site.
+    * A file must explicitly indicate using a `public: true` variable/field that it is to be published.
+      * So directories with no public files, are non-existent in the generated site.
+    * Files _reachable_ from marked-as-public files will also be publicly accessible.
+      * Here, reachability is discovered when a provided `link` function is used to link to other files.
+
+3. There are two kinds of files that are subject to processing with [PyPage](https://github.com/arjun-menon/pypage): Markdown files (ending with `.md`) and any file with a `.py` before its actual extension.
+    * Markdown Files:
+        * Markdown files are first processed to have their "front matter" extracted using [Meta-Data](https://python-markdown.github.io/extensions/meta_data/).
+          * The first blank line or `---` ends the front matter section.
+          * The front matter is processed as YAML, and the fields are injected into the `pypage` environment.
+        * ~~The Markdown file is processed using `pypage`, with its Python environment enhanced by the YAML fields from the front matter~~.
+        * The environment dictionary after the Markdown is processed by pypage is treated as the "return value" of this `.md` file. ~~This "return value" dictionary has a `content` key added to it which maps to the `pypage` output for this `.md` file~~. 
+        * This Markdown file is passed to a **template** specified in configuration, for a second round of processing by PyPage.
+        * Markdown files result in **_a directory_**, with an `index.html` file containing the Markdown's output.
+    * Other Dynamic Files (_i.e. any file with a `.py` before the last `.` in its file name_):
+      * These files are processed with PyPage _once_ with no template application step afterward.
+    * Other content files are not read. They are _selectively_ either **symlink**ed or **copied**.
+
+4. Python Environment and Configuration:
+   * _Note:_ Python code in both `.md` and other `.py.*` files are run using Python's built-in [`exec`](https://docs.python.org/3/library/functions.html#exec) (and [`eval`](https://docs.python.org/3/library/functions.html#eval)) functions, and when they're run, we passed in a dictionary for their `globals` argument. We call that dict the **environment**, or `env`.
+   * Configuration is done through file(s) called `__config__.py`.
+     * First, we recursively go through all directories top-down.
+     * At each directory (descending downward), we execute an `__config__.py` file, if one is present. After
+   execution, we absorb any variables in it that do not start with a `_` into the `env` dict.
+       * This behavior cna be used to override values. For example a top-level directory can define a `default_template`, which can then be overriden by inner directories.
+   * The deepest `.md`/`.py.*` files get executed first. After it executes, we check if a `env` contains a field `public` that is set as `True`. If it does, we mark that file for publication. Other than recording the value of `public` after each dynamic file is executed, any modification to `env` made by a dynamic file are discarded (and not absorbed, unlike with `__config__.py`).
+     * I would recommend not using `__config__.py` to set `public` as `True`, as that would make the entire directory and all its descendants public (unless that behavior is exactly what is desired). Reachability with `link` (described below) is, in my opinion, a better way to make _only reachable_ content public.
+
+5. Name Registry and `link`.
+    * A Python function named `link` is injected into the top level `env`.
+      * This function can be used to get relative links to any other file. `link` will automatically determine & return the relative path to a file.
+        * For example, one can do `<a href="{{link('some-other-blog-post')}}">`, and the generated site will have a relative link to it (i.e. to its directory if a Markdown file, and to the file itself otherwise).
+      * Reachability of files is determined using this function, and unreachable files will be treated as non-public (and thus not exist in the generated site).
+    * Extensions must be omitted for dynamic files (i.e. `.md` and any file with `.py` before its extension).
+      * I.e. one writes `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`. (TODO: support referring to files both ways; i.e. with the full file name as well.)
+    * The name of every file in the input content is stored in a "name registry" of sorts that's used by `link`.
+      * Currently, names, without their file extension, have to be unique across input content. This might change in the future.
+      * The Name Registry will error out if it encounters any non-unique names. (I understand this is a significant limitation, so I might support marking this simply opt-in behavior with a `--unique` flag in the future.)
+    * Any non-dynamic content file that has been `link`-ed to is marked for publication (i.e. copying or symlinking).
 
 ## Testing
 
