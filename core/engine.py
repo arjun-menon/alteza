@@ -25,13 +25,18 @@ from core.fs_crawl import (
 
 class Args(Tap):
     copy_assets: bool = False  # Copy assets instead of symlinking to them
-    trailing_slash: bool = False  # Include a trailing slash in links to markdown pages
+    trailing_slash: bool = (
+        False  # Include a trailing slash for links to markdown page directories
+    )
     content_dir: str = "test_content"  # Directory to read the input content from.
     output_dir: str = "test_output"  # Directory to send the output. WARNING: This will be deleted first.
 
 
 class Content(object):
-    def __init__(self, rootDir: DirNode, nameRegistry: NameRegistry) -> None:
+    def __init__(
+        self, args: Args, rootDir: DirNode, nameRegistry: NameRegistry
+    ) -> None:
+        self.args = args
         self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
 
@@ -51,8 +56,9 @@ class Content(object):
             dstFileName = dstFile.pyPage.rectifiedFileName
         elif isinstance(dstFile.pyPage, Md):
             dstFileName = (
-                # todo: maybe pass an arg to pass in a "/" trailing slash
                 dstFile.pyPage.realBasename
+                # Add a "/" trailing slash if arg requests it
+                + ("/" if self.args.trailing_slash else "")
             )
 
         srcPath = splitPath(srcFile.fullPath)[:-1]
@@ -201,7 +207,7 @@ def run(args: Args) -> None:
     with enterDir(args.content_dir):
         rootDir, nameRegistry = fs_crawl()
         print(nameRegistry)
-        content = Content(rootDir, nameRegistry)
+        content = Content(args, rootDir, nameRegistry)
         print("Processing...\n")
         content.process()
         print("\nSuccessfully completed processing.\n")
