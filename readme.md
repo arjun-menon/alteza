@@ -18,12 +18,14 @@ translated to [illustrious](https://m.interglot.com/en/es/illustriousness) in Es
 A core design decision of Alteza is executing code (and writing little scripts) to generate your website. (This of
 course means that you must run Alteza with trusted code, or in an isolated container.)
 
-## The Basics
+## User Guide
 
-1. Recursively go through all directories.
-2. At each directory (descending downward), execute an `__config__.py` file, if one is present. After
-   execution, absorb the variables into an `env` dict.
-3. Process all `.md` and `.html` files with `pypage`. Pass the `env` dict to Pypage.
+### Basic Operation
+
+1. First, we recursively go through all directories.
+2. At each directory (descending downward), we execute an `__config__.py` file, if one is present. After
+   execution, we absorb any variables in it that do not start with a `_` into an `env` dict.
+3. Process all `.md` files and any file with a `.py` before its actual extension with `pypage`. Pass the `env` dict to Pypage.
    1. Pypage is called on the "leaf nodes" (innermost files) first, and then upwards.
    2. Thus, the `.md` and `.html` files in the parent directory receives a list of objects representing the processed results of all its subdirectories. (And, this is repeated, recursively upwards).
 4. Resultant HTML output is copied to the output directory (and non-HTML output symlinked there).
