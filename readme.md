@@ -30,7 +30,6 @@ course means that you must run Alteza with trusted code, or in an isolated conta
    2. Thus, the `.md` and `.html` files in the parent directory receives a list of objects representing the processed results of all its subdirectories. (And, this is repeated, recursively upwards).
 4. Resultant HTML output is copied to the output directory (and non-HTML output symlinked there).
 
-
 ## Testing
 
 To run, execute the `core` module itself, from the project directory:
@@ -54,7 +53,6 @@ To re-format the code, just run: `black core`.
 
 To install dependencies, run:
 ```sh
-brew install watchman # on macOS
 python3 -m pip install -r requirements.txt
 ```
 
@@ -66,3 +64,8 @@ python3 -m pip install -r requirements.txt
 deactive # end the venv
 ```
 
+---
+
+#### License
+This project is licensed under the AGPL v3, but I'm reserving the right to re-license it under a license with fewer
+restriction, e.g. the Apache License 2.0, and any PRs constitute consent to re-license as such.
