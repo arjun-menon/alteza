@@ -12,6 +12,7 @@ Flexible Static Site Generator
   * Modify name registry so that if there are names with multiple matches, we just
     print a warning listing the multiple matches for each name, and print a message
     recommending using unique names.
+  * A `--unique` flag to mandate unique names.
 * Watch option `--watch` that rebuilds automatically.
 * Simple built-in HTTP server option `--serve` that serves the output directory.
 * Development `--dev` options which turns on both `--watch` and `--serve`.
