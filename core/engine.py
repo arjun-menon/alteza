@@ -87,8 +87,11 @@ class Content(object):
         assert fileNode.pyPage is not None
         print(f"{Fore.grey_42}Processing:{Style.reset}", fileNode.fullPath)
         env = env.copy()
-        toProcessFurther: str
 
+        # Enrich with current file:
+        env |= {"file": fileNode}
+
+        toProcessFurther: str
         if isinstance(fileNode.pyPage, NonMd) or isinstance(fileNode.pyPage, Md):
             toProcessFurther = fileNode.pyPage.fileContent
         else:
@@ -132,7 +135,7 @@ class Content(object):
             env = env.copy()
 
             # Enrich with current dir:
-            env |= {"dir": self}
+            env |= {"dir": node}
 
             # Run a __config__.py file, if one exists.
             configEnv = env.copy()
