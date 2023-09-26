@@ -61,8 +61,8 @@ class Content(object):
                 + ("/" if self.args.trailing_slash else "")
             )
 
-        srcPath = splitPath(srcFile.fullPath)[:-1]
-        dstPath = splitPath(dstFile.fullPath)[:-1]
+        srcPath = self.splitPath(srcFile.fullPath)[:-1]
+        dstPath = self.splitPath(dstFile.fullPath)[:-1]
         commonLevel = 0
         for i in range(min(len(srcPath), len(dstPath))):
             if srcPath[i] == dstPath[i]:
@@ -127,29 +127,6 @@ class Content(object):
 
         fileNode.pyPageOutput = pyPageOutput
 
-    @staticmethod
-    def getTemplateHtml(env: dict[str, Any]) -> str:
-        if "template" not in env:
-            raise Exception(
-                "You must define a `template` var in some ancestral `__config__.py` file."
-            )
-        template = env["template"]
-        if not isinstance(template, str):
-            raise Exception("The `template` must be a string.")
-        return template
-
-    @staticmethod
-    def getModuleVars(env: Dict[str, Any]) -> Dict[str, Any]:
-        return {
-            k: v
-            for k, v in env.items()
-            if (not k.startswith("_") and not isinstance(v, types.ModuleType))
-        }
-
-    @staticmethod
-    def getBasicHelpers() -> Dict[str, Any]:
-        return {"readfile": readfile, "sh": sh}
-
     def process(self) -> None:
         def walk(node: DirNode, env: dict[str, Any]) -> None:
             env = env.copy()
@@ -176,18 +153,41 @@ class Content(object):
             # information about the subdirectories.
             for f in node.files:
                 if f.pyPage is not None:
-                    self.processWithPyPage(f, env.copy())
+                    self.processWithPyPage(f, env)
 
         initial_env = self.getBasicHelpers()
         walk(self.rootDir, initial_env)
 
+    @staticmethod
+    def getModuleVars(env: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            k: v
+            for k, v in env.items()
+            if (not k.startswith("_") and not isinstance(v, types.ModuleType))
+        }
 
-def splitPath(path: str) -> List[str]:
-    head, tail = os.path.split(path)
-    if head == "":
-        return [path]
-    else:
-        return splitPath(head) + [tail]
+    @staticmethod
+    def getBasicHelpers() -> Dict[str, Any]:
+        return {"readfile": readfile, "sh": sh}
+
+    @staticmethod
+    def splitPath(path: str) -> List[str]:
+        head, tail = os.path.split(path)
+        if head == "":
+            return [path]
+        else:
+            return Content.splitPath(head) + [tail]
+
+    @staticmethod
+    def getTemplateHtml(env: dict[str, Any]) -> str:
+        if "template" not in env:
+            raise Exception(
+                "You must define a `template` var in some ancestral `__config__.py` file."
+            )
+        template = env["template"]
+        if not isinstance(template, str):
+            raise Exception("The `template` must be a string.")
+        return template
 
 
 @contextmanager
