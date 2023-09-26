@@ -36,6 +36,12 @@ course means that you must run Alteza with trusted code, or in an isolated conta
         * ~~The Markdown file is processed using `pypage`, with its Python environment enhanced by the YAML fields from the front matter~~.
         * The environment dictionary after the Markdown is processed by pypage is treated as the "return value" of this `.md` file. ~~This "return value" dictionary has a `content` key added to it which maps to the `pypage` output for this `.md` file~~. 
         * This Markdown file is passed to a **template** specified in configuration, for a second round of processing by PyPage.
+          * Templates are HTML files processed by PyPage. The PyPage-processed Markdown HTML output is passed to the template as the variable `body` variable. The template itself is executed by PyPage.
+            * The template should use this `body` value via PyPage (with `{{ boydy }}` in order to render the `body`'s contents.
+          * (See more on configuration files in the next section.)
+          * The template is defined using a `template` variable declared in a `__config__.py` file.
+          * The `template`'s value must be the entire contents of a template HTML file. A convenience function `readfile` is provided for this. So you can write `template = readfile('some_template.html')` in a config file.
+          * Templates may be overriden in descendant `__config__.py` files, or in the Markdown _**itself**_ using front matter.
         * Markdown files result in **_a directory_**, with an `index.html` file containing the Markdown's output.
     * Other Dynamic Files (_i.e. any file with a `.py` before the last `.` in its file name_):
       * These files are processed with PyPage _once_ with no template application step afterward.
@@ -52,16 +58,16 @@ course means that you must run Alteza with trusted code, or in an isolated conta
      * I would recommend not using `__config__.py` to set `public` as `True`, as that would make the entire directory and all its descendants public (unless that behavior is exactly what is desired). Reachability with `link` (described below) is, in my opinion, a better way to make _only reachable_ content public.
 
 5. Name Registry and `link`.
-    * A Python function named `link` is injected into the top level `env`.
-      * This function can be used to get relative links to any other file. `link` will automatically determine & return the relative path to a file.
-        * For example, one can do `<a href="{{link('some-other-blog-post')}}">`, and the generated site will have a relative link to it (i.e. to its directory if a Markdown file, and to the file itself otherwise).
-      * Reachability of files is determined using this function, and unreachable files will be treated as non-public (and thus not exist in the generated site).
-    * Extensions must be omitted for dynamic files (i.e. `.md` and any file with `.py` before its extension).
-      * I.e. one writes `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`. (TODO: support referring to files both ways; i.e. with the full file name as well.)
     * The name of every file in the input content is stored in a "name registry" of sorts that's used by `link`.
       * Currently, names, without their file extension, have to be unique across input content. This might change in the future.
       * The Name Registry will error out if it encounters any non-unique names. (I understand this is a significant limitation, so I might support marking this simply opt-in behavior with a `--unique` flag in the future.)
     * Any non-dynamic content file that has been `link`-ed to is marked for publication (i.e. copying or symlinking).
+    * A Python function named `link` is injected into the top level `env`.
+      * This function can be used to get relative links to any other file. `link` will automatically determine & return the relative path to a file.
+        * For example, one can do `<a href="{{link('some-other-blog-post')}}">`, and the generated site will have a relative link to it (i.e. to its directory if a Markdown file, and to the file itself otherwise).
+      * Reachability of files is determined using this function, and unreachable files will be treated as non-public (and thus not exist in the generated site).
+    * Extensions may be omitted for dynamic files (i.e. `.md` for Markdown, and `.py*` for any file with `.py` before its extension).
+      * I.e. one can write both `link('magic-turtle')` or `link('magic-turtle.md')` for the file `magic-turtle.md`, and `link('pygments-styles')` or `link('pygments-styles.py.css')` for the file `pygments-styles.py.css`.
 
 ## Testing
 
