@@ -3,6 +3,8 @@ Flexible Static Site Generator
 ------------------------------
 
 #### Ideas...
+* Use pip compile, to freeze package versions.
+  * Don't forget to add it to dependabot.yml.
 * Support for this: https://python-markdown.github.io/extensions/wikilinks/ ?
   * Use `build_url` to talk to `link` to return the correct url?
 * Maybe run the Markdown processing twice -- first to grab front matter, and inject it into
