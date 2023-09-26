@@ -24,12 +24,12 @@ from core.fs_crawl import (
 
 
 class Args(Tap):
+    content_dir: str = "test_content"  # Directory to read the input content from.
+    output_dir: str = "test_output"  # Directory to send the output. WARNING: This will be deleted first.
     copy_assets: bool = False  # Copy assets instead of symlinking to them
     trailing_slash: bool = (
         False  # Include a trailing slash for links to markdown page directories
     )
-    content_dir: str = "test_content"  # Directory to read the input content from.
-    output_dir: str = "test_output"  # Directory to send the output. WARNING: This will be deleted first.
 
 
 class Content(object):
@@ -121,22 +121,22 @@ class Content(object):
                 fileNode.shouldPublish = False
 
         if isinstance(fileNode.pyPage, Md):
-            defaultHtmlTemplate = Content.getDefaultHtmlTemplate(env)
-            # Re-process against `defaultHtmlTemplate` with PyPage:
-            pyPageOutput = pypage(defaultHtmlTemplate, env | {"body": pyPageOutput})
+            templateHtml = Content.getTemplateHtml(env)
+            # Re-process against `templateHtml` with PyPage:
+            pyPageOutput = pypage(templateHtml, env | {"body": pyPageOutput})
 
         fileNode.pyPageOutput = pyPageOutput
 
     @staticmethod
-    def getDefaultHtmlTemplate(env: dict[str, Any]) -> str:
-        if "default_template" not in env:
+    def getTemplateHtml(env: dict[str, Any]) -> str:
+        if "template" not in env:
             raise Exception(
-                "You must define a `default_template` in some ancestral `__config__.py` file."
+                "You must define a `template` var in some ancestral `__config__.py` file."
             )
-        default_template = env["default_template"]
-        if not isinstance(default_template, str):
-            raise Exception("The `default_template` must be a string.")
-        return default_template
+        template = env["template"]
+        if not isinstance(template, str):
+            raise Exception("The `template` must be a string.")
+        return template
 
     @staticmethod
     def getModuleVars(env: Dict[str, Any]) -> Dict[str, Any]:
