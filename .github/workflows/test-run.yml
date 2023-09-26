@@ -33,4 +33,4 @@ jobs:
 
       - name: Test Run
         run: |
-          python -m core
+          python -m alteza --content test_content --output test_output

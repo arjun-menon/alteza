@@ -95,7 +95,10 @@ options:
 ```
 As might be obvious above, you set the `content` to your content directory. The output directory will be deleted entirely, before being written to.
 
-To test against `test_content` (and generate output to `test_output`), run it with the arguments `--content test_content --output test_output`.
+To test against `test_content` (and generate output to `test_output`), run it like this:
+```sh
+python -m alteza --content test_content --output test_output
+```
 
 ### Type checking & reformatting
 To run some type checks:
