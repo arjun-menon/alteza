@@ -43,6 +43,7 @@ jobs:
           # See https://github.com/facebook/pyre-action#inputs
           repo-directory: './'
           requirements-path: 'requirements.txt'
+   
   #
   # Mypy Check
   #
@@ -68,7 +69,8 @@ jobs:
 
       - name: Mypy Check
         run: |
-          mypy core
+          mypy alteza
+
   #
   # Pyright Check
   #
@@ -94,7 +96,8 @@ jobs:
 
       - name: Pyright Check
         run: |
-          pyright core
+          pyright alteza
+
   #
   # Pytype Check
   #
@@ -120,4 +123,4 @@ jobs:
 
       - name: Pytype Check
         run: |
-          pytype core
+          pytype alteza
