@@ -71,10 +71,11 @@ course means that you must run Alteza with trusted code, or in an isolated conta
 
 ## Testing
 
-To run, execute the `core` module itself, from the project directory:
+To run, execute the `alteza` module itself, from the project directory:
 ```sh
-python3 -m core -h
+python3 -m alteza -h
 ```
+If you're working on Alteza itself, then run the `core` module itself, from the project directory directly, e.g. `python3 -m core -h`.
 
 #### Command-line usage:
 The `-h` argument above will print the list of available arguments:
@@ -92,7 +93,7 @@ options:
 ```
 As might be obvious above, you set the `content_dir` to your content directory. The output directory will be deleted entirely, before being written to.
 
-To test against `test_content`, just run it without any argument, i.e. `python3 -m core`.
+To test against `test_content` (and generate output to `test_output`), run it with the arguments `--content_dir test_content --output test_output`.
 
 ### Type checking & reformatting
 To run some type checks:

@@ -24,8 +24,8 @@ from .fs_crawl import (
 
 
 class Args(Tap):
-    content_dir: str = "test_content"  # Directory to read the input content from.
-    output_dir: str = "test_output"  # Directory to send the output. WARNING: This will be deleted first.
+    content_dir: str  # Directory to read the input content from.
+    output_dir: str  # Directory to send the output. WARNING: This will be deleted.
     copy_assets: bool = False  # Copy assets instead of symlinking to them
     trailing_slash: bool = (
         False  # Include a trailing slash for links to markdown page directories
