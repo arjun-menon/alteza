@@ -115,6 +115,7 @@ def displayDir(dirNode: DirNode, indent: int = 0) -> str:
 class NameRegistry(object):
     def __init__(self, root: DirNode, skipForRegistry: Callable[[str], bool]) -> None:
         self.allFiles: Dict[str, FileNode] = {}
+        self.skipForRegistry = skipForRegistry
 
         allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
 
@@ -131,7 +132,7 @@ class NameRegistry(object):
 
         def walk(node: DirNode) -> None:
             for f in node.files:
-                if not defaultSkipForRegistry(f.fileName):
+                if not self.skipForRegistry(f.fileName):
                     record(f)
             for d in node.subDirs:
                 walk(d)
