@@ -23,7 +23,7 @@ from .fs_crawl import (
 )
 
 
-class Args(Tap):
+class Args(Tap):  # pyre-ignore[13]
     content: str  # Directory to read the input content from.
     output: str  # Directory to send the output. WARNING: This will be deleted.
     copy_assets: bool = False  # Copy assets instead of symlinking to them
