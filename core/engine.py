@@ -52,11 +52,11 @@ class Content(object):
         dstFile.makePublic()  # FixMe: Circular links can make pages public.
 
         dstFileName = dstFile.fileName
-        if isinstance(dstFile.pyPage, NonMd):
-            dstFileName = dstFile.pyPage.rectifiedFileName
-        elif isinstance(dstFile.pyPage, Md):
+        if isinstance(dstFile.page, NonMd):
+            dstFileName = dstFile.page.rectifiedFileName
+        elif isinstance(dstFile.page, Md):
             dstFileName = (
-                dstFile.pyPage.realBasename
+                dstFile.page.realBasename
                 # Add a "/" trailing slash if arg requests it
                 + ("/" if self.args.trailing_slash else "")
             )
@@ -76,7 +76,7 @@ class Content(object):
                 relativePath.append("..")
         for p in remainingPath:
             relativePath.append(p)
-        if isinstance(srcFile.pyPage, Md):
+        if isinstance(srcFile.page, Md):
             relativePath = [".."] + relativePath
 
         relativePathStr = os.path.join("", *relativePath)
@@ -84,7 +84,7 @@ class Content(object):
         return relativePathStr
 
     def invokePyPage(self, fileNode: FileNode, env: dict[str, Any]) -> None:
-        assert fileNode.pyPage is not None
+        assert fileNode.page is not None
         print(f"{Fore.grey_42}Processing:{Style.reset}", fileNode.fullPath)
         env = env.copy()
 
@@ -92,8 +92,8 @@ class Content(object):
         env |= {"file": fileNode}
 
         toProcessFurther: str
-        if isinstance(fileNode.pyPage, NonMd) or isinstance(fileNode.pyPage, Md):
-            toProcessFurther = fileNode.pyPage.fileContent
+        if isinstance(fileNode.page, NonMd) or isinstance(fileNode.page, Md):
+            toProcessFurther = fileNode.page.fileContent
         else:
             raise Exception(f"{fileNode} pyPage attribute is invalid.")
 
@@ -103,16 +103,16 @@ class Content(object):
 
         env |= {"link": link}
 
-        if isinstance(fileNode.pyPage, Page):
-            env |= {"lastUpdated": fileNode.pyPage.lastUpdated}
-        if isinstance(fileNode.pyPage, Md) and fileNode.pyPage.draftDate is not None:
-            env |= {"draftDate": fileNode.pyPage.draftDate}
+        if isinstance(fileNode.page, Page):
+            env |= {"lastUpdated": fileNode.page.lastUpdated}
+        if isinstance(fileNode.page, Md) and fileNode.page.draftDate is not None:
+            env |= {"draftDate": fileNode.page.draftDate}
 
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)
 
         # Perform Markdown processing
-        if isinstance(fileNode.pyPage, Md):
+        if isinstance(fileNode.page, Md):
             mdResult = Md.processMarkdown(pyPageOutput)
             env.update(mdResult.metadata)
             pyPageOutput = mdResult.html
@@ -123,7 +123,7 @@ class Content(object):
             elif env["public"] is False:
                 fileNode.shouldPublish = False
 
-        if isinstance(fileNode.pyPage, Md):
+        if isinstance(fileNode.page, Md):
             templateHtml = Content.getTemplateHtml(env)
             # Re-process against `templateHtml` with PyPage:
             pyPageOutput = pypage(templateHtml, env | {"body": pyPageOutput})
@@ -156,7 +156,7 @@ class Content(object):
             # all subdirectories have been processed so that they have access to
             # information about the subdirectories.
             for f in node.files:
-                if f.pyPage is not None:
+                if f.page is not None:
                     self.invokePyPage(f, env)
 
         initial_env = self.getBasicHelpers()
@@ -237,17 +237,17 @@ def generate(args: Args, content: Content) -> None:
 
         for fileNode in curDir.files:
             if fileNode.shouldPublish:
-                if fileNode.pyPage is not None:
+                if fileNode.page is not None:
                     assert fileNode.pyPageOutput is not None
                     assert isinstance(fileNode.pyPageOutput, str)
 
-                    if isinstance(fileNode.pyPage, Md):
-                        os.mkdir(fileNode.pyPage.realBasename)
-                        with enterDir(fileNode.pyPage.realBasename):
+                    if isinstance(fileNode.page, Md):
+                        os.mkdir(fileNode.page.realBasename)
+                        with enterDir(fileNode.page.realBasename):
                             with open("index.html", "w") as pageHtml:
                                 pageHtml.write(fileNode.pyPageOutput)
-                    elif isinstance(fileNode.pyPage, NonMd):
-                        fileName = fileNode.pyPage.rectifiedFileName
+                    elif isinstance(fileNode.page, NonMd):
+                        fileName = fileNode.page.rectifiedFileName
                         if os.path.exists(fileName):
                             raise Exception(
                                 f"File {fileName} already exists, and conflicts with {fileNode}."

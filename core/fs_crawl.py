@@ -62,14 +62,14 @@ class FileNode(FsNode):
         self.extension: str = split_name[1]
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
 
-        self.pyPage: Optional[Union[Md, NonMd]] = None
+        self.page: Optional[Union[Md, NonMd]] = None
         self.pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
     def colorize(self, r: str) -> str:
         if colored_logs:
-            if self.pyPage is not None and self.shouldPublish:
+            if self.page is not None and self.shouldPublish:
                 r = f"{Fore.spring_green_1}{r}{Style.reset}"
-            elif isinstance(self.pyPage, Md):
+            elif isinstance(self.page, Md):
                 r = f"{Fore.purple_4b}{r}{Style.reset}"
         return r
 
@@ -122,13 +122,13 @@ class NameRegistry(object):
         def record(fileNode: FileNode) -> None:
             allFilesMulti[fileNode.fileName].add(fileNode)
 
-            if fileNode.pyPage is not None:
+            if fileNode.page is not None:
                 allFilesMulti[fileNode.basename].add(fileNode)  # maybe delete this
             if (
-                fileNode.pyPage is not None
-                and fileNode.basename != fileNode.pyPage.realBasename
+                fileNode.page is not None
+                and fileNode.basename != fileNode.page.realBasename
             ):
-                allFilesMulti[fileNode.pyPage.realBasename].add(fileNode)
+                allFilesMulti[fileNode.page.realBasename].add(fileNode)
 
         def walk(node: DirNode) -> None:
             for f in node.files:
@@ -278,9 +278,9 @@ def readPages(node: FsNode) -> None:
     elif isinstance(node, FileNode):
         f: FileNode = node
         if f.extension == ".md":
-            f.pyPage = Md(f)
+            f.page = Md(f)
         else:
-            f.pyPage = NonMd.isNonMdPyPageFile(f)
+            f.page = NonMd.isNonMdPyPageFile(f)
 
 
 def readfile(file_path: str) -> str:
