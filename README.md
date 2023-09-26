@@ -82,20 +82,20 @@ If you're working on Alteza itself, then run the `alteza` module itself, from th
 #### Command-line Arguments
 The `-h` argument above will print the list of available arguments:
 ```
-usage: __main__.py [--copy_assets] [--trailing_slash] [--content_dir CONTENT_DIR] [--output_dir OUTPUT_DIR] [-h]
+usage: __main__.py [--copy_assets] [--trailing_slash] [--content CONTENT] [--output OUTPUT] [-h]
 
 options:
   --copy_assets         (bool, default=False) Copy assets instead of symlinking to them
   --trailing_slash      (bool, default=False) Include a trailing slash in links to markdown pages
-  --content_dir CONTENT_DIR
+  --content CONTENT
                         (str, default=test_content) Directory to read the input content from.
-  --output_dir OUTPUT_DIR
+  --output OUTPUT
                         (str, default=test_output) Directory to send the output. WARNING: This will be deleted first.
   -h, --help            show this help message and exit
 ```
-As might be obvious above, you set the `content_dir` to your content directory. The output directory will be deleted entirely, before being written to.
+As might be obvious above, you set the `content` to your content directory. The output directory will be deleted entirely, before being written to.
 
-To test against `test_content` (and generate output to `test_output`), run it with the arguments `--content_dir test_content --output test_output`.
+To test against `test_content` (and generate output to `test_output`), run it with the arguments `--content test_content --output test_output`.
 
 ### Type checking & reformatting
 To run some type checks:

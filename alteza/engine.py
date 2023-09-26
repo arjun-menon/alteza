@@ -24,8 +24,8 @@ from .fs_crawl import (
 
 
 class Args(Tap):
-    content_dir: str  # Directory to read the input content from.
-    output_dir: str  # Directory to send the output. WARNING: This will be deleted.
+    content: str  # Directory to read the input content from.
+    output: str  # Directory to send the output. WARNING: This will be deleted.
     copy_assets: bool = False  # Copy assets instead of symlinking to them
     trailing_slash: bool = (
         False  # Include a trailing slash for links to markdown page directories
@@ -200,8 +200,11 @@ def enterDir(newDir: str) -> Generator[None, None, None]:
 
 def run(args: Args) -> None:
     startTimeNs = time_ns()
+    contentDir = args.content
+    if not os.path.isdir(contentDir):
+        raise Exception(f"The provided path '{contentDir}' is not a directory.")
 
-    with enterDir(args.content_dir):
+    with enterDir(args.content):
         rootDir, nameRegistry = fs_crawl()
         print(nameRegistry)
         content = Content(args, rootDir, nameRegistry)
@@ -219,7 +222,7 @@ def run(args: Args) -> None:
 
 
 def generate(args: Args, content: Content) -> None:
-    outputDir = args.output_dir
+    outputDir = args.output
 
     def walk(curDir: DirNode) -> None:
         for subDir in curDir.subDirs:
