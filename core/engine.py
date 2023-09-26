@@ -83,7 +83,7 @@ class Content(object):
 
         return relativePathStr
 
-    def processWithPyPage(self, fileNode: FileNode, env: dict[str, Any]) -> None:
+    def invokePyPage(self, fileNode: FileNode, env: dict[str, Any]) -> None:
         assert fileNode.pyPage is not None
         print(f"{Fore.grey_42}Processing:{Style.reset}", fileNode.fullPath)
         env = env.copy()
@@ -131,6 +131,9 @@ class Content(object):
         def walk(node: DirNode, env: dict[str, Any]) -> None:
             env = env.copy()
 
+            # Enrich with current dir:
+            env |= {"dir": self}
+
             # Run a __config__.py file, if one exists.
             configEnv = env.copy()
             if config_py_file in (f.fileName for f in node.files):
@@ -139,8 +142,6 @@ class Content(object):
                     os.path.join(node.fullPath, config_py_file),
                 )
                 exec(readfile(config_py_file), configEnv)
-
-            # Note that `|=` doesn't create a copy unlike `x = x | y`.
             env |= self.getModuleVars(configEnv)
 
             # Ordering Note: We must recurse into the subdirectories first.
@@ -153,7 +154,7 @@ class Content(object):
             # information about the subdirectories.
             for f in node.files:
                 if f.pyPage is not None:
-                    self.processWithPyPage(f, env)
+                    self.invokePyPage(f, env)
 
         initial_env = self.getBasicHelpers()
         walk(self.rootDir, initial_env)
