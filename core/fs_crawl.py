@@ -63,6 +63,7 @@ class FileNode(FsNode):
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
 
         self.page: Optional[Union[Md, NonMd]] = None
+        self.pageName: str = self.basename  # to be overwritten selectively
         self.pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
     def colorize(self, r: str) -> str:
@@ -124,11 +125,9 @@ class NameRegistry(object):
 
             if fileNode.page is not None:
                 allFilesMulti[fileNode.basename].add(fileNode)  # maybe delete this
-            if (
-                fileNode.page is not None
-                and fileNode.basename != fileNode.page.realBasename
-            ):
-                allFilesMulti[fileNode.page.realBasename].add(fileNode)
+
+                if fileNode.basename != fileNode.pageName:
+                    allFilesMulti[fileNode.pageName].add(fileNode)
 
         def walk(node: DirNode) -> None:
             for f in node.files:
@@ -180,7 +179,6 @@ class Page(object):
     def __init__(self, f: FileNode) -> None:
         self.fileContent: str = readfile(f.fullPath)
         self.lastUpdated: datetime = self.getLastUpdated(f.fullPath)
-        self.realBasename: str = f.basename  # overriden
 
     @staticmethod
     def getLastUpdated(path: str) -> datetime:
@@ -224,7 +222,7 @@ class Md(Page):
             if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}-$", dateFragment_):
                 dateFragment = dateFragment_[:-1]
                 self.draftDate = date.fromisoformat(dateFragment)
-                self.realBasename: str = remainingBasename
+                f.pageName = remainingBasename
 
     class Result(NamedTuple):
         metadata: Dict[str, str]
@@ -251,11 +249,10 @@ class Md(Page):
 
 
 class NonMd(Page):
-    def __init__(self, f: FileNode, rectifiedFileName: str, realBasename: str) -> None:
+    def __init__(self, f: FileNode, pageName: str, rectifiedFileName: str) -> None:
         super().__init__(f)
-
+        f.pageName = pageName
         self.rectifiedFileName: str = rectifiedFileName
-        self.realBasename: str = realBasename
 
     @staticmethod
     def isNonMdPyPageFile(fileNode: FileNode) -> Optional["NonMd"]:
@@ -268,9 +265,9 @@ class NonMd(Page):
             expectedRemainingExt = ".py" + fileNode.extension
             if remainingExt == expectedRemainingExt:
                 # The condition above passing indicates this is a NonMd page file.
-                realBasename = fileNode.fileName[:pySubExtPos]
-                rectifiedFileName = realBasename + fileNode.extension
-                return NonMd(fileNode, rectifiedFileName, realBasename)
+                realPageName = fileNode.fileName[:pySubExtPos]
+                rectifiedFileName = realPageName + fileNode.extension
+                return NonMd(fileNode, realPageName, rectifiedFileName)
         return None
 
 
