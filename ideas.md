@@ -3,6 +3,7 @@ Flexible Static Site Generator
 ------------------------------
 
 #### Ideas...
+* Require full path when there is a name registry name conflict?
 * An `index` bool (that is set to `True` by default on pages with a `realBasename` of `index) which causes it to processed after all other files have been processed.
 * Use pip compile, to freeze package versions.
   * Don't forget to add it to dependabot.yml.

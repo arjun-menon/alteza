@@ -122,7 +122,9 @@ class NameRegistry(object):
             allFilesMulti[fileNode.fileName].add(fileNode)
 
             if fileNode.pyPage is not None:
-                allFilesMulti[fileNode.pyPage.realBasename].add(fileNode)
+                allFilesMulti[fileNode.basename].add(fileNode)
+                if fileNode.basename != fileNode.pyPage.realBasename:
+                    allFilesMulti[fileNode.pyPage.realBasename].add(fileNode)
 
         def walk(node: DirNode) -> None:
             for f in node.files:

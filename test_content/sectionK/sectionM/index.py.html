@@ -1,0 +1,20 @@
+{{
+title = 'Section M...'
+public = True
+}}
+
+
+<h4>
+    The pages here are:
+</h4>
+
+<ul>
+    {% for file in dir.files if file.basename != '__config__' %}
+    <li>
+        <a href="{{ link(file.basename) }}">
+            {{file.basename}}
+        </a>
+    </li>
+    {% %}
+</ul>
+
