@@ -7,7 +7,7 @@ from time import time_ns
 from contextlib import contextmanager
 from typing import Generator, List, Dict, Any
 from pypage import pypage  # type: ignore
-from core.fs_crawl import (
+from .fs_crawl import (
     FileNode,
     DirNode,
     displayDir,
