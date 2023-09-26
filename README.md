@@ -75,9 +75,10 @@ To run, execute the `core` module itself, from the project directory:
 ```sh
 python3 -m core -h
 ```
-The `-h` argument above will print the available options:
+
+#### Command-line usage:
+The `-h` argument above will print the list of available arguments:
 ```
-(venv) python3 -m core -h
 usage: __main__.py [--copy_assets] [--trailing_slash] [--content_dir CONTENT_DIR] [--output_dir OUTPUT_DIR] [-h]
 
 options:
@@ -91,7 +92,7 @@ options:
 ```
 As might be obvious above, you set the `content_dir` to your content directory. The output directory will be deleted entirely, before being written to.
 
-To just run the standard test suite (`test_content`), just run it without any argument (`python3 -m core`).
+To test against `test_content`, just run it without any argument, i.e. `python3 -m core`.
 
 ### Type checking & reformatting
 To run some type checks:
