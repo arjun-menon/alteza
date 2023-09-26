@@ -119,10 +119,10 @@ class NameRegistry(object):
         allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
 
         def record(fileNode: FileNode) -> None:
+            allFilesMulti[fileNode.fileName].add(fileNode)
+
             if fileNode.pyPage is not None:
                 allFilesMulti[fileNode.pyPage.realBasename].add(fileNode)
-            else:
-                allFilesMulti[fileNode.fileName].add(fileNode)
 
         def walk(node: DirNode) -> None:
             for f in node.files:
