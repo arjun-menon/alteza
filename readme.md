@@ -41,7 +41,7 @@ course means that you must run Alteza with trusted code, or in an isolated conta
           * (See more on configuration files in the next section.)
           * The template is defined using a `template` variable declared in a `__config__.py` file.
           * The `template`'s value must be the entire contents of a template HTML file. A convenience function `readfile` is provided for this. So you can write `template = readfile('some_template.html')` in a config file.
-          * Templates may be overriden in descendant `__config__.py` files, or in the Markdown _**itself**_ using front matter.
+          * Templates may be overriden in descendant `__config__.py` files, or in the Markdown _**itself**_ using a PyPage multiline code tag (not inline code tag).
         * Markdown files result in **_a directory_**, with an `index.html` file containing the Markdown's output.
     * Other Dynamic Files (_i.e. any file with a `.py` before the last `.` in its file name_):
       * These files are processed with PyPage _once_ with no template application step afterward.
