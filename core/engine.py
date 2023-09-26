@@ -41,14 +41,7 @@ class Content(object):
         self.nameRegistry = nameRegistry
 
     def link(self, srcFile: FileNode, name: str) -> str:
-        if name not in self.nameRegistry.allFiles:
-            print(
-                f"Link error: `{name}` was not found in the name registry."
-                f" The {self.nameRegistry}"
-            )
-            raise Exception(f"Link error: {name}")
-
-        dstFile: FileNode = self.nameRegistry.allFiles[name]
+        dstFile: FileNode = self.nameRegistry.lookup(name)
         dstFile.makePublic()  # FixMe: Circular links can make pages public.
 
         dstFileName = dstFile.fileName

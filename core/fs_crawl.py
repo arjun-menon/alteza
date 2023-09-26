@@ -139,12 +139,24 @@ class NameRegistry(object):
 
         walk(root)
 
+        # TODO: Handle index pages specially here
+
         for name, fileNodes in allFilesMulti.items():
             assert len(fileNodes) >= 1
             if len(fileNodes) > 1:
                 self.errorOut(name, fileNodes)
 
             self.allFiles[name] = fileNodes.pop()
+
+    def lookup(self, name: str) -> FileNode:
+        if name not in self.allFiles:
+            print(
+                f"Link error: `{name}` was not found in the name registry."
+                f" The {self}"
+            )
+            raise Exception(f"Link error: {name}")
+
+        return self.allFiles[name]
 
     @staticmethod
     def errorOut(name: str, fileNodes: Set[FileNode]) -> None:
