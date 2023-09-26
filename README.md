@@ -69,15 +69,17 @@ course means that you must run Alteza with trusted code, or in an isolated conta
     * Extensions may be omitted for dynamic files (i.e. `.md` for Markdown, and `.py*` for any file with `.py` before its extension).
       * I.e. one can write both `link('magic-turtle')` or `link('magic-turtle.md')` for the file `magic-turtle.md`, and `link('pygments-styles')` or `link('pygments-styles.py.css')` for the file `pygments-styles.py.css`.
 
-## Testing
+### Usage, Testing & Development
 
-To run, execute the `alteza` module itself, from the project directory:
+#### Running
+
+If you've installed Alteza with pip, you can just run `alteza`, e.g.:
 ```sh
-python3 -m alteza -h
+alteza -h
 ```
-If you're working on Alteza itself, then run the `core` module itself, from the project directory directly, e.g. `python3 -m core -h`.
+If you're working on Alteza itself, then run the `alteza` module itself, from the project directory directly, e.g. `python3 -m alteza -h`.
 
-#### Command-line usage:
+#### Command-line Arguments
 The `-h` argument above will print the list of available arguments:
 ```
 usage: __main__.py [--copy_assets] [--trailing_slash] [--content_dir CONTENT_DIR] [--output_dir OUTPUT_DIR] [-h]
@@ -98,10 +100,10 @@ To test against `test_content` (and generate output to `test_output`), run it wi
 ### Type checking & reformatting
 To run some type checks:
 ```sh
-mypy core  # should have zero errors
+mypy alteza  # should have zero errors
 pyre check  # should have zero errors as well
-pyright core  # should have zero errors also
-pytype core  # should have zero errors too
+pyright alteza  # should have zero errors also
+pytype alteza  # should have zero errors too
 ```
 Or all at once with: `mypy core ; pyre check ; pyright core ; pytype core`.
 
@@ -109,7 +111,7 @@ To re-format the code, just run: `black core`.
 
 ### Dependencies
 
-To install dependencies, run:
+To install dependencies for development, run:
 ```sh
 python3 -m pip install -r requirements.txt
 ```

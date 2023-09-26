@@ -11,6 +11,7 @@ setup(
     name=name,
     version=version,
     description="Super-flexible Static Site Generator",
+    # Ref: https://packaging.python.org/en/latest/discussions/install-requires-vs-requirements/
     install_requires=[
         # Standard dependencies:
         "pypage >= 2.0.8",
@@ -38,10 +39,10 @@ setup(
     author_email="contact@arjungmenon.com",
     keywords=["static site generator", "static sites", "ssg"],
     license="AGPL-3.0-or-later",
-    package_dir={f"{name}": "core"},
+    # Ref:https://docs.python.org/3.11/distutils/examples.html
     packages=["alteza"],
     entry_points={
-        "console_scripts": [f"{name}=core.__main__:main"],
+        "console_scripts": [f"{name}=alteza.__main__:main"],
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
