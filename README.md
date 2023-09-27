@@ -1,7 +1,3 @@
-
-
-https://img.shields.io/pypi/v/pypage.svg
-
 # Alteza [![PyPI](https://img.shields.io/pypi/v/alteza.svg)](https://pypi.org/project/alteza/) [![Type Checks](https://github.com/arjun-menon/appletree/actions/workflows/type-checks.yml/badge.svg)](https://github.com/arjun-menon/appletree/actions/workflows/type-checks.yml/) [![Test Run](https://github.com/arjun-menon/appletree/actions/workflows/test-run.yml/badge.svg)](https://github.com/arjun-menon/appletree/actions/workflows/test-run.yml/)
 
 Alteza is a static site generator driven by [PyPage](https://github.com/arjun-menon/pypage).
