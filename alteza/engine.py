@@ -41,6 +41,7 @@ class Content(object):
         self.nameRegistry = nameRegistry
 
     def link(self, srcFile: FileNode, name: str) -> str:
+        print(f"  {Fore.grey_42}Linking to:{Style.reset}", name)
         dstFile: FileNode = self.nameRegistry.lookup(name)
         dstFile.makePublic()  # FixMe: Circular links can make pages public.
 
@@ -78,7 +79,7 @@ class Content(object):
 
     def invokePyPage(self, fileNode: FileNode, env: dict[str, Any]) -> None:
         assert fileNode.page is not None
-        print(f"{Fore.grey_42}Processing:{Style.reset}", fileNode.fullPath)
+        print(f"{Fore.dark_orange}Processing:{Style.reset}", fileNode.fullPath)
         env = env.copy()
 
         # Enrich with current file:
@@ -134,7 +135,7 @@ class Content(object):
             configEnv = env.copy()
             if config_py_file in (f.fileName for f in node.files):
                 print(
-                    f"{Fore.dark_red_2}Running:{Style.reset}",
+                    f"{Fore.gold_1}Running:{Style.reset}",
                     os.path.join(node.fullPath, config_py_file),
                 )
                 exec(readfile(config_py_file), configEnv)

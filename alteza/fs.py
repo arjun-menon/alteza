@@ -151,7 +151,7 @@ class NameRegistry(object):
         if name not in self.allFiles:
             print(
                 f"Link error: `{name}` was not found in the name registry."
-                f" The {self}"
+                # f" The {self}"
             )
             raise Exception(f"Link error: {name}")
 
@@ -319,6 +319,8 @@ def defaultShouldIgnore(name: str, isDir: bool) -> bool:
         return True
     basename, fileExt = os.path.splitext(name)
     if fileExt == ".pyc":
+        return True
+    if name != config_py_file and fileExt == ".py":
         return True
     return False
 
