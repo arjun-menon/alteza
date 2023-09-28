@@ -107,9 +107,9 @@ pyre check  # should have zero errors as well
 pyright alteza  # should have zero errors also
 pytype alteza  # should have zero errors too
 ```
-Or all at once with: `mypy core ; pyre check ; pyright core ; pytype core`.
+Or all at once with: `mypy alteza ; pyre check ; pyright alteza ; pytype alteza`.
 
-To re-format the code, just run: `black core`.
+To re-format the code, just run: `black alteza`.
 
 ### Dependencies
 
