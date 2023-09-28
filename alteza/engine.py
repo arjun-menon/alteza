@@ -89,7 +89,7 @@ class Content(object):
 
         toProcessFurther: str
         if isinstance(fileNode.page, NonMd) or isinstance(fileNode.page, Md):
-            toProcessFurther = fileNode.page.fileContent
+            toProcessFurther = readfile(fileNode.absoluteFilePath)
         else:
             raise Exception(f"{fileNode} pyPage attribute is invalid.")
 

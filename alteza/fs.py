@@ -177,7 +177,6 @@ class NameRegistry(object):
 
 class Page(object):
     def __init__(self, f: FileNode) -> None:
-        self.fileContent: str = readfile(f.fullPath)
         self.lastUpdated: datetime = self.getLastUpdated(f.fullPath)
 
     @staticmethod
