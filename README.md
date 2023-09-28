@@ -10,11 +10,13 @@ The learning curve is also shorter with Alteza. I've tried to follow part of [xm
 of keeping things small and simple. Alteza doesn't try to do a lot of things; instead it simply offers the core crucial
 functionality that is common to most static site generators.
 
-Alteza also imposes very little _required_ structure or a particular "way of doing things" on your website. You retain
-the freedom to organize your website as you wish. (The name _Alteza_ comes from a word that may be
-translated to [illustriousness](https://m.interglot.com/en/es/illustriousness) in Español.)
+Alteza also imposes very little _required_ structure or a particular "way of doing things" on your website (other than
+requiring unique names). You retain the freedom to organize your website as you wish. (The name _Alteza_ comes from
+a word that may be translated to [illustriousness](https://m.interglot.com/en/es/illustriousness) in Español.)
 
-A core design decision of Alteza is executing code (and writing little scripts) to generate your website. (This of
+A key design principle of Alteza is writing little scripts and executing such code to generate your website. Your static
+site contain arbitrary Python that is executed, at the time of site generation. [PyPage](https://github.com/arjun-menon/pypage),
+in particular, makes it seamless to include actual Python code inside page templates. (This of
 course means that you must run Alteza with trusted code, or in an isolated container.)
 
 #### Installation
