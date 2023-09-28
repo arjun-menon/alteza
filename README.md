@@ -17,6 +17,15 @@ translated to [illustriousness](https://m.interglot.com/en/es/illustriousness) i
 A core design decision of Alteza is executing code (and writing little scripts) to generate your website. (This of
 course means that you must run Alteza with trusted code, or in an isolated container.)
 
+#### Installation
+
+You can [install](https://docs.python.org/3/installing/) Alteza easily with [pip](https://pip.pypa.io/en/stable/):
+
+```
+pip install alteza
+```
+Try running `alteza -h` to see the command-line options available.
+
 ## User Guide
 
 1. The directory structure is generally mirrored in the generated site.
@@ -99,9 +108,14 @@ To test against `test_content` (and generate output to `test_output`), run it li
 python -m alteza --content test_content --output test_output
 ```
 
-### Type checking & reformatting
+#### Code Style
 
-To ensure a high code quality, Alteza is quadruple type-checked with four different type checking systems: [Mypy](https://mypy-lang.org/), Meta's [Pyre](https://pyre-check.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), and Google's [Pytype](https://github.com/google/pytype).
+I'm using `black`. To re-format the code, just run: `black alteza`.
+Fwiw, I've configured my IDE (_PyCharm_) to always auto-format with `black`.
+
+### Type Checking
+
+To ensure better code quality, Alteza is quadruple type-checked with four different type checking systems: [Mypy](https://mypy-lang.org/), Meta's [Pyre](https://pyre-check.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), and Google's [Pytype](https://github.com/google/pytype).
 
 To run some type checks:
 ```sh
@@ -111,8 +125,6 @@ pyright alteza  # should have zero errors also
 pytype alteza  # should have zero errors too
 ```
 Or all at once with: `mypy alteza ; pyre check ; pyright alteza ; pytype alteza`.
-
-To re-format the code, just run: `black alteza`.
 
 ### Dependencies
 
