@@ -85,7 +85,7 @@ pyre-check==0.9.18
     # via alteza (setup.py)
 pyre-extensions==0.0.30
     # via pyre-check
-pyright==1.1.327
+pyright==1.1.329
     # via alteza (setup.py)
 pytype==2023.9.19
     # via alteza (setup.py)
