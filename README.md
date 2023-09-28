@@ -100,6 +100,9 @@ python -m alteza --content test_content --output test_output
 ```
 
 ### Type checking & reformatting
+
+To ensure a high code quality, Alteza is quadruple type-checked with four different type checking systems: [Mypy](https://mypy-lang.org/), Meta's [Pyre](https://pyre-check.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), and Google's [Pytype](https://github.com/google/pytype).
+
 To run some type checks:
 ```sh
 mypy alteza  # should have zero errors
