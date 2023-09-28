@@ -271,8 +271,13 @@ def generate(args: Args, content: Content) -> None:
 
 def resetOutputDir(outputDir: str) -> None:
     if os.path.isfile(outputDir):
-        raise Exception("There is a file named %s." % outputDir)
+        raise Exception(
+            "There already exists a file named %s. (Please move/delete it.)" % outputDir
+        )
     if os.path.isdir(outputDir):
-        print("Deleting directory %s and all of its content...\n" % outputDir)
+        print(
+            f"Deleting directory {Fore.dark_red_2}%s{Style.reset} and all of its content...\n"
+            % outputDir
+        )
         shutil.rmtree(outputDir)
     os.mkdir(outputDir)

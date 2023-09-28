@@ -11,7 +11,7 @@ of keeping things small and simple. Alteza doesn't try to do a lot of things; in
 functionality that is common to most static site generators.
 
 Alteza also imposes very little _required_ structure or a particular "way of doing things" on your website. You retain
-the freedom of organize your website as you wish. (The name _Alteza_ comes from a word that may be
+the freedom to organize your website as you wish. (The name _Alteza_ comes from a word that may be
 translated to [illustriousness](https://m.interglot.com/en/es/illustriousness) in Español.)
 
 A core design decision of Alteza is executing code (and writing little scripts) to generate your website. (This of
