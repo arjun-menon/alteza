@@ -114,7 +114,7 @@ tomli==2.0.1
     #   pyproject-hooks
 typed-argument-parser==1.8.1
     # via alteza (setup.py)
-typeguard==2.13.3
+typeguard==4.1.5
     # via testslide
 types-markdown==3.4.2.10
     # via alteza (setup.py)
