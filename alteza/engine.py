@@ -1,4 +1,5 @@
 import os
+import sys
 import types
 import shutil
 import sh  # type: ignore
@@ -39,6 +40,7 @@ class Content(object):
         self.args = args
         self.rootDir: DirNode = rootDir
         self.nameRegistry = nameRegistry
+        self.fixSysPath()
 
     def link(self, srcFile: FileNode, name: str) -> str:
         print(f"  {Fore.grey_42}Linking to:{Style.reset}", name)
@@ -155,6 +157,15 @@ class Content(object):
 
         initial_env = self.getBasicHelpers()
         walk(self.rootDir, initial_env)
+
+    @staticmethod
+    def fixSysPath() -> None:
+        """
+        This is necessary for import statements inside executed .py to consider the current directory.
+        Without this, for example, an import statement inside a `__config__.py` file will error out.
+        See: https://stackoverflow.com/questions/57870498/cannot-find-module-after-change-directory
+        """
+        sys.path.insert(0, "")
 
     @staticmethod
     def getModuleVars(env: Dict[str, Any]) -> Dict[str, Any]:
