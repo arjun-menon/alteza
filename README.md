@@ -15,7 +15,7 @@ requiring unique names). You retain the freedom to organize your website as you 
 a word that may be translated to [illustriousness](https://m.interglot.com/en/es/illustriousness) in Español.)
 
 A key design principle of Alteza is writing little scripts and executing such code to generate your website. Your static
-site contain arbitrary Python that is executed, at the time of site generation. [PyPage](https://github.com/arjun-menon/pypage),
+site can contain arbitrary Python that is executed, at the time of site generation. [PyPage](https://github.com/arjun-menon/pypage),
 in particular, makes it seamless to include actual Python code inside page templates. (This of
 course means that you must run Alteza with trusted code, or in an isolated container.)
 
