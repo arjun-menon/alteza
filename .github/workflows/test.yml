@@ -27,6 +27,7 @@ jobs:
 
       - name: Generate
         run: |
+          echo Generating with Alteza...
           echo PWD: `pwd`
-          alteza -content test_content --output alteza-output
+          alteza --content test_content --output alteza-output
 
