@@ -28,5 +28,5 @@ jobs:
       - name: Generate
         run: |
           pwd
-          alteza -h
+          alteza -content_dir test_content --output_dir alteza-output
 
