@@ -20,13 +20,6 @@ jobs:
         with:
           submodules: true
 
-#      - name: Set up Python
-#        uses: actions/setup-python@v4
-#        with:
-#          python-version: '3.11'
-#          cache: pip
-#          cache-dependency-path: setup.py
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -34,5 +27,6 @@ jobs:
 
       - name: Generate
         run: |
+          pwd
           alteza -h
 
