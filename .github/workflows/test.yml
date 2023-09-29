@@ -28,5 +28,5 @@ jobs:
       - name: Generate
         run: |
           echo PWD: `pwd`
-          alteza -content_dir test_content --output_dir alteza-output
+          alteza -content test_content --output alteza-output
 
