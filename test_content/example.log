@@ -1,0 +1,2 @@
+INFO:root:hello
+INFO:root:{Fore.spring_green_2b}hi{Style.reset}hello
