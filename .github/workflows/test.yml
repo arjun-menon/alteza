@@ -50,6 +50,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Display PWD
+        run: |
+          echo PWD: `pwd`
+
+      - name: Display structure of files before download
+        run: ls -R
+
       - uses: actions/download-artifact@v3
         with:
           name: alteza-output
