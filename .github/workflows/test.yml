@@ -39,6 +39,8 @@ jobs:
           path: alteza-output
 
   publish:
+    needs:
+      - generate
     runs-on: ubuntu-latest
     permissions:
       actions: read
