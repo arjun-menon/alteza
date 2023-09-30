@@ -64,6 +64,13 @@ jobs:
         with:
           ref: 'gh-pages'
 
+      - name: Git Clean
+        run: |
+          git clean -fdx
+
+      - name: Display structure of files after cleaning
+        run: ls -R
+
       - name: Display structure of files after checkout
         run: ls -R
 
