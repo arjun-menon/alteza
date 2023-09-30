@@ -56,7 +56,7 @@ jobs:
       #        run: |
       #          rm -rf * .*
 
-      - name: Display structure of files before download
+      - name: Display structure of files initially
         run: ls -R
 
       - name: Checkout repo
@@ -64,11 +64,14 @@ jobs:
         with:
           ref: 'gh-pages'
 
+      - name: Display structure of files after checkout
+        run: ls -R
+
       - uses: actions/download-artifact@v3
         with:
           name: alteza-output
 
-      - name: Display structure of downloaded files
+      - name: Display structure after artifact download
         run: ls -R
 
       - name: Add files
