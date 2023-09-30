@@ -68,8 +68,6 @@ jobs:
 
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          ref: 'gh-pages'
 
       - name: Display structure afterward
         run: ls -R
