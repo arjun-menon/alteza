@@ -78,3 +78,7 @@ jobs:
         run: |
           git add .
 
+      - name: Commit
+        run: |
+          git commit -m "Published at `date '+%Y-%m-%dT%H:%M:%S%z'`"
+
