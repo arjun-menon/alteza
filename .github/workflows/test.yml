@@ -22,9 +22,6 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      - name: Display git log
-        run: git log --pretty=fuller
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -64,15 +61,15 @@ jobs:
         with:
           ref: 'gh-pages'
 
+      - name: Display structure of files after checkout
+        run: ls -R
+
       - name: Git Clean
         run: |
           git clean -fdx
           git rm -r .
 
       - name: Display structure of files after cleaning
-        run: ls -R
-
-      - name: Display structure of files after checkout
         run: ls -R
 
       - uses: actions/download-artifact@v3
