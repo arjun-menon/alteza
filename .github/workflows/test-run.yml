@@ -20,7 +20,7 @@ jobs:
     # Ref: https://til.simonwillison.net/github-actions/cache-setup-py
     strategy:
       matrix:
-        python-version: [ "3.9", "3.10", "3.11" ]
+        python-version: [ "3.9", "3.10", "3.11", "pypy3.10" ]
 
     steps:
       - uses: actions/checkout@v4
