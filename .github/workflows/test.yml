@@ -67,6 +67,7 @@ jobs:
       - name: Git Clean
         run: |
           git clean -fdx
+          git rm -r .
 
       - name: Display structure of files after cleaning
         run: ls -R
