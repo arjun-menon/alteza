@@ -59,6 +59,11 @@ jobs:
       - name: Display structure of files before download
         run: ls -R
 
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: 'gh-pages'
+
       - uses: actions/download-artifact@v3
         with:
           name: alteza-output
@@ -66,15 +71,7 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
 
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          ref: 'gh-pages'
-
-      - name: Display structure afterward
-        run: ls -R
-
       - name: Add files
         run: |
-          git add . .*
+          git add .
 
