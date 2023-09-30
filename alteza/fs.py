@@ -199,11 +199,11 @@ class Page(object):
     @staticmethod
     def getGitFileLastAuthDate(path: str) -> Optional[datetime]:
         try:
-            return datetime.fromisoformat(
-                check_output(
-                    ["git", "log", "-n", "1", "--pretty=format:%aI", path]
-                ).decode()
-            )
+            gitLogDate = check_output(
+                ["git", "log", "-n", "1", "--pretty=format:%aI", path]
+            ).decode()
+            print("For", path, "detected git log date:", gitLogDate)
+            return datetime.fromisoformat(gitLogDate)
         except Exception as e:
             return None
 
