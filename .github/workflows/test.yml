@@ -39,9 +39,31 @@ jobs:
           name: alteza-output
           path: alteza-output
 
-  publish:
+
+  intermediate:
     needs:
       - generate
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+      security-events: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Display structure of files
+        run: ls -R
+
+      - name: Check if branch exists, and if not create it.
+        run: |
+          > echo TODO
+
+
+  publish:
+    needs:
+      - intermediate
     runs-on: ubuntu-latest
     permissions:
       actions: read
