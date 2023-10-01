@@ -1,0 +1,8 @@
+black
+pip-tools
+mypy ~= 1.5.1
+pyre-check ~= 0.9.18
+pyright ~= 1.1.329
+pytype ~= 2023.9.27
+types-PyYAML >= 6.0.12.12
+types-Markdown >= 3.4.2.10
