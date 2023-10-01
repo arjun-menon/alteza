@@ -22,7 +22,7 @@ colored_logs = True
 config_py_file = "__config__.py"
 
 
-class FsNode(object):
+class FsNode:
     def __init__(
         self, parent: Optional["FsNode"], dirPath: str, fileName: Optional[str]
     ) -> None:
@@ -112,7 +112,7 @@ def displayDir(dirNode: DirNode, indent: int = 0) -> str:
     )
 
 
-class NameRegistry(object):
+class NameRegistry:
     def __init__(self, root: DirNode, skipForRegistry: Callable[[str], bool]) -> None:
         self.allFiles: Dict[str, FileNode] = {}
         self.skipForRegistry = skipForRegistry
@@ -310,7 +310,7 @@ def isHidden(name: str) -> bool:
     return name.startswith(".")
 
 
-def defaultShouldIgnore(name: str, isDir: bool) -> bool:
+def defaultShouldIgnore(name: str, _: bool) -> bool:
     if isHidden(name):
         return True
     if name in {"__pycache__"}:
