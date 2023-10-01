@@ -56,10 +56,14 @@ jobs:
       - name: Display structure of files initially
         run: ls -R
 
+      - name: Check if branch exists, and if not create it.
+        run: |
+          > echo TODO
+
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          ref: 'gh-pages'
+          ref: 'gh-pages0'
 
       - name: Display structure of files after checkout
         run: ls -R
