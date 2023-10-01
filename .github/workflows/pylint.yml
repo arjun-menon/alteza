@@ -55,11 +55,12 @@ jobs:
 
       - name: Run pyreverse
         run: |
-          pyreverse --output html alteza
+          mkdir class-structure
+          pyreverse --output html --output-directory class-structure alteza
 
-      - name: Upload classes diagram html
+      - name: Upload class structure diagrams
         uses: actions/upload-artifact@v3
         with:
-          name: class-diagram.html
-          path: classes.html
+          name: class-structure
+          path: class-structure
 
