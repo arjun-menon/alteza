@@ -19,12 +19,13 @@ jobs:
       id-token: write
       security-events: write
 
-    #    environment:
-    #      name: github-pages
-    #      url: ${{ steps.deployment.outputs.page_url }}
+    environment:
+      name: github-pages
+      url: ${{ steps.generate.outputs.page_url }}
 
     steps:
-      - name: Build Alteza Website
+      - name: Generate Alteza Website
+        id: generate
         uses: arjun-menon/alteza-gh-action@main
         with:
           path: test_content
