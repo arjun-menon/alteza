@@ -8,6 +8,10 @@ inputs:
     required: true
     default: "test_content"
 
+outputs:
+  page_url:
+    description: 'URL to deployed GitHub Pages'
+
 runs:
   using: composite
   steps:
@@ -46,7 +50,6 @@ runs:
       with:
         enablement: true
 
-
     - name: Display output of the GitHub Pages configuration step
       env:
         GH_PAGES_BASE_URL: ${{ steps.gh_pages_config.outputs.base_url }}
@@ -68,4 +71,12 @@ runs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v2
+
+    - name: Display deployed GitHub Pages URL
+      env:
+        GH_PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+      shell: bash
+      run: |
+        echo "GitHub Pages URL: $GH_PAGE_URL"
+        echo "::set-output name=page_url::$GH_PAGE_URL"
 
