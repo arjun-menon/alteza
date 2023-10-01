@@ -35,9 +35,9 @@ runs:
         echo PWD: `pwd`
         alteza --content test_content --output alteza-output
 
-    - name: Display structure of files
-      shell: bash
-      run: ls -laR --ignore=.git
+    #    - name: Display structure of files
+    #      shell: bash
+    #      run: ls -laR --ignore=.git
 
     - name: Upload website ZIP file
       uses: actions/upload-artifact@v3
