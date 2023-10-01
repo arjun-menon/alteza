@@ -26,6 +26,7 @@ jobs:
     steps:
       - name: Generate Alteza Website
         id: generate
+        # Improve a bit once https://github.com/orgs/community/discussions/10985 is implemented.
         uses: arjun-menon/alteza-gh-action@main
         with:
           path: test_content
