@@ -33,14 +33,24 @@ jobs:
           echo PWD: `pwd`
           alteza --content test_content --output alteza-output
 
-      #      - name: Display structure of files
-      #        run: ls -laR --ignore=.git
-      #
-      #      - name: Upload artifact for debug
-      #        uses: actions/upload-artifact@v3
-      #        with:
-      #          name: alteza-output
-      #          path: alteza-output
+      - name: Display structure of files
+        run: ls -laR --ignore=.git
+
+      - name: Upload artifact for debug
+        uses: actions/upload-artifact@v3
+        with:
+          name: alteza-output
+          path: alteza-output
+
+      - id: gh_pages_config
+        name: Configure GitHub Pages
+        uses: actions/configure-pages@v3
+        with:
+          enablement: true
+
+      - name: Display some vars
+        run: |
+          echo ${{ gh_pages_config.base_url }}
 
       - name: Upload artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v2
