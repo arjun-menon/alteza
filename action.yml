@@ -6,7 +6,6 @@ inputs:
   path:
     description: "Path of the directory containing the input Alteza content."
     required: true
-    default: "test_content"
 
 outputs:
   page_url:
@@ -34,10 +33,6 @@ runs:
         echo Generating with Alteza...
         echo PWD: `pwd`
         alteza --content test_content --output alteza-output
-
-    #    - name: Display structure of files
-    #      shell: bash
-    #      run: ls -laR --ignore=.git
 
     - name: Upload website ZIP file
       uses: actions/upload-artifact@v3
@@ -72,12 +67,3 @@ runs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v2
-
-    - name: Set and display deployed GitHub Pages URL
-      env:
-        GH_PAGE_URL: ${{ steps.deployment.outputs.page_url }}
-      shell: bash
-      run: |
-        echo "GitHub Pages URL: $GH_PAGE_URL"
-        echo "::set-output name=page_url::$GH_PAGE_URL"
-
