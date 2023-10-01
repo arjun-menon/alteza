@@ -121,6 +121,7 @@ class Content(object):
                 fileNode.shouldPublish = False
 
         if isinstance(fileNode.page, Md):
+            print("  Invoking template")  # TODO (see ideas.md)
             templateHtml = Content.getTemplateHtml(env)
             # Re-process against `templateHtml` with PyPage:
             pyPageOutput = pypage(templateHtml, env | {"body": pyPageOutput})

@@ -10,6 +10,7 @@ Flexible Static Site Generator
 * Add a `dateTimeFormat` option, and add a `lastUpdated` which uses it to transform `lastUpdatedDatetime` into a pretty string.
 * (For the far future, for when a site starts taking in the order 5 minutes or more to generate; Strictly An Site Generation Speed Optimization): `__skip_if_no_git_diff__: True` in `__config.py__`: Provided an "old output" reference exists (e.g. a `gh-pages`-like branch on the repo); Skip processing a subdirectory if the `git diff` for that directory between the current commit and the previous commit indicates that nothing has changed, and simply retain the contents of the existing output directory.
 * An `index` bool (that is set to `True` by default on pages with a `realBasename` of `index) which causes it to processed after all other files have been processed.
+* (For the future) Optional publishing of a non-canonical copy to Medium using Medium’s Publishing API, with the canonical URLs set to point to the canonical host domain.
 * Use pip compile, to freeze package versions.
   * Don't forget to add it to dependabot.yml.
 * Support for this: https://python-markdown.github.io/extensions/wikilinks/ ?
