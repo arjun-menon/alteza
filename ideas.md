@@ -45,6 +45,7 @@ Flexible Static Site Generator
   * Alternatively, the assets could also be in a folder inside Dropbox or Tresorit, but that's publicly served.
     * Alteza needs to be able to recognize this, verify such files exist on the local disk (at some specified location), but also appropriately adjust `link` so that in the generated website, they link to the correct public (possibly-different-domain) URL.
   * Investigate if there's a **free, public** service to host static assets like PDFs, audio, and video, which can be relied upon to fairly quickly served (via CDN?) and have stable long-lived URLs.
+* Update GitHub action once https://github.com/orgs/community/discussions/10985 has been implemented.
 * Some "extra" flags for extensions/features that are opt-in.
   * For example an `--extra_sitemap_xml` flag which generates a `sitemap.xml` file.
     * https://www.searchenginejournal.com/technical-seo/xml-sitemaps/
