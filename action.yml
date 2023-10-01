@@ -1,5 +1,5 @@
-name: "Alteza GH Action"
-description: "A composite action that builds and deploys an Alteza website"
+name: "Alteza"
+description: "A composite action that builds and deploys an Alteza website to GitHub pages"
 author: "Arjun Menon"
 
 inputs:
@@ -9,7 +9,7 @@ inputs:
 
 outputs:
   page_url:
-    description: 'URL to deployed GitHub Pages'
+    description: 'URL to the deployed GitHub Pages'
     value: ${{ steps.deployment.outputs.page_url }}
 
 runs:
