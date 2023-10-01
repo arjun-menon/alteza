@@ -45,7 +45,7 @@ jobs:
       - name: Upload artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v2
         with:
-          path: alteza-output
+          path: alteza-output/
 
 
 #  intermediate:
