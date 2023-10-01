@@ -33,6 +33,9 @@ jobs:
           echo PWD: `pwd`
           alteza --content test_content --output alteza-output
 
+      - name: Display structure of files
+        run: ls -laR
+
       - name: Upload artifact for debug
         uses: actions/upload-artifact@v3
         with:
