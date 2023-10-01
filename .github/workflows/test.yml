@@ -43,14 +43,14 @@ jobs:
           path: alteza-output
 
       - name: Configure GitHub Pages
-        uses: actions/configure-pages@v3
         id: gh_pages_config
+        uses: actions/configure-pages@v3
         with:
           enablement: true
 
       - name: Display some vars
         env:
-          BASE_URL: ${{gh_pages_config.base_url}}
+          BASE_URL: ${{ steps.gh_pages_config.outputs.base_url }}
         run: |
           echo "$BASE_URL"
 
