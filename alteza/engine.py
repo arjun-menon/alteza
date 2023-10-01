@@ -6,7 +6,7 @@ import sh  # type: ignore
 from tap import Tap
 from time import time_ns
 from contextlib import contextmanager
-from typing import Generator, List, Dict, Any
+from typing import Generator, List, Dict, Any, Union, Literal
 from pypage import pypage  # type: ignore
 from .fs import (
     FileNode,
@@ -43,8 +43,10 @@ class Content(object):
         self.nameRegistry = nameRegistry
         self.fixSysPath()
 
+        self.linkDepth: Union[Literal[2], Literal[4]] = 2
+
     def link(self, srcFile: FileNode, name: str) -> str:
-        print(f"  {Fore.grey_42}Linking to:{Style.reset}", name)
+        print(" " * self.linkDepth + f"{Fore.grey_42}Linking to:{Style.reset}", name)
         dstFile: FileNode = self.nameRegistry.lookup(name)
         dstFile.makePublic()  # FixMe: Circular links can make pages public.
 
@@ -121,10 +123,14 @@ class Content(object):
                 fileNode.shouldPublish = False
 
         if isinstance(fileNode.page, Md):
-            print("  Invoking template")  # TODO (see ideas.md)
+            print(
+                f"  {Fore.purple_3}Applying template...{Style.reset}"
+            )  # TODO (see ideas.md)
             templateHtml = Content.getTemplateHtml(env)
+            self.linkDepth = 4
             # Re-process against `templateHtml` with PyPage:
             pyPageOutput = pypage(templateHtml, env | {"body": pyPageOutput})
+            self.linkDepth = 2
 
         fileNode.pyPageOutput = pyPageOutput
 
@@ -216,7 +222,9 @@ def run(args: Args) -> None:
     startTimeNs = time_ns()
     contentDir = args.content
     if not os.path.isdir(contentDir):
-        raise Exception(f"The provided path '{contentDir}' is not a directory.")
+        raise Exception(
+            f"The provided path '{contentDir}' does not exist or is not a directory."
+        )
 
     with enterDir(args.content):
         rootDir, nameRegistry = fs_crawl()
