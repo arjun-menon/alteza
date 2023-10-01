@@ -2,7 +2,6 @@ import re
 import os
 import yaml
 import markdown
-import sh  # type: ignore
 from collections import defaultdict
 from datetime import date, datetime
 from subprocess import check_output, CalledProcessError, STDOUT
@@ -204,7 +203,7 @@ class Page(object):
                     ["git", "log", "-n", "1", "--pretty=format:%aI", path]
                 ).decode()
             )
-        except Exception as e:
+        except Exception:
             return None
 
 
@@ -316,7 +315,7 @@ def defaultShouldIgnore(name: str, isDir: bool) -> bool:
         return True
     if name in {"__pycache__"}:
         return True
-    basename, fileExt = os.path.splitext(name)
+    _, fileExt = os.path.splitext(name)
     if fileExt == ".pyc":
         return True
     if name != config_py_file and fileExt == ".py":
