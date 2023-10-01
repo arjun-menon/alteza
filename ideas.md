@@ -42,6 +42,9 @@ Flexible Static Site Generator
   If not, require the extension to be specified.
 * (For the future:) add a `post-processing` step which executes `Callable[[FileNode], None]` on every _page_ after its processing has been completed.
 * (For the _far_ future): allow referencing an "assets" or "resources" repo (or such folder in a different repo) -- for/if the time comes when you don't want to slow down rebuilds of a website due to there being many heavy static assets in it.
+* Some "extra" flags for extensions/features that are opt-in.
+  * For example an `--extra_sitemap_xml` flag which generates a `sitemap.xml` file.
+* In the GitHub action: an option to pip install a `requirements.txt` file. (It'd just do `touch requirements.txt; pip install requirements.txt`.) Or maybe not an option, but always-on behavior.
 
 Older Ideas 2
 =============
