@@ -44,6 +44,10 @@ Flexible Static Site Generator
 * (For the _far_ future): allow referencing an "assets" or "resources" repo (or such folder in a different repo) -- for/if the time comes when you don't want to slow down rebuilds of a website due to there being many heavy static assets in it.
 * Some "extra" flags for extensions/features that are opt-in.
   * For example an `--extra_sitemap_xml` flag which generates a `sitemap.xml` file.
+* To look into:
+  * https://github.com/actions/upload-pages-artifact
+  * https://github.com/actions/deploy-pages
+  * https://github.com/actions/configure-pages
 * In the GitHub action: an option to pip install a `requirements.txt` file. (It'd just do `touch requirements.txt; pip install requirements.txt`.) Or maybe not an option, but always-on behavior.
 
 Older Ideas 2
