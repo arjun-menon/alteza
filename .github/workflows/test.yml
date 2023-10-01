@@ -34,7 +34,7 @@ jobs:
           alteza --content test_content --output alteza-output
 
       - name: Display structure of files
-        run: ls -laR
+        run: ls -laR --ignore=.git
 
       - name: Upload artifact for debug
         uses: actions/upload-artifact@v3
