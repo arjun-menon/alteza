@@ -13,6 +13,7 @@ from .fs import (
     DirNode,
     displayDir,
     NameRegistry,
+    AltezaException,
     fs_crawl,
     Md,
     Page,
@@ -34,7 +35,7 @@ class Args(Tap):  # pyre-ignore[13]
     seed_env: str = "{}"  # seed data to add to the initial/root env (TODO!)
 
 
-class Content(object):
+class Content:
     def __init__(
         self, args: Args, rootDir: DirNode, nameRegistry: NameRegistry
     ) -> None:
@@ -94,7 +95,7 @@ class Content(object):
         if isinstance(fileNode.page, NonMd) or isinstance(fileNode.page, Md):
             toProcessFurther = readfile(fileNode.absoluteFilePath)
         else:
-            raise Exception(f"{fileNode} pyPage attribute is invalid.")
+            raise AltezaException(f"{fileNode} pyPage attribute is invalid.")
 
         # Inject link
         def link(name: str) -> str:
@@ -198,12 +199,12 @@ class Content(object):
     @staticmethod
     def getTemplateHtml(env: dict[str, Any]) -> str:
         if "template" not in env:
-            raise Exception(
+            raise AltezaException(
                 "You must define a `template` var in some ancestral `__config__.py` file."
             )
         template = env["template"]
         if not isinstance(template, str):
-            raise Exception("The `template` must be a string.")
+            raise AltezaException("The `template` must be a string.")
         return template
 
 
@@ -222,7 +223,7 @@ def run(args: Args) -> None:
     startTimeNs = time_ns()
     contentDir = args.content
     if not os.path.isdir(contentDir):
-        raise Exception(
+        raise AltezaException(
             f"The provided path '{contentDir}' does not exist or is not a directory."
         )
 
@@ -267,14 +268,16 @@ def generate(args: Args, content: Content) -> None:
                     elif isinstance(fileNode.page, NonMd):
                         fileName = fileNode.page.rectifiedFileName
                         if os.path.exists(fileName):
-                            raise Exception(
+                            raise AltezaException(
                                 f"File {fileName} already exists, and conflicts with {fileNode}."
                             )
                         with open(fileName, "w") as nonMdFile:
                             nonMdFile.write(fileNode.pyPageOutput)
 
                     else:
-                        raise Exception(f"{fileNode} pyPage attribute is invalid.")
+                        raise AltezaException(
+                            f"{fileNode} pyPage attribute is invalid."
+                        )
 
                 else:
                     if args.copy_assets:
@@ -292,7 +295,7 @@ def generate(args: Args, content: Content) -> None:
 
 def resetOutputDir(outputDir: str) -> None:
     if os.path.isfile(outputDir):
-        raise Exception(
+        raise AltezaException(
             "There already exists a file named %s. (Please move/delete it.)" % outputDir
         )
     if os.path.isdir(outputDir):

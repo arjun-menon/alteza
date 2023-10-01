@@ -112,6 +112,10 @@ def displayDir(dirNode: DirNode, indent: int = 0) -> str:
     )
 
 
+class AltezaException(Exception):
+    """Alteza Exceptions"""
+
+
 class NameRegistry:
     def __init__(self, root: DirNode, skipForRegistry: Callable[[str], bool]) -> None:
         self.allFiles: Dict[str, FileNode] = {}
@@ -152,13 +156,13 @@ class NameRegistry:
                 f"Link error: `{name}` was not found in the name registry."
                 # f" The {self}"
             )
-            raise Exception(f"Link error: {name}")
+            raise AltezaException(f"Link error: {name}")
 
         return self.allFiles[name]
 
     @staticmethod
     def errorOut(name: str, fileNodes: Set[FileNode]) -> None:
-        raise Exception(
+        raise AltezaException(
             f"Error: The name '{name}' has multiple matches:\n"
             + "  \n".join(f" {fileNode.fullPath}" for fileNode in fileNodes)
         )
@@ -174,7 +178,7 @@ class NameRegistry:
         )
 
 
-class Page(object):
+class Page:
     def __init__(self, f: FileNode) -> None:
         self.lastUpdated: datetime = self.getLastUpdated(f.fullPath)
 
@@ -192,7 +196,7 @@ class Page(object):
         try:
             check_output(["git", "status"], stderr=STDOUT).decode()
             return True
-        except CalledProcessError as e:
+        except CalledProcessError:
             return False
 
     @staticmethod
@@ -232,16 +236,16 @@ class Md(Page):
         html: str = md.convert(text)
         yamlFrontMatter: str = ""
 
-        for name, lines in md.Meta.items():  # type: ignore
+        for name, lines in md.Meta.items():  # type: ignore # pylint: disable=no-member
             yamlFrontMatter += "%s : %s \n" % (name, lines[0])
             for line in lines[1:]:
                 yamlFrontMatter += " " * (len(name) + 3) + line + "\n"
 
         metadata = yaml.safe_load(yamlFrontMatter)
         if metadata is None:
-            metadata = dict()
+            metadata = {}
         if not isinstance(metadata, dict):
-            raise Exception("Expected yaml.safe_load to return a dict or None.")
+            raise AltezaException("Expected yaml.safe_load to return a dict or None.")
 
         return Md.Result(metadata=metadata, html=html)
 
@@ -310,7 +314,9 @@ def isHidden(name: str) -> bool:
     return name.startswith(".")
 
 
-def defaultShouldIgnore(name: str, isDir: bool) -> bool:
+def defaultShouldIgnore(
+    name: str, isDir: bool  # pylint: disable=unused-argument
+) -> bool:
     if isHidden(name):
         return True
     if name in {"__pycache__"}:
