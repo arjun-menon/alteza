@@ -28,6 +28,8 @@ jobs:
           do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
 
   test:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     permissions:
       actions: read
       contents: read
