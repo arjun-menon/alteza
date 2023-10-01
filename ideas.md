@@ -36,6 +36,8 @@ Flexible Static Site Generator
 * Should I allow `config.py` if a `__config__.py` is missing?
 * Allow name registry to refer to any file without an extension, as long as that file name w/o extension is unique.
   If not, require the extension to be specified.
+* (For the future:) add a `post-processing` step which executes `Callable[[FileNode], None]` on every _page_ after its processing has been completed.
+* (For the _far_ future): allow referencing an "assets" or "resources" repo (or such folder in a different repo) -- for/if the time comes when you don't want to slow down rebuilds of a website due to there being many heavy static assets in it.
 
 Older Ideas 2
 =============
