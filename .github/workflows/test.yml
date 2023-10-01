@@ -11,10 +11,17 @@ jobs:
   build:
     name: Build Website
     runs-on: ubuntu-latest
+
     permissions:
       actions: read
       contents: read
+      pages: write
+      id-token: write
       security-events: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout
@@ -64,23 +71,12 @@ jobs:
       - name: Upload artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v2
         with:
-          path: alteza-output/
+          path: alteza-output
 
-  deploy:
-    name: Deploy Website
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
+
 
 #  intermediate:
 #    needs:
