@@ -1,0 +1,69 @@
+name: "Alteza GH Action"
+description: "A composite action that builds and deploys an Alteza website"
+author: "Arjun Menon"
+
+inputs:
+  path:
+    description: "Path of the directory containing the input Alteza content."
+    required: true
+
+outputs:
+  page_url:
+    description: 'URL to deployed GitHub Pages'
+    value: ${{ steps.deployment.outputs.page_url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+        fetch-depth: 0
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python -m pip install -q --upgrade pip
+        pip install -q alteza
+
+    - name: Generate
+      shell: bash
+      run: |
+        echo Generating with Alteza...
+        echo PWD: `pwd`
+        alteza --content test_content --output alteza-output
+
+    - name: Upload website ZIP file
+      uses: actions/upload-artifact@v3
+      with:
+        name: alteza-output
+        path: alteza-output
+
+    - name: Configure GitHub Pages
+      id: gh_pages_config
+      uses: actions/configure-pages@v3
+      with:
+        enablement: true
+
+    - name: Display output of the GitHub Pages configuration step
+      env:
+        GH_PAGES_BASE_URL: ${{ steps.gh_pages_config.outputs.base_url }}
+        GH_PAGES_BASE_ORIGIN: ${{ steps.gh_pages_config.outputs.origin }}
+        GH_PAGES_BASE_HOST: ${{ steps.gh_pages_config.outputs.host }}
+        GH_PAGES_BASE_PATH: ${{ steps.gh_pages_config.outputs.base_path }}
+      shell: bash
+      run: |
+        echo "GitHub Pages site full base URL: $GH_PAGES_BASE_URL"
+        echo "GitHub Pages site origin: $GH_PAGES_BASE_ORIGIN"
+        echo "GitHub Pages site origin: $GH_PAGES_BASE_HOST"
+        echo "GitHub Pages site full base path: $GH_PAGES_BASE_PATH"
+
+    - name: Upload artifact to GitHub Pages
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: alteza-output
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
