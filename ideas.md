@@ -47,6 +47,7 @@ Flexible Static Site Generator
   * Investigate if there's a **free, public** service to host static assets like PDFs, audio, and video, which can be relied upon to fairly quickly served (via CDN?) and have stable long-lived URLs.
 * Some "extra" flags for extensions/features that are opt-in.
   * For example an `--extra_sitemap_xml` flag which generates a `sitemap.xml` file.
+    * https://www.searchenginejournal.com/technical-seo/xml-sitemaps/
 * To look into for a GitHub Pages action:
   * https://github.com/actions/upload-pages-artifact
   * https://github.com/actions/deploy-pages
