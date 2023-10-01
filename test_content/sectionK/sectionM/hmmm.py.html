@@ -16,8 +16,8 @@ public = True
 <ul>
     {% for file in dir.files if file.basename != '__config__' %}
     <li>
-        <a href="{{ link(file.basename) }}">
-            {{file.basename}}
+        <a href="{{ link(file.pageName) }}">
+            {{file.pageName}}
         </a>
     </li>
     {% %}
