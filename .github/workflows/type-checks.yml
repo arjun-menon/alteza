@@ -14,7 +14,7 @@ jobs:
   #
   # Skip type checks if source hasn't changed.
   #
-  pre_job:
+  should_skip:
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     outputs:
@@ -31,8 +31,8 @@ jobs:
   # Pyre Check
   #
   pyre:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: should_skip
+    if: needs.should_skip.outputs.should_skip != 'true'
     permissions:
       actions: read
       contents: read
@@ -55,8 +55,8 @@ jobs:
   # Mypy Check
   #
   mypy:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: should_skip
+    if: needs.should_skip.outputs.should_skip != 'true'
     permissions:
       actions: read
       contents: read
@@ -84,8 +84,8 @@ jobs:
   # Pyright Check
   #
   pyright:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: should_skip
+    if: needs.should_skip.outputs.should_skip != 'true'
     permissions:
       actions: read
       contents: read
@@ -113,8 +113,8 @@ jobs:
   # Pytype Check
   #
   pytype:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: should_skip
+    if: needs.should_skip.outputs.should_skip != 'true'
     permissions:
       actions: read
       contents: read

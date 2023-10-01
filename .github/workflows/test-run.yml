@@ -14,7 +14,7 @@ jobs:
   #
   # Skip test run if only non-relevant things have changed.
   #
-  pre_job:
+  should_skip:
     # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
     outputs:
@@ -28,8 +28,8 @@ jobs:
           do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
 
   test:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: should_skip
+    if: needs.should_skip.outputs.should_skip != 'true'
     permissions:
       actions: read
       contents: read
