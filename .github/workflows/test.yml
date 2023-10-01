@@ -44,12 +44,13 @@ jobs:
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v3
+        id: gh_pages_config
         with:
           enablement: true
 
       - name: Display some vars
         env:
-          BASE_URL: ${{base_url}}
+          BASE_URL: ${{gh_pages_config.base_url}}
         run: |
           echo "$BASE_URL"
 
