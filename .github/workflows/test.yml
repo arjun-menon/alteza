@@ -33,14 +33,14 @@ jobs:
           echo PWD: `pwd`
           alteza --content test_content --output alteza-output
 
-      - name: Display structure of files
-        run: ls -laR --ignore=.git
-
-      - name: Upload artifact for debug
-        uses: actions/upload-artifact@v3
-        with:
-          name: alteza-output
-          path: alteza-output
+      #      - name: Display structure of files
+      #        run: ls -laR --ignore=.git
+      #
+      #      - name: Upload artifact for debug
+      #        uses: actions/upload-artifact@v3
+      #        with:
+      #          name: alteza-output
+      #          path: alteza-output
 
       - name: Upload artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v2
