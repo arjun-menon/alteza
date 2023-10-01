@@ -42,6 +42,9 @@ Flexible Static Site Generator
   If not, require the extension to be specified.
 * (For the future:) add a `post-processing` step which executes `Callable[[FileNode], None]` on every _page_ after its processing has been completed.
 * (For the _far_ future): allow referencing an "assets" or "resources" repo (or such folder in a different repo) -- for/if the time comes when you don't want to slow down rebuilds of a website due to there being many heavy static assets in it.
+  * Alternatively, the assets could also be in a folder inside Dropbox or Tresorit, but that's publicly served.
+    * Alteza needs to be able to recognize this, verify such files exist on the local disk (at some specified location), but also appropriately adjust `link` so that in the generated website, they link to the correct public (possibly-different-domain) URL.
+  * Investigate if there's a **free, public** service to host static assets like PDFs, audio, and video, which can be relied upon to fairly quickly served (via CDN?) and have stable long-lived URLs.
 * Some "extra" flags for extensions/features that are opt-in.
   * For example an `--extra_sitemap_xml` flag which generates a `sitemap.xml` file.
 * To look into for a GitHub Pages action:
