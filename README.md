@@ -133,13 +133,15 @@ Or all at once with: `mypy alteza ; pyre check ; pyright alteza ; pytype alteza`
 To install dependencies for development, run:
 ```sh
 python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements-dev.txt
 ```
 
 To use a virtual environment (after creating one with `python3 -m venv venv`):
 ```sh
 source venv/bin/activate
 python3 -m pip install -r requirements.txt
-# ... do some testing ...
+python3 -m pip install -r requirements-dev.txt
+# ... do some work ...
 deactive # end the venv
 ```
 
