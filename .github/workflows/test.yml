@@ -36,7 +36,7 @@ jobs:
       - name: Display structure of files
         run: ls -laR --ignore=.git
 
-      - name: Upload artifact for debug
+      - name: Upload website ZIP file
         uses: actions/upload-artifact@v3
         with:
           name: alteza-output
@@ -48,11 +48,17 @@ jobs:
         with:
           enablement: true
 
-      - name: Display some vars
+      - name: Display output of the GitHub Pages configuration step
         env:
-          BASE_URL: ${{ steps.gh_pages_config.outputs.base_url }}
+          GH_PAGES_BASE_URL: ${{ steps.gh_pages_config.outputs.base_url }}
+          GH_PAGES_BASE_ORIGIN: ${{ steps.gh_pages_config.outputs.origin }}
+          GH_PAGES_BASE_HOST: ${{ steps.gh_pages_config.outputs.host }}
+          GH_PAGES_BASE_PATH: ${{ steps.gh_pages_config.outputs.base_path }}
         run: |
-          echo "$BASE_URL"
+          echo "GitHub Pages site full base URL: $BASE_URL"
+          echo "GitHub Pages site origin: GH_PAGES_BASE_ORIGIN"
+          echo "GitHub Pages site origin: GH_PAGES_BASE_HOST"
+          echo "GitHub Pages site full base path: GH_PAGES_BASE_PATH"
 
       - name: Upload artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v2
