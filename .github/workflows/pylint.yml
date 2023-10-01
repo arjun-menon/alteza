@@ -53,3 +53,7 @@ jobs:
         run: |
           pylint -j 0 alteza
 
+      - name: Run pyreverse
+        run: |
+          pyreverse --output html alteza
+
