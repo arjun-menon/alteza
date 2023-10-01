@@ -11,7 +11,7 @@ inputs:
 outputs:
   page_url:
     description: 'URL to deployed GitHub Pages'
-    value: 'https://arjun-menon.com/'
+    value: ${{ steps.deployment.outputs.page_url }}
 
 runs:
   using: composite
