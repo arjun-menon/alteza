@@ -5,6 +5,7 @@ Flexible Static Site Generator
 #### Ideas...
 * Require full path when there is a name registry name conflict?
 * Try https://python-poetry.org/ ?
+* Need to have dev dependencies listed somewhere separately somehow, to avoid pulling needless deps when users install.
 * (Not fully figured out) Templates/Layouts: allow _**name**_ only referral to a layout, and figure out a way to do it well. Maybe the _name_ is looked up in the NameRegistry (without `link` being used), hence the template/layout file doesn't get linked, but can still be read for usage.
   * One more minor thing: figure out whether to call it `layout` or ` template`.
 * Add a `dateTimeFormat` option, and add a `lastUpdated` which uses it to transform `lastUpdatedDatetime` into a pretty string.
