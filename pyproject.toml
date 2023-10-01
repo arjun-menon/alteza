@@ -377,7 +377,11 @@ disable = [
     "missing-function-docstring",
     "missing-module-docstring",
     "wrong-import-order",
-    "missing-class-docstring"
+    "missing-class-docstring",
+    "line-too-long",
+    "exec-used",
+    "broad-exception-caught", # perhaps something to reconsider disabling
+    "fixme"
 ]
 
 # Enable the message, report, category or checker with the given id(s). You can
