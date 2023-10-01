@@ -31,6 +31,7 @@ class Args(Tap):  # pyre-ignore[13]
     trailing_slash: bool = (
         False  # Include a trailing slash for links to markdown page directories
     )
+    seed_env: str = "{}"  # seed data to add to the initial/root env (TODO!)
 
 
 class Content(object):
@@ -100,9 +101,9 @@ class Content(object):
         env |= {"link": link}
 
         if isinstance(fileNode.page, Page):
-            env |= {"lastUpdated": fileNode.page.lastUpdated}
+            env |= {"lastUpdatedDatetime": fileNode.page.lastUpdated}
         if isinstance(fileNode.page, Md) and fileNode.page.draftDate is not None:
-            env |= {"draftDate": fileNode.page.draftDate}
+            env |= {"ideaDate": fileNode.page.draftDate}
 
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)
