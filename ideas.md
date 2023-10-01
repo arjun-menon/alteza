@@ -5,6 +5,7 @@ Flexible Static Site Generator
 #### Ideas...
 * Require full path when there is a name registry name conflict?
 * Try https://python-poetry.org/ ?
+* Add a `dateTimeFormat` option, and add a `lastUpdated` which uses it to transform `lastUpdatedDatetime` into a pretty string.
 * (For the far future, for when a site starts taking in the order 5 minutes or more to generate; Strictly An Site Generation Speed Optimization): `__skip_if_no_git_diff__: True` in `__config.py__`: Provided an "old output" reference exists (e.g. a `gh-pages`-like branch on the repo); Skip processing a subdirectory if the `git diff` for that directory between the current commit and the previous commit indicates that nothing has changed, and simply retain the contents of the existing output directory.
 * An `index` bool (that is set to `True` by default on pages with a `realBasename` of `index) which causes it to processed after all other files have been processed.
 * Use pip compile, to freeze package versions.
