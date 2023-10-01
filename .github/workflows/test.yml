@@ -49,8 +49,10 @@ jobs:
           enablement: true
 
       - name: Display some vars
+        env:
+          BASE_URL: ${{gh_pages_config.base_url}}
         run: |
-          echo ${{ gh_pages_config.base_url }}
+          echo "$BASE_URL"
 
       - name: Upload artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v2
