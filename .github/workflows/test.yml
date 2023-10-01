@@ -42,9 +42,9 @@ jobs:
           name: alteza-output
           path: alteza-output
 
-      - id: gh_pages_config
-        name: Configure GitHub Pages
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v3
+        id: gh_pages_config
         with:
           enablement: true
 
