@@ -232,7 +232,27 @@ class Md(Page):
 
     @staticmethod
     def processMarkdown(text: str) -> Result:
-        md = markdown.Markdown(extensions=["meta", "codehilite"])
+        md = markdown.Markdown(
+            # See: https://python-markdown.github.io/extensions/
+            extensions=[
+                # Extra extensions:
+                "abbr",
+                "attr_list",
+                "def_list",
+                "fenced_code",
+                "footnotes",
+                "md_in_html",
+                "tables",
+                # Standard extensions:
+                "admonition",
+                "codehilite",
+                "meta",
+                "sane_lists",
+                "smarty",  # not sure
+                "toc",
+                "wikilinks",
+            ]
+        )
         html: str = md.convert(text)
         yamlFrontMatter: str = ""
 
