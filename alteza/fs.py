@@ -334,7 +334,7 @@ def defaultSkipForRegistry(name: str) -> bool:
     return False
 
 
-def fs_crawl(
+def fsCrawl(
     # Signature -- shouldIgnore(name: str, isDir: bool) -> bool
     shouldIgnore: Callable[[str, bool], bool] = defaultShouldIgnore,
     skipForRegistry: Callable[[str], bool] = defaultSkipForRegistry,

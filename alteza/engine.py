@@ -14,7 +14,7 @@ from .fs import (
     displayDir,
     NameRegistry,
     AltezaException,
-    fs_crawl,
+    fsCrawl,
     Md,
     Page,
     NonMd,
@@ -227,7 +227,7 @@ def run(args: Args) -> None:
         )
 
     with enterDir(args.content):
-        rootDir, nameRegistry = fs_crawl()
+        rootDir, nameRegistry = fsCrawl()
         print(nameRegistry)
         content = Content(args, rootDir, nameRegistry)
         print("Processing...\n")
