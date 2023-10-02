@@ -263,7 +263,7 @@ def generate(args: Args, content: Content) -> None:
                     if isinstance(fileNode.page, Md):
                         os.mkdir(fileNode.pageName)
                         with enterDir(fileNode.pageName):
-                            with open("index.html", "w") as pageHtml:
+                            with open("index.html", "w", encoding="utf-8") as pageHtml:
                                 pageHtml.write(fileNode.pyPageOutput)
                     elif isinstance(fileNode.page, NonMd):
                         fileName = fileNode.page.rectifiedFileName
@@ -271,8 +271,8 @@ def generate(args: Args, content: Content) -> None:
                             raise AltezaException(
                                 f"File {fileName} already exists, and conflicts with {fileNode}."
                             )
-                        with open(fileName, "w") as nonMdFile:
-                            nonMdFile.write(fileNode.pyPageOutput)
+                        with open(fileName, "w", encoding="utf-8") as nonMdPage:
+                            nonMdPage.write(fileNode.pyPageOutput)
 
                     else:
                         raise AltezaException(

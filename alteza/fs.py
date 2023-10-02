@@ -295,8 +295,8 @@ def readPages(node: FsNode) -> None:
 
 
 def readfile(file_path: str) -> str:
-    with open(file_path, "r") as a_file:
-        return a_file.read()
+    with open(file_path, "r", encoding="utf-8") as someFile:
+        return someFile.read()
 
 
 def runOnFsNodeAndAscendantNodes(
