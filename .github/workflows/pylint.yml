@@ -20,7 +20,7 @@ jobs:
         uses: fkirc/skip-duplicate-actions@v5
         with:
           skip_after_successful_duplicate: 'true'
-          paths: '["alteza/**", "**/pylint.yml"]'
+          paths: '["alteza/**", "**/pylint.yml", "pyproject.toml"]'
           do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
 
   pylint:
