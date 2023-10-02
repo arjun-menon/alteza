@@ -25,7 +25,16 @@ runs:
       shell: bash
       run: |
         python -m pip install -q --upgrade pip
-        # pip install -q alteza
+        #
+        # Once this is stable, switch to installing a specific tagging version.
+        # Eventually, will need to adopt a version cadence approach in order to
+        # avoid releasing an updated `action.yml` before the PyPI had updated.
+        # One possible approach: use odd-numbered patch versions for actual
+        # features/code updates, and immediately follow every odd-numbered
+        # patch version release with an _even-numbered_ patch version
+        # release that is limited to documentation and `action.yml`.
+        #
+        # pip install -q alteza@v0.7.1
         pip install -q git+https://github.com/arjun-menon/alteza.git@master
 
     - name: Generate
