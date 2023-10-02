@@ -32,7 +32,7 @@ class Args(Tap):  # pyre-ignore[13]
     trailing_slash: bool = (
         False  # Include a trailing slash for links to markdown page directories
     )
-    seed_env: str = "{}"  # seed data to add to the initial/root env (TODO!)
+    seed: str = "{}"  # seed data to add to the initial/root env (TODO!)
 
 
 class Content:

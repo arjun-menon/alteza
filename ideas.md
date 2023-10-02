@@ -7,6 +7,7 @@ Flexible Static Site Generator
   * WikiLinks
   * Fix circular
   * Fix multi index
+  * Implement --seed
   * Support index flag
 * Require full path when there is a name registry name conflict?
 * Need to have dev dependencies listed somewhere separately somehow, to avoid pulling needless deps when users install.
