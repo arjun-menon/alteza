@@ -107,7 +107,7 @@ class DirNode(FsNode):
 def displayDir(dirNode: DirNode, indent: int = 0) -> str:
     return (
         (" " * 2 * indent)
-        + "%s -> %s\n" % (dirNode, dirNode.files)
+        + f"{dirNode} -> {dirNode.files}\n"
         + "".join(displayDir(subDir, indent + 1) for subDir in dirNode.subDirs)
     )
 
@@ -169,7 +169,7 @@ class NameRegistry:
 
     def __repr__(self) -> str:
         return (
-            f"Name Registry:\n  "
+            "Name Registry:\n  "
             + "\n  ".join(
                 f"{k}: {v} {Fore.grey_39}@ {v.fullPath}{Style.reset}"
                 for k, v in self.allFiles.items()
@@ -237,7 +237,7 @@ class Md(Page):
         yamlFrontMatter: str = ""
 
         for name, lines in md.Meta.items():  # type: ignore # pylint: disable=no-member
-            yamlFrontMatter += "%s : %s \n" % (name, lines[0])
+            yamlFrontMatter += f"{name} : {lines[0]} \n"
             for line in lines[1:]:
                 yamlFrontMatter += " " * (len(name) + 3) + line + "\n"
 
