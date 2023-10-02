@@ -11,37 +11,37 @@ jobs:
   #
   # Skip if source hasn't changed.
   #
-  should_skip:
-    runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5
-        with:
-          skip_after_successful_duplicate: 'true'
-          paths: '["alteza/**", "**/pylint.yml", "pyproject.toml"]'
-          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
+  #should_skip:
+  #  runs-on: ubuntu-latest
+  #  outputs:
+  #    should_skip: ${{ steps.skip_check.outputs.should_skip }}
+  #  steps:
+  #    - id: skip_check
+  #      uses: fkirc/skip-duplicate-actions@v5
+  #      with:
+  #        skip_after_successful_duplicate: 'true'
+  #        paths: '["alteza/**", "**/pylint.yml", "pyproject.toml"]'
+  #        do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
 
   pylint:
-    needs: should_skip
-    if: needs.should_skip.outputs.should_skip != 'true'
+    #needs: should_skip
+    #if: needs.should_skip.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
 
-    strategy:
-      matrix:
-        python-version: [ "3.10", "3.11" ]
+    #strategy:
+    #  matrix:
+    #    python-version: [ "3.10", "3.11" ]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python #${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"  #${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
@@ -54,7 +54,7 @@ jobs:
           pylint -j 0 alteza
 
       - name: Run pyreverse
-        if: matrix.python-version == '3.11'
+        #if: matrix.python-version == '3.11'
         run: |
           mkdir class-structure
           pyreverse --output html --output-directory class-structure alteza
@@ -65,7 +65,7 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Upload class structure diagrams
-        if: matrix.python-version == '3.11'
+        #if: matrix.python-version == '3.11'
         uses: actions/upload-artifact@v3
         with:
           name: class-structure
