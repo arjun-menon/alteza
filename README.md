@@ -117,7 +117,7 @@ Fwiw, I've configured my IDE (_PyCharm_) to always auto-format with `black`.
 
 ### Type Checking
 
-To ensure better code quality, Alteza is type-checked with five different type checking systems: [Mypy](https://mypy-lang.org/), Meta's [Pyre](https://pyre-check.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), Google's [Pytype](https://github.com/google/pytype), and [Pyflakes](https://pypi.org/project/pyflakes/); and linted with [Pylint](https://pylint.pycqa.org/en/latest/index.html).
+To ensure better code quality, Alteza is type-checked with five different type checking systems: [Mypy](https://mypy-lang.org/), Meta's [Pyre](https://pyre-check.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), Google's [Pytype](https://github.com/google/pytype), and [Pyflakes](https://pypi.org/project/pyflakes/); as well as linted with [Pylint](https://pylint.pycqa.org/en/latest/index.html).
 
 To run some type checks:
 ```sh
