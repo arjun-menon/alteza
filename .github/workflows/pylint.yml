@@ -57,6 +57,7 @@ jobs:
         run: |
           mkdir class-structure
           pyreverse --output html --output-directory class-structure alteza
+          cat class-structure/classes.html >> $GITHUB_STEP_SUMMARY
 
       - name: Upload class structure diagrams
         if: matrix.python-version == '3.10'
