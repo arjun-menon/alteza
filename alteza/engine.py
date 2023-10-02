@@ -92,7 +92,7 @@ class Content:
         env |= {"file": fileNode}
 
         toProcessFurther: str
-        if isinstance(fileNode.page, NonMd) or isinstance(fileNode.page, Md):
+        if isinstance(fileNode.page, (Md, NonMd)):
             toProcessFurther = readfile(fileNode.absoluteFilePath)
         else:
             raise AltezaException(f"{fileNode} pyPage attribute is invalid.")
@@ -193,8 +193,7 @@ class Content:
         head, tail = os.path.split(path)
         if head == "":
             return [path]
-        else:
-            return Content.splitPath(head) + [tail]
+        return Content.splitPath(head) + [tail]
 
     @staticmethod
     def getTemplateHtml(env: dict[str, Any]) -> str:
@@ -241,6 +240,7 @@ def run(args: Args) -> None:
     generate(args, content)
 
     elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
+    # pylint: disable=consider-using-f-string
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
 
 
@@ -296,7 +296,8 @@ def generate(args: Args, content: Content) -> None:
 def resetOutputDir(outputDir: str) -> None:
     if os.path.isfile(outputDir):
         raise AltezaException(
-            "There already exists a file named %s. (Please move/delete it.)" % outputDir
+            f"A file named {outputDir} already exists. Please move it or delete it. "
+            "Note that if this had been a directory, we would have erased it."
         )
     if os.path.isdir(outputDir):
         print(

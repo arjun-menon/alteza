@@ -31,7 +31,7 @@ class FsNode:
         self.dirName: str = os.path.basename(dirPath)
         self.fullPath: str = (
             (os.curdir if dirPath == "" else dirPath)
-            if isinstance(self, DirNode) or type(fileName) is not str
+            if isinstance(self, DirNode) or not isinstance(fileName, str)
             else os.path.join(dirPath, fileName)
         )
         self.shouldPublish: bool = False
@@ -314,9 +314,8 @@ def isHidden(name: str) -> bool:
     return name.startswith(".")
 
 
-def defaultShouldIgnore(
-    name: str, isDir: bool  # pylint: disable=unused-argument
-) -> bool:
+def defaultShouldIgnore(name: str, isDir: bool) -> bool:
+    # pylint: disable=unused-argument
     if isHidden(name):
         return True
     if name in {"__pycache__"}:
