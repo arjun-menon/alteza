@@ -47,6 +47,7 @@ Flexible Static Site Generator
   If not, require the extension to be specified.
 * (For the future:) add a `post-processing` step which executes `Callable[[FileNode], None]` on every _page_ after its processing has been completed.
 * ~~Try https://python-poetry.org/ ?~~
+* (For the future): Auto-compression of images to different sizes, and img tags with `srcset` being inserted, if Markdown image syntax (i.e. a link with a `!` in front of it) is used.
 * (For the _far_ future): allow referencing an "assets" or "resources" repo (or such folder in a different repo) -- for/if the time comes when you don't want to slow down rebuilds of a website due to there being many heavy static assets in it.
   * Alternatively, the assets could also be in a folder inside Dropbox or Tresorit, but that's publicly served.
     * Alteza needs to be able to recognize this, verify such files exist on the local disk (at some specified location), but also appropriately adjust `link` so that in the generated website, they link to the correct public (possibly-different-domain) URL.
