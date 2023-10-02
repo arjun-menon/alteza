@@ -3,8 +3,12 @@ Flexible Static Site Generator
 ------------------------------
 
 #### Ideas...
+* Next up:
+  * WikiLinks
+  * Fix circular
+  * Fix multi index
+  * Support index flag
 * Require full path when there is a name registry name conflict?
-* Try https://python-poetry.org/ ?
 * Need to have dev dependencies listed somewhere separately somehow, to avoid pulling needless deps when users install.
 * (Not fully figured out) Templates/Layouts: allow _**name**_ only referral to a layout, and figure out a way to do it well. Maybe the _name_ is looked up in the NameRegistry (without `link` being used), hence the template/layout file doesn't get linked, but can still be read for usage.
   * One more minor thing: figure out whether to call it `layout` or ` template`.
@@ -42,6 +46,7 @@ Flexible Static Site Generator
 * Allow name registry to refer to any file without an extension, as long as that file name w/o extension is unique.
   If not, require the extension to be specified.
 * (For the future:) add a `post-processing` step which executes `Callable[[FileNode], None]` on every _page_ after its processing has been completed.
+* ~~Try https://python-poetry.org/ ?~~
 * (For the _far_ future): allow referencing an "assets" or "resources" repo (or such folder in a different repo) -- for/if the time comes when you don't want to slow down rebuilds of a website due to there being many heavy static assets in it.
   * Alternatively, the assets could also be in a folder inside Dropbox or Tresorit, but that's publicly served.
     * Alteza needs to be able to recognize this, verify such files exist on the local disk (at some specified location), but also appropriately adjust `link` so that in the generated website, they link to the correct public (possibly-different-domain) URL.
