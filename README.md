@@ -117,16 +117,17 @@ Fwiw, I've configured my IDE (_PyCharm_) to always auto-format with `black`.
 
 ### Type Checking
 
-To ensure better code quality, Alteza is quadruple type-checked with four different type checking systems: [Mypy](https://mypy-lang.org/), Meta's [Pyre](https://pyre-check.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), and Google's [Pytype](https://github.com/google/pytype), and linted with [Pylint](https://pylint.pycqa.org/en/latest/index.html).
+To ensure better code quality, Alteza is type-checked with five different type checking systems: [Mypy](https://mypy-lang.org/), Meta's [Pyre](https://pyre-check.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), Google's [Pytype](https://github.com/google/pytype), and [Pyflakes](https://pypi.org/project/pyflakes/); and linted with [Pylint](https://pylint.pycqa.org/en/latest/index.html).
 
 To run some type checks:
 ```sh
 mypy alteza  # should have zero errors
+pyflakes alteza  # should have zero errors
 pyre check  # should have zero errors as well
 pyright alteza  # should have zero errors also
 pytype alteza  # should have zero errors too
 ```
-Or all at once with: `mypy alteza ; pyre check ; pyright alteza ; pytype alteza`.
+Or, all at once with: `mypy alteza ; pyre check ; pyright alteza ; pytype alteza ; pyflakes alteza`.
 
 #### Linting
 Linting policy is very strict. [Pylint](https://pylint.pycqa.org/en/latest/index.html) must issue a perfect 10/10 score, otherwise the [Pylint CI check](https://github.com/arjun-menon/alteza/actions/workflows/pylint.yml) will fail.
