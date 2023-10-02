@@ -117,7 +117,7 @@ Fwiw, I've configured my IDE (_PyCharm_) to always auto-format with `black`.
 
 ### Type Checking
 
-To ensure better code quality, Alteza is quadruple type-checked with four different type checking systems: [Mypy](https://mypy-lang.org/), Meta's [Pyre](https://pyre-check.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), and Google's [Pytype](https://github.com/google/pytype).
+To ensure better code quality, Alteza is quadruple type-checked with four different type checking systems: [Mypy](https://mypy-lang.org/), Meta's [Pyre](https://pyre-check.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), and Google's [Pytype](https://github.com/google/pytype), and linted with [Pylint](https://pylint.pycqa.org/en/latest/index.html).
 
 To run some type checks:
 ```sh
@@ -127,6 +127,14 @@ pyright alteza  # should have zero errors also
 pytype alteza  # should have zero errors too
 ```
 Or all at once with: `mypy alteza ; pyre check ; pyright alteza ; pytype alteza`.
+
+#### Linting
+Linting policy is very strict. [Pylint](https://pylint.pycqa.org/en/latest/index.html) must issue a perfect 10/10 score, otherwise the [Pylint CI check](https://github.com/arjun-menon/alteza/actions/workflows/pylint.yml) will fail.
+
+To test whether lints are passing, simply run:
+```
+pylint -j 0 alteza
+```
 
 ### Dependencies
 
@@ -139,9 +147,8 @@ python3 -m pip install -r requirements-dev.txt
 To use a virtual environment (after creating one with `python3 -m venv venv`):
 ```sh
 source venv/bin/activate
-python3 -m pip install -r requirements.txt
-python3 -m pip install -r requirements-dev.txt
-# ... do some work ...
+# ... install requirements ...
+# ... do some development ...
 deactive # end the venv
 ```
 
