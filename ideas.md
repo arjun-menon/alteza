@@ -11,6 +11,7 @@ Flexible Static Site Generator
   * Support index flag
 * Require full path when there is a name registry name conflict?
 * Need to have dev dependencies listed somewhere separately somehow, to avoid pulling needless deps when users install.
+* Move support with a root-level `move.json` file and `--move` file. Auto-generating a redirect page, with a built-in redirect HTML template that can be overriden with a user-provided template.
 * (Not fully figured out) Templates/Layouts: allow _**name**_ only referral to a layout, and figure out a way to do it well. Maybe the _name_ is looked up in the NameRegistry (without `link` being used), hence the template/layout file doesn't get linked, but can still be read for usage.
   * One more minor thing: figure out whether to call it `layout` or ` template`.
 * Add a `dateTimeFormat` option, and add a `lastUpdated` which uses it to transform `lastUpdatedDatetime` into a pretty string.
