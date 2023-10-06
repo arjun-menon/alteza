@@ -4,11 +4,10 @@ Flexible Static Site Generator
 
 #### Ideas...
 * Next up:
-  * WikiLinks
-  * Fix circular
   * Fix multi index
   * Implement --seed
   * Support index flag
+  * Fix circular (low priority?)
 * Require full path when there is a name registry name conflict?
 * Need to have dev dependencies listed somewhere separately somehow, to avoid pulling needless deps when users install.
 * Move support with a root-level `move.json` file and `--move` file. Auto-generating a redirect page, with a built-in redirect HTML template that can be overriden with a user-provided template.
@@ -22,6 +21,7 @@ Flexible Static Site Generator
   * Don't forget to add it to dependabot.yml.
 * Support for this: https://python-markdown.github.io/extensions/wikilinks/ ?
   * Use `build_url` to talk to `link` to return the correct url?
+  * Enhance the NameRegistry with Markdown pages' titles as well, so a WikiLink can refer to a page by its title?
 * Maybe run the Markdown processing twice -- first to grab front matter, and inject it into
   the env (discarding the html out); and the second time to actually grab the html.
 * Changing Name Registry to allow is to handle multiple files with the same basename. (Low Priority)
@@ -36,7 +36,7 @@ Flexible Static Site Generator
   * Maybe a WebSocket that tells the listener if a site rebuild is _in progress_.
 * Obsidian Vault internal links recognition?
 * Fix the `link` circular issue by tracing links after processing, from every `public` node.
-  * Use some graph visualization library to draw a visual map of the website.
+* (Low value) Use some graph visualization library to draw a visual map of the website.
 * Limit pypage processing to `.py.html` (and `.md`) files.
   * (In the far future:) Perhaps add pypage processing (plus front matter) support for RST as well. 
 * GitHub action to publish a website to `gh-pages`-like branch of the same repo (the branch as configured).
