@@ -104,7 +104,12 @@ class Content:
         env |= {"link": link}
 
         if isinstance(fileNode.page, Page):
-            env |= {"lastUpdatedDatetime": fileNode.page.lastUpdated}
+            if fileNode.page.lastUpdated is not None:
+                lastUpdatedDatetime = fileNode.page.lastUpdated
+                # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
+                lastUpdated = lastUpdatedDatetime.strftime("%Y %b %-d at %-H:%M %p")
+                env |= {"lastUpdatedDatetime": lastUpdatedDatetime}
+                env |= {"lastUpdated": lastUpdated}
         if isinstance(fileNode.page, Md) and fileNode.page.draftDate is not None:
             env |= {"ideaDate": fileNode.page.draftDate}
 
