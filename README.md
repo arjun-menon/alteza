@@ -136,6 +136,7 @@ To test whether lints are passing, simply run:
 ```
 pylint -j 0 alteza
 ```
+Of course, when it makes sense, lints are suppressed next to the relevant line, in code. Also, unlike typical Python code, the naming convention generally-followed in this codebase is `camelCase`. Pylint checks have been mostly disabled for names.
 
 ### Dependencies
 
