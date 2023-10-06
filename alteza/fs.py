@@ -4,7 +4,6 @@ import yaml
 import markdown
 from collections import defaultdict
 from datetime import date, datetime
-from markdown.extensions.wikilinks import WikiLinkExtension
 from subprocess import check_output, CalledProcessError, STDOUT
 from typing import (
     Optional,
@@ -251,7 +250,6 @@ class Md(Page):
                 "sane_lists",
                 "smarty",  # not sure
                 "toc",
-                WikiLinkExtension(),
             ]
         )
         html: str = md.convert(text)
