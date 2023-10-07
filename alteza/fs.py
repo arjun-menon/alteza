@@ -64,6 +64,7 @@ class FileNode(FsNode):
         self.page: Optional[Union[Md, NonMd]] = None
         self.realName: str = self.baseName  # to be overwritten selectively
         self.pyPageOutput: Optional[str] = None  # to be generated (by pypage)
+        injectPage(self)
 
     def colorize(self, r: str) -> str:
         if colored_logs:
@@ -317,15 +318,6 @@ def injectPage(fileNode: FileNode) -> None:
             fileNode.page = NonMd(fileNode, realPageName, rectifiedFileName)
 
 
-def injectPages(node: FsNode) -> None:
-    # TODO: Combine this with initial FsNode tree construction?
-    assert isinstance(node, DirNode)
-    for dirNode in node.subDirs:
-        injectPages(dirNode)
-    for fileNode in node.files:
-        injectPage(fileNode)
-
-
 def readfile(file_path: str) -> str:
     with open(file_path, "r", encoding="utf-8") as someFile:
         return someFile.read()
@@ -378,8 +370,6 @@ def fsCrawl(
     rootDir: DirNode = DirNode(
         None, dirPath, lambda s, b: shouldIgnore(s, b) or defaultShouldIgnore(s, b)
     )
-
-    injectPages(rootDir)  # This must occur before NameRegistry creation.
 
     nameRegistry = NameRegistry(
         rootDir, lambda s: skipForRegistry(s) and defaultSkipForRegistry(s)
