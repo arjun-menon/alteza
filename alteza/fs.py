@@ -68,9 +68,9 @@ class FileNode(FsNode):
             expectedRemainingExt = ".py" + fileNode.extension
             if remainingExt == expectedRemainingExt:
                 # The condition above passing indicates this is a NonMd page file.
-                realPageName = fileNode.fileName[:pySubExtPos]
-                rectifiedFileName = realPageName + fileNode.extension
-                fileNode.page = NonMd(fileNode, realPageName, rectifiedFileName)
+                realName = fileNode.fileName[:pySubExtPos]
+                rectifiedFileName = realName + fileNode.extension
+                fileNode.page = NonMd(fileNode, realName, rectifiedFileName)
 
     def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
@@ -167,14 +167,14 @@ class NameRegistry:
                 allFilesMulti[rectifiedParentDirName].add(fileNode)
 
             else:
-                # Non-index (regular, incl. page) files:
-                allFilesMulti[fileNode.fileName].add(fileNode)
-
-                if fileNode.page is not None:
-                    allFilesMulti[fileNode.baseName].add(fileNode)  # maybe delete this
-
-                    if fileNode.baseName != fileNode.realName:
-                        allFilesMulti[fileNode.realName].add(fileNode)
+                if isinstance(fileNode.page, Md) or (
+                    isinstance(fileNode.page, NonMd) and fileNode.extension == ".html"
+                ):
+                    allFilesMulti[fileNode.realName].add(fileNode)
+                elif isinstance(fileNode.page, NonMd):
+                    allFilesMulti[fileNode.page.rectifiedFileName].add(fileNode)
+                else:
+                    allFilesMulti[fileNode.fileName].add(fileNode)
 
         def walk(node: DirNode) -> None:
             for f in node.files:
@@ -312,9 +312,9 @@ class Md(Page):
 
 
 class NonMd(Page):
-    def __init__(self, f: FileNode, pageName: str, rectifiedFileName: str) -> None:
+    def __init__(self, f: FileNode, realName: str, rectifiedFileName: str) -> None:
         super().__init__(f)
-        f.realName = pageName
+        f.realName = realName
         self.rectifiedFileName: str = rectifiedFileName
 
 
