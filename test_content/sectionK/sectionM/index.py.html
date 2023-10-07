@@ -15,11 +15,13 @@ public = True
 
 <ul>
     {% for file in dir.files if file.basename != '__config__' %}
+    {% if file.pageName != 'index' %} <!-- FIXME / TODO -->
     <li>
         <a href="{{ link(file.pageName) }}">
             {{file.pageName}}
         </a>
     </li>
+    {% %}
     {% %}
 </ul>
 
