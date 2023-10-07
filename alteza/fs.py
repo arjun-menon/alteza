@@ -113,13 +113,18 @@ class DirNode(FsNode):
         # Note: if `dirName` is an empty string (""), that means we're at the root (/).
         return self.dirName if len(self.dirName) > 0 else "/"
 
+    @staticmethod
+    def _displayDir(dirNode: "DirNode", indent: int = 0) -> str:
+        return (
+            (" " * 2 * indent)
+            + f"{dirNode} -> {dirNode.files}\n"
+            + "".join(
+                DirNode._displayDir(subDir, indent + 1) for subDir in dirNode.subDirs
+            )
+        )
 
-def displayDir(dirNode: DirNode, indent: int = 0) -> str:
-    return (
-        (" " * 2 * indent)
-        + f"{dirNode} -> {dirNode.files}\n"
-        + "".join(displayDir(subDir, indent + 1) for subDir in dirNode.subDirs)
-    )
+    def displayDir(self) -> str:
+        return self._displayDir(self)
 
 
 class AltezaException(Exception):

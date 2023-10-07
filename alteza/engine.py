@@ -11,7 +11,6 @@ from pypage import pypage  # type: ignore
 from .fs import (
     FileNode,
     DirNode,
-    displayDir,
     NameRegistry,
     AltezaException,
     fsCrawl,
@@ -240,7 +239,7 @@ def run(args: Args) -> None:
         print("\nSuccessfully completed processing.\n")
 
     print("File Tree:")
-    print(displayDir(rootDir))
+    print(rootDir.displayDir())
 
     generate(args, content)
 
