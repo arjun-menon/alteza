@@ -15,7 +15,7 @@ from .fs import (
     AltezaException,
     fsCrawl,
     Md,
-    Page,
+    PageNode,
     NonMd,
     readfile,
     config_py_file,
@@ -102,13 +102,12 @@ class Content:
 
         env |= {"link": link}
 
-        if isinstance(fileNode.page, Page):
-            if fileNode.page.lastUpdated is not None:
-                lastUpdatedDatetime = fileNode.page.lastUpdated
-                # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
-                lastUpdated = lastUpdatedDatetime.strftime("%Y %b %-d at %-H:%M %p")
-                env |= {"lastUpdatedDatetime": lastUpdatedDatetime}
-                env |= {"lastUpdated": lastUpdated}
+        if isinstance(fileNode.page, PageNode):
+            lastUpdatedDatetime = fileNode.page.lastUpdated
+            # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
+            lastUpdated = lastUpdatedDatetime.strftime("%Y %b %-d at %-H:%M %p")
+            env |= {"lastUpdatedDatetime": lastUpdatedDatetime}
+            env |= {"lastUpdated": lastUpdated}
         if isinstance(fileNode.page, Md) and fileNode.page.draftDate is not None:
             env |= {"ideaDate": fileNode.page.draftDate}
 

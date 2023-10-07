@@ -151,15 +151,15 @@ class AltezaException(Exception):
     """Alteza Exceptions"""
 
 
-class Page:
+class PageNode:
     def __init__(self, f: FileNode) -> None:
         self.lastUpdated: datetime = self.getLastUpdated(f.fullPath)
 
     @staticmethod
     def getLastUpdated(path: str) -> datetime:
         """Get last modified date from: (a) git history, or (b) system modified time."""
-        if Page.isGitRepo():
-            lastUpdated = Page.getGitFileLastAuthDate(path)
+        if PageNode.isGitRepo():
+            lastUpdated = PageNode.getGitFileLastAuthDate(path)
             if lastUpdated is not None:
                 return lastUpdated
         return datetime.fromtimestamp(os.path.getmtime(path))
@@ -184,7 +184,7 @@ class Page:
             return None
 
 
-class Md(Page):
+class Md(PageNode):
     def __init__(self, f: FileNode) -> None:
         super().__init__(f)
         self.draftDate: Optional[date] = None
@@ -242,7 +242,7 @@ class Md(Page):
         return Md.Result(metadata=metadata, html=html)
 
 
-class NonMd(Page):
+class NonMd(PageNode):
     def __init__(self, f: FileNode, realName: str, rectifiedFileName: str) -> None:
         super().__init__(f)
         f.realName = realName
