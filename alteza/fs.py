@@ -292,44 +292,33 @@ class NonMd(Page):
         f.pageName = pageName
         self.rectifiedFileName: str = rectifiedFileName
 
-    @staticmethod
-    def isNonMdPyPageFile(fileNode: FileNode) -> Optional["NonMd"]:
-        """Check if fileNode is a non-Md page (that needs to be processed with pypage).
-        If is a non-Md page, we return a NonMd object.
-        If it is not, we return None."""
-        if ".py." in fileNode.fileName:
-            pySubExtPos = fileNode.fileName.find(".py.")
-            remainingExt = fileNode.fileName[pySubExtPos:]
-            expectedRemainingExt = ".py" + fileNode.extension
-            if remainingExt == expectedRemainingExt:
-                # The condition above passing indicates this is a NonMd page file.
-                realPageName = fileNode.fileName[:pySubExtPos]
-                rectifiedFileName = realPageName + fileNode.extension
-                return NonMd(fileNode, realPageName, rectifiedFileName)
-        return None
+
+def injectPage(fileNode: FileNode) -> None:
+    """Check if fileNode is a Md or non-Md page (that needs to be processed with pypage).
+    If is a Md page, we set `fileNode.page` to a Md object.
+    If is a non-Md page, we set `fileNode.page` to a NonMd object.
+    If it is neither, we do nothing."""
+
+    if fileNode.extension == ".md":
+        fileNode.page = Md(fileNode)
+    elif ".py." in fileNode.fileName:
+        pySubExtPos = fileNode.fileName.find(".py.")
+        remainingExt = fileNode.fileName[pySubExtPos:]
+        expectedRemainingExt = ".py" + fileNode.extension
+        if remainingExt == expectedRemainingExt:
+            # The condition above passing indicates this is a NonMd page file.
+            realPageName = fileNode.fileName[:pySubExtPos]
+            rectifiedFileName = realPageName + fileNode.extension
+            fileNode.page = NonMd(fileNode, realPageName, rectifiedFileName)
 
 
-def readPages(node: FsNode) -> None:
+def injectPages(node: FsNode) -> None:
     # TODO: Combine this with initial FsNode tree construction?
-    if isinstance(node, DirNode):
-        d: DirNode = node
-        for aDir in node.subDirs:
-            readPages(aDir)
-        for aFile in node.files:
-            readPages(aFile)
-
-        # TODO: is the shouldPublish update below still being used?
-        if any(aDir.shouldPublish for aDir in node.subDirs) or any(
-            aFile.shouldPublish for aFile in node.files
-        ):
-            d.shouldPublish = True
-
-    elif isinstance(node, FileNode):
-        f: FileNode = node
-        if f.extension == ".md":
-            f.page = Md(f)
-        else:
-            f.page = NonMd.isNonMdPyPageFile(f)
+    assert isinstance(node, DirNode)
+    for dirNode in node.subDirs:
+        injectPages(dirNode)
+    for fileNode in node.files:
+        injectPage(fileNode)
 
 
 def readfile(file_path: str) -> str:
@@ -385,7 +374,7 @@ def fsCrawl(
         None, dirPath, lambda s, b: shouldIgnore(s, b) or defaultShouldIgnore(s, b)
     )
 
-    readPages(rootDir)  # This must occur before NameRegistry creation.
+    injectPages(rootDir)  # This must occur before NameRegistry creation.
 
     nameRegistry = NameRegistry(
         rootDir, lambda s: skipForRegistry(s) and defaultSkipForRegistry(s)
