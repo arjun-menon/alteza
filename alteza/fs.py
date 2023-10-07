@@ -53,6 +53,25 @@ class FsNode:
 
 
 class FileNode(FsNode):
+    @staticmethod
+    def injectPage(fileNode: "FileNode") -> None:
+        """Check if fileNode is a Md or non-Md page (that needs to be processed with pypage).
+        If is a Md page, we set `fileNode.page` to a Md object.
+        If is a non-Md page, we set `fileNode.page` to a NonMd object.
+        If it is neither, we do nothing."""
+
+        if fileNode.extension == ".md":
+            fileNode.page = Md(fileNode)
+        elif ".py." in fileNode.fileName:
+            pySubExtPos = fileNode.fileName.find(".py.")
+            remainingExt = fileNode.fileName[pySubExtPos:]
+            expectedRemainingExt = ".py" + fileNode.extension
+            if remainingExt == expectedRemainingExt:
+                # The condition above passing indicates this is a NonMd page file.
+                realPageName = fileNode.fileName[:pySubExtPos]
+                rectifiedFileName = realPageName + fileNode.extension
+                fileNode.page = NonMd(fileNode, realPageName, rectifiedFileName)
+
     def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
         self.fileName: str = fileName  # for typing
@@ -64,7 +83,7 @@ class FileNode(FsNode):
         self.page: Optional[Union[Md, NonMd]] = None
         self.realName: str = self.baseName  # to be overwritten selectively
         self.pyPageOutput: Optional[str] = None  # to be generated (by pypage)
-        injectPage(self)
+        self.injectPage(self)
 
     def colorize(self, r: str) -> str:
         if colored_logs:
@@ -297,25 +316,6 @@ class NonMd(Page):
         super().__init__(f)
         f.realName = pageName
         self.rectifiedFileName: str = rectifiedFileName
-
-
-def injectPage(fileNode: FileNode) -> None:
-    """Check if fileNode is a Md or non-Md page (that needs to be processed with pypage).
-    If is a Md page, we set `fileNode.page` to a Md object.
-    If is a non-Md page, we set `fileNode.page` to a NonMd object.
-    If it is neither, we do nothing."""
-
-    if fileNode.extension == ".md":
-        fileNode.page = Md(fileNode)
-    elif ".py." in fileNode.fileName:
-        pySubExtPos = fileNode.fileName.find(".py.")
-        remainingExt = fileNode.fileName[pySubExtPos:]
-        expectedRemainingExt = ".py" + fileNode.extension
-        if remainingExt == expectedRemainingExt:
-            # The condition above passing indicates this is a NonMd page file.
-            realPageName = fileNode.fileName[:pySubExtPos]
-            rectifiedFileName = realPageName + fileNode.extension
-            fileNode.page = NonMd(fileNode, realPageName, rectifiedFileName)
 
 
 def readfile(file_path: str) -> str:
