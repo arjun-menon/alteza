@@ -14,7 +14,7 @@ public = True
 </h4>
 
 <ul>
-    {% for file in dir.files if file.basename != '__config__' %}
+    {% for file in dir.files if file.baseName != '__config__' %}
     {% if file.pageName != 'index' %} <!-- FIXME / TODO -->
     <li>
         <a href="{{ link(file.pageName) }}">

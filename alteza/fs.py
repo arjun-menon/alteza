@@ -57,12 +57,12 @@ class FileNode(FsNode):
         super().__init__(parent, dirPath, fileName)
         self.fileName: str = fileName  # for typing
         split_name = os.path.splitext(fileName)
-        self.basename: str = split_name[0]
+        self.baseName: str = split_name[0]
         self.extension: str = split_name[1]
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
 
         self.page: Optional[Union[Md, NonMd]] = None
-        self.pageName: str = self.basename  # to be overwritten selectively
+        self.pageName: str = self.baseName  # to be overwritten selectively
         self.pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
     def colorize(self, r: str) -> str:
@@ -146,9 +146,9 @@ class NameRegistry:
                 allFilesMulti[fileNode.fileName].add(fileNode)
 
                 if fileNode.page is not None:
-                    allFilesMulti[fileNode.basename].add(fileNode)  # maybe delete this
+                    allFilesMulti[fileNode.baseName].add(fileNode)  # maybe delete this
 
-                    if fileNode.basename != fileNode.pageName:
+                    if fileNode.baseName != fileNode.pageName:
                         allFilesMulti[fileNode.pageName].add(fileNode)
 
         def walk(node: DirNode) -> None:
@@ -235,9 +235,9 @@ class Md(Page):
 
         # Handle file names that start with a date
         dateFragmentLength = len("YYYY-MM-DD-")
-        if len(f.basename) > dateFragmentLength:
-            dateFragment_ = f.basename[:dateFragmentLength]
-            remainingBasename = f.basename[dateFragmentLength:]
+        if len(f.baseName) > dateFragmentLength:
+            dateFragment_ = f.baseName[:dateFragmentLength]
+            remainingBasename = f.baseName[dateFragmentLength:]
             if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}-$", dateFragment_):
                 dateFragment = dateFragment_[:-1]
                 self.draftDate = date.fromisoformat(dateFragment)
