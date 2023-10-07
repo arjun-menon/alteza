@@ -56,7 +56,7 @@ class Content:
             dstFileName = dstFile.page.rectifiedFileName
         elif isinstance(dstFile.page, Md):
             dstFileName = (
-                dstFile.pageName
+                dstFile.realName
                 # Add a "/" trailing slash if arg requests it
                 + ("/" if self.args.trailing_slash else "")
             )
@@ -266,8 +266,8 @@ def generate(args: Args, content: Content) -> None:
                     assert isinstance(fileNode.pyPageOutput, str)
 
                     if isinstance(fileNode.page, Md):
-                        os.mkdir(fileNode.pageName)
-                        with enterDir(fileNode.pageName):
+                        os.mkdir(fileNode.realName)
+                        with enterDir(fileNode.realName):
                             with open("index.html", "w", encoding="utf-8") as pageHtml:
                                 pageHtml.write(fileNode.pyPageOutput)
                     elif isinstance(fileNode.page, NonMd):

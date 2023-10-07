@@ -62,7 +62,7 @@ class FileNode(FsNode):
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
 
         self.page: Optional[Union[Md, NonMd]] = None
-        self.pageName: str = self.baseName  # to be overwritten selectively
+        self.realName: str = self.baseName  # to be overwritten selectively
         self.pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
     def colorize(self, r: str) -> str:
@@ -134,7 +134,7 @@ class NameRegistry:
         allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
 
         def record(fileNode: FileNode) -> None:
-            if fileNode.pageName == "index" and (
+            if fileNode.realName == "index" and (
                 fileNode.extension in (".md", ".html")
             ):
                 # Index pages (i.e. `index.md` or `index[.py].html` files):
@@ -148,8 +148,8 @@ class NameRegistry:
                 if fileNode.page is not None:
                     allFilesMulti[fileNode.baseName].add(fileNode)  # maybe delete this
 
-                    if fileNode.baseName != fileNode.pageName:
-                        allFilesMulti[fileNode.pageName].add(fileNode)
+                    if fileNode.baseName != fileNode.realName:
+                        allFilesMulti[fileNode.realName].add(fileNode)
 
         def walk(node: DirNode) -> None:
             for f in node.files:
@@ -241,7 +241,7 @@ class Md(Page):
             if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}-$", dateFragment_):
                 dateFragment = dateFragment_[:-1]
                 self.draftDate = date.fromisoformat(dateFragment)
-                f.pageName = remainingBasename
+                f.realName = remainingBasename
 
     class Result(NamedTuple):
         metadata: Dict[str, str]
@@ -289,7 +289,7 @@ class Md(Page):
 class NonMd(Page):
     def __init__(self, f: FileNode, pageName: str, rectifiedFileName: str) -> None:
         super().__init__(f)
-        f.pageName = pageName
+        f.realName = pageName
         self.rectifiedFileName: str = rectifiedFileName
 
 
