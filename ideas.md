@@ -36,6 +36,7 @@ Flexible Static Site Generator
   * Maybe a WebSocket that tells the listener if a site rebuild is _in progress_.
 * Obsidian Vault internal links recognition?
 * Fix the `link` circular issue by tracing links after processing, from every `public` node.
+* Generating a "Site Structure" Mermaid output, and adding it to the GitHub Action summary, based on page links?
 * (Low value) Use some graph visualization library to draw a visual map of the website.
 * Limit pypage processing to `.py.html` (and `.md`) files.
   * (In the far future:) Perhaps add pypage processing (plus front matter) support for RST as well. 

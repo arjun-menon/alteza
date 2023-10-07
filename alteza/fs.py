@@ -79,6 +79,12 @@ class FileNode(FsNode):
         r = super().colorize(r)
         return r
 
+    def getParentDir(self) -> "DirNode":
+        # Note: The parent of a FileNode is always a DirNode (and never None).
+        assert isinstance(self.parent, DirNode)
+        parentDir: DirNode = self.parent
+        return parentDir
+
 
 class DirNode(FsNode):
     def __init__(
@@ -103,6 +109,10 @@ class DirNode(FsNode):
             if not shouldIgnore(subDirName, True)
         ]
 
+    def getRectifiedName(self) -> str:
+        # Note: if `dirName` is an empty string (""), that means we're at the root (/).
+        return self.dirName if len(self.dirName) > 0 else "/"
+
 
 def displayDir(dirNode: DirNode, indent: int = 0) -> str:
     return (
@@ -124,13 +134,22 @@ class NameRegistry:
         allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
 
         def record(fileNode: FileNode) -> None:
-            allFilesMulti[fileNode.fileName].add(fileNode)
+            if fileNode.pageName == "index" and (
+                fileNode.extension in (".md", ".html")
+            ):
+                # Index pages (i.e. `index.md` or `index[.py].html` files):
+                rectifiedParentDirName: str = fileNode.getParentDir().getRectifiedName()
+                allFilesMulti[rectifiedParentDirName].add(fileNode)
 
-            if fileNode.page is not None:
-                allFilesMulti[fileNode.basename].add(fileNode)  # maybe delete this
+            else:
+                # Non-index (regular, incl. page) files:
+                allFilesMulti[fileNode.fileName].add(fileNode)
 
-                if fileNode.basename != fileNode.pageName:
-                    allFilesMulti[fileNode.pageName].add(fileNode)
+                if fileNode.page is not None:
+                    allFilesMulti[fileNode.basename].add(fileNode)  # maybe delete this
+
+                    if fileNode.basename != fileNode.pageName:
+                        allFilesMulti[fileNode.pageName].add(fileNode)
 
         def walk(node: DirNode) -> None:
             for f in node.files:
@@ -140,8 +159,6 @@ class NameRegistry:
                 walk(d)
 
         walk(root)
-
-        # TODO: Handle index pages specially here
 
         for name, fileNodes in allFilesMulti.items():
             assert len(fileNodes) >= 1
@@ -293,6 +310,7 @@ class NonMd(Page):
 
 
 def readPages(node: FsNode) -> None:
+    # TODO: Combine this with initial FsNode tree construction?
     if isinstance(node, DirNode):
         d: DirNode = node
         for aDir in node.subDirs:
@@ -300,6 +318,7 @@ def readPages(node: FsNode) -> None:
         for aFile in node.files:
             readPages(aFile)
 
+        # TODO: is the shouldPublish update below still being used?
         if any(aDir.shouldPublish for aDir in node.subDirs) or any(
             aFile.shouldPublish for aFile in node.files
         ):
