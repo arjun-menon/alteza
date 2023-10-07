@@ -151,75 +151,6 @@ class AltezaException(Exception):
     """Alteza Exceptions"""
 
 
-class NameRegistry:
-    def __init__(self, root: DirNode, skipForRegistry: Callable[[str], bool]) -> None:
-        self.allFiles: Dict[str, FileNode] = {}
-        self.skipForRegistry = skipForRegistry
-
-        allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
-
-        def record(fileNode: FileNode) -> None:
-            if fileNode.realName == "index" and (
-                fileNode.extension in (".md", ".html")
-            ):
-                # Index pages (i.e. `index.md` or `index[.py].html` files):
-                rectifiedParentDirName: str = fileNode.getParentDir().getRectifiedName()
-                allFilesMulti[rectifiedParentDirName].add(fileNode)
-
-            else:
-                if isinstance(fileNode.page, Md) or (
-                    isinstance(fileNode.page, NonMd) and fileNode.extension == ".html"
-                ):
-                    allFilesMulti[fileNode.realName].add(fileNode)
-                elif isinstance(fileNode.page, NonMd):
-                    allFilesMulti[fileNode.page.rectifiedFileName].add(fileNode)
-                else:
-                    allFilesMulti[fileNode.fileName].add(fileNode)
-
-        def walk(node: DirNode) -> None:
-            for f in node.files:
-                if not self.skipForRegistry(f.fileName):
-                    record(f)
-            for d in node.subDirs:
-                walk(d)
-
-        walk(root)
-
-        for name, fileNodes in allFilesMulti.items():
-            assert len(fileNodes) >= 1
-            if len(fileNodes) > 1:
-                self.errorOut(name, fileNodes)
-
-            self.allFiles[name] = fileNodes.pop()
-
-    def lookup(self, name: str) -> FileNode:
-        if name not in self.allFiles:
-            print(
-                f"Link error: `{name}` was not found in the name registry."
-                # f" The {self}"
-            )
-            raise AltezaException(f"Link error: {name}")
-
-        return self.allFiles[name]
-
-    @staticmethod
-    def errorOut(name: str, fileNodes: Set[FileNode]) -> None:
-        raise AltezaException(
-            f"Error: The name '{name}' has multiple matches:\n"
-            + "  \n".join(f" {fileNode.fullPath}" for fileNode in fileNodes)
-        )
-
-    def __repr__(self) -> str:
-        return (
-            "Name Registry:\n  "
-            + "\n  ".join(
-                f"{k}: {v} {Fore.grey_39}@ {v.fullPath}{Style.reset}"
-                for k, v in self.allFiles.items()
-            )
-            + "\n"
-        )
-
-
 class Page:
     def __init__(self, f: FileNode) -> None:
         self.lastUpdated: datetime = self.getLastUpdated(f.fullPath)
@@ -316,6 +247,75 @@ class NonMd(Page):
         super().__init__(f)
         f.realName = realName
         self.rectifiedFileName: str = rectifiedFileName
+
+
+class NameRegistry:
+    def __init__(self, root: DirNode, skipForRegistry: Callable[[str], bool]) -> None:
+        self.allFiles: Dict[str, FileNode] = {}
+        self.skipForRegistry = skipForRegistry
+
+        allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
+
+        def record(fileNode: FileNode) -> None:
+            if fileNode.realName == "index" and (
+                fileNode.extension in (".md", ".html")
+            ):
+                # Index pages (i.e. `index.md` or `index[.py].html` files):
+                rectifiedParentDirName: str = fileNode.getParentDir().getRectifiedName()
+                allFilesMulti[rectifiedParentDirName].add(fileNode)
+
+            else:
+                if isinstance(fileNode.page, Md) or (
+                    isinstance(fileNode.page, NonMd) and fileNode.extension == ".html"
+                ):
+                    allFilesMulti[fileNode.realName].add(fileNode)
+                elif isinstance(fileNode.page, NonMd):
+                    allFilesMulti[fileNode.page.rectifiedFileName].add(fileNode)
+                else:
+                    allFilesMulti[fileNode.fileName].add(fileNode)
+
+        def walk(node: DirNode) -> None:
+            for f in node.files:
+                if not self.skipForRegistry(f.fileName):
+                    record(f)
+            for d in node.subDirs:
+                walk(d)
+
+        walk(root)
+
+        for name, fileNodes in allFilesMulti.items():
+            assert len(fileNodes) >= 1
+            if len(fileNodes) > 1:
+                self.errorOut(name, fileNodes)
+
+            self.allFiles[name] = fileNodes.pop()
+
+    def lookup(self, name: str) -> FileNode:
+        if name not in self.allFiles:
+            print(
+                f"Link error: `{name}` was not found in the name registry."
+                # f" The {self}"
+            )
+            raise AltezaException(f"Link error: {name}")
+
+        return self.allFiles[name]
+
+    @staticmethod
+    def errorOut(name: str, fileNodes: Set[FileNode]) -> None:
+        raise AltezaException(
+            f"Error: The name '{name}' has multiple matches:\n"
+            + "  \n".join(f" {fileNode.fullPath}" for fileNode in fileNodes)
+        )
+
+    def __repr__(self) -> str:
+        return (
+            "Name Registry:\n  "
+            + "\n  ".join(
+                f"{k}: {v} {Fore.grey_39}@ {v.fullPath}{Style.reset}"
+                for k, v in self.allFiles.items()
+            )
+            + "\n"
+        )
 
 
 def readfile(file_path: str) -> str:
