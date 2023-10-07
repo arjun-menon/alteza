@@ -167,9 +167,7 @@ class NameRegistry:
                 allFilesMulti[rectifiedParentDirName].add(fileNode)
 
             else:
-                if isinstance(fileNode.page, Md) or (
-                    isinstance(fileNode.page, NonMd) and fileNode.extension == ".html"
-                ):
+                if isinstance(fileNode.page, Md):
                     allFilesMulti[fileNode.realName].add(fileNode)
                 elif isinstance(fileNode.page, NonMd):
                     allFilesMulti[fileNode.page.rectifiedFileName].add(fileNode)
