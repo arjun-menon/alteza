@@ -225,15 +225,15 @@ def run(args: Args) -> None:
         )
 
     with enterDir(args.content):
-        rootDir, nameRegistry = Fs.crawl()
-        print(nameRegistry)
-        content = Content(args, rootDir, nameRegistry)
+        fs = Fs()
+        print(fs.nameRegistry)
+        content = Content(args, fs.rootDir, fs.nameRegistry)
         print("Processing...\n")
         content.process()
         print("\nSuccessfully completed processing.\n")
 
     print("File Tree:")
-    print(rootDir.displayDir())
+    print(fs.rootDir.displayDir())
 
     generate(args, content)
 

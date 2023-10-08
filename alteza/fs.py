@@ -391,7 +391,7 @@ class Fs:
         return False
 
     @staticmethod
-    def crawl(
+    def _crawl(
         # Signature -- shouldIgnore(name: str, isDir: bool) -> bool
         shouldIgnore: Callable[[str, bool], bool] = _defaultShouldIgnore,
         skipForRegistry: Callable[[str], bool] = _defaultSkipForRegistry,
@@ -400,14 +400,13 @@ class Fs:
         Crawl the current directory. Construct & return an FsNode tree and NameRegistry.
         """
         dirPath: str = os.curdir
-        rootDir: DirNode = DirNode(
-            None,
-            dirPath,
-            lambda s, b: shouldIgnore(s, b) or Fs._defaultShouldIgnore(s, b),
-        )
 
-        nameRegistry = NameRegistry(
-            rootDir, lambda s: skipForRegistry(s) and Fs._defaultSkipForRegistry(s)
-        )
+        rootDir: DirNode = DirNode(None, dirPath, shouldIgnore)
+        nameRegistry = NameRegistry(rootDir, skipForRegistry)
 
         return rootDir, nameRegistry
+
+    def __init__(self) -> None:
+        rootDir, nameRegistry = Fs._crawl()
+        self.rootDir: DirNode = rootDir
+        self.nameRegistry: NameRegistry = nameRegistry
