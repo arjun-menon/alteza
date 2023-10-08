@@ -79,10 +79,6 @@ class Content:
 
         return relativePathStr
 
-    def link(self, srcFile: PyPageNode, name: str) -> str:
-        dstFile: FileNode = self.nameRegistry.lookup(name)
-        return self.linkObj(srcFile, dstFile)
-
     def invokePyPage(self, fileNode: PyPageNode, env: dict[str, Any]) -> None:
         print(f"{Fore.gold_1}Processing:{Style.reset}", fileNode.fullPath)
         env = env.copy()
@@ -97,7 +93,8 @@ class Content:
             raise AltezaException(f"{fileNode} Unsupported type of PyPageNode.")
 
         def link(name: str) -> str:
-            return self.link(fileNode, name)
+            dstFile: FileNode = self.nameRegistry.lookup(name)
+            return self.linkObj(fileNode, dstFile)
 
         def linkObj(dstFile: FileNode) -> str:
             return self.linkObj(fileNode, dstFile)
