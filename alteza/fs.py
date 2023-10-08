@@ -13,13 +13,11 @@ from typing import (
     Set,
     Tuple,
     Callable,
-    Union,
     NamedTuple,
 )
 from colored import Style, Fore  # type: ignore
 
-colored_logs = True
-config_py_file = "__config__.py"
+coloredLogs = True
 
 
 class FsNode:
@@ -40,7 +38,7 @@ class FsNode:
         return self.colorize(self.fullPath)
 
     def colorize(self, r: str) -> str:
-        if colored_logs:
+        if coloredLogs:
             if self.shouldPublish:
                 r = f"{Style.bold}{Fore.spring_green_2b}{r}{Style.reset}"
         return r
@@ -49,47 +47,54 @@ class FsNode:
         self.shouldPublish = True
 
     def makePublic(self) -> None:
-        runOnFsNodeAndAscendantNodes(self, lambda fsNode: fsNode.setNodeAsPublic())
+        Fs.runOnFsNodeAndAscendantNodes(self, lambda fsNode: fsNode.setNodeAsPublic())
 
 
 class FileNode(FsNode):
     @staticmethod
-    def injectPage(fileNode: "FileNode") -> None:
-        """Check if fileNode is a Md or non-Md page (that needs to be processed with pypage).
-        If is a Md page, we set `fileNode.page` to a Md object.
-        If is a non-Md page, we set `fileNode.page` to a NonMd object.
-        If it is neither, we do nothing."""
+    def construct(parent: Optional[FsNode], dirPath: str, fileName: str) -> "FileNode":
+        """Constructs an object of type FileNode or one of its subclasses.
+        Check if fileName needs to be processed with pypage.
+            If is a Md page, we return a Md object.
+            If is a non-Md page, we return a NonMd object.
+        If it is neither, we return a FileNode object.
+        """
+        _, extension = FileNode.splitFileName(fileName)
 
-        if fileNode.extension == ".md":
-            fileNode.page = Md(fileNode)
-        elif ".py." in fileNode.fileName:
-            pySubExtPos = fileNode.fileName.find(".py.")
-            remainingExt = fileNode.fileName[pySubExtPos:]
-            expectedRemainingExt = ".py" + fileNode.extension
+        if extension == ".md":
+            return Md(parent, dirPath, fileName)
+
+        if ".py." in fileName:
+            pySubExtPos = fileName.find(".py.")
+            remainingExt = fileName[pySubExtPos:]
+            expectedRemainingExt = ".py" + extension
             if remainingExt == expectedRemainingExt:
                 # The condition above passing indicates this is a NonMd page file.
-                realName = fileNode.fileName[:pySubExtPos]
-                rectifiedFileName = realName + fileNode.extension
-                fileNode.page = NonMd(fileNode, realName, rectifiedFileName)
+                realName = fileName[:pySubExtPos]
+                rectifiedFileName = realName + extension
+                return NonMd(realName, rectifiedFileName, parent, dirPath, fileName)
+
+        return FileNode(parent, dirPath, fileName)
+
+    @staticmethod
+    def splitFileName(fileName: str) -> Tuple[str, str]:
+        return os.path.splitext(fileName)
 
     def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
+        """Do not use this constructor directly. Use the static method construct instead."""
         super().__init__(parent, dirPath, fileName)
-        self.fileName: str = fileName  # for typing
-        split_name = os.path.splitext(fileName)
-        self.baseName: str = split_name[0]
-        self.extension: str = split_name[1]
+        baseName, extension = FileNode.splitFileName(fileName)
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
-
-        self.page: Optional[Union[Md, NonMd]] = None
+        self.fileName: str = fileName
+        self.extension: str = extension
+        self.baseName: str = baseName
         self.realName: str = self.baseName  # to be overwritten selectively
-        self.pyPageOutput: Optional[str] = None  # to be generated (by pypage)
-        self.injectPage(self)
 
     def colorize(self, r: str) -> str:
-        if colored_logs:
-            if self.page is not None and self.shouldPublish:
+        if coloredLogs:
+            if isinstance(self, PyPageNode) is not None and self.shouldPublish:
                 r = f"{Fore.spring_green_1}{r}{Style.reset}"
-            elif isinstance(self.page, Md):
+            elif isinstance(self, Md):
                 r = f"{Fore.purple_4b}{r}{Style.reset}"
         return r
 
@@ -119,7 +124,7 @@ class DirNode(FsNode):
         super().__init__(parent, dirPath, None)
 
         self.files: List[FileNode] = [
-            FileNode(self, dirPath, fileName)
+            FileNode.construct(self, dirPath, fileName)
             for fileName in fileNames
             if not shouldIgnore(fileName, False)
         ]
@@ -151,9 +156,10 @@ class AltezaException(Exception):
     """Alteza Exceptions"""
 
 
-class PageNode:
-    def __init__(self, f: FileNode) -> None:
-        self.lastUpdated: datetime = self.getLastUpdated(f.fullPath)
+class PageNode(FileNode):
+    def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
+        super().__init__(parent, dirPath, fileName)
+        self.lastUpdated: datetime = self.getLastUpdated(self.fullPath)
 
     @staticmethod
     def getLastUpdated(path: str) -> datetime:
@@ -184,20 +190,35 @@ class PageNode:
             return None
 
 
-class Md(PageNode):
-    def __init__(self, f: FileNode) -> None:
-        super().__init__(f)
-        self.draftDate: Optional[date] = None
+class PyPageNode(PageNode):
+    def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
+        super().__init__(parent, dirPath, fileName)
+        self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
-        # Handle file names that start with a date
+    def setPyPageOutput(self, output: str) -> None:
+        self._pyPageOutput = output
+
+    def getPyPageOutput(self) -> str:
+        if self._pyPageOutput is None:
+            raise AltezaException("PyPage output has not been generated yet.")
+        assert isinstance(self._pyPageOutput, str)
+        return self._pyPageOutput
+
+
+class Md(PyPageNode):
+    def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
+        super().__init__(parent, dirPath, fileName)
+
+        self.ideaDate: Optional[date] = None
+        # Handle file names that start with a date:
         dateFragmentLength = len("YYYY-MM-DD-")
-        if len(f.baseName) > dateFragmentLength:
-            dateFragment_ = f.baseName[:dateFragmentLength]
-            remainingBasename = f.baseName[dateFragmentLength:]
+        if len(self.baseName) > dateFragmentLength:
+            dateFragment_ = self.baseName[:dateFragmentLength]
+            remainingBasename = self.baseName[dateFragmentLength:]
             if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}-$", dateFragment_):
                 dateFragment = dateFragment_[:-1]
-                self.draftDate = date.fromisoformat(dateFragment)
-                f.realName = remainingBasename
+                self.ideaDate = date.fromisoformat(dateFragment)
+                self.realName: str = remainingBasename
 
     class Result(NamedTuple):
         metadata: Dict[str, str]
@@ -242,10 +263,18 @@ class Md(PageNode):
         return Md.Result(metadata=metadata, html=html)
 
 
-class NonMd(PageNode):
-    def __init__(self, f: FileNode, realName: str, rectifiedFileName: str) -> None:
-        super().__init__(f)
-        f.realName = realName
+class NonMd(PyPageNode):
+    def __init__(
+        # pylint: disable=too-many-arguments
+        self,
+        realName: str,
+        rectifiedFileName: str,
+        parent: Optional[FsNode],
+        dirPath: str,
+        fileName: str,
+    ) -> None:
+        super().__init__(parent, dirPath, fileName)
+        self.realName = realName
         self.rectifiedFileName: str = rectifiedFileName
 
 
@@ -265,12 +294,12 @@ class NameRegistry:
                 allFilesMulti[rectifiedParentDirName].add(fileNode)
 
             else:
-                if isinstance(fileNode.page, Md) or (
-                    isinstance(fileNode.page, NonMd) and fileNode.extension == ".html"
+                if isinstance(fileNode, Md) or (
+                    isinstance(fileNode, NonMd) and fileNode.extension == ".html"
                 ):
                     allFilesMulti[fileNode.realName].add(fileNode)
-                elif isinstance(fileNode.page, NonMd):
-                    allFilesMulti[fileNode.page.rectifiedFileName].add(fileNode)
+                elif isinstance(fileNode, NonMd):
+                    allFilesMulti[fileNode.rectifiedFileName].add(fileNode)
                 else:
                     allFilesMulti[fileNode.fileName].add(fileNode)
 
@@ -318,61 +347,67 @@ class NameRegistry:
         )
 
 
-def readfile(file_path: str) -> str:
-    with open(file_path, "r", encoding="utf-8") as someFile:
-        return someFile.read()
+class Fs:
+    configFileName: str = "__config__.py"
 
+    @staticmethod
+    def readfile(file_path: str) -> str:
+        with open(file_path, "r", encoding="utf-8") as someFile:
+            return someFile.read()
 
-def runOnFsNodeAndAscendantNodes(
-    startingNode: FsNode, fn: Callable[[FsNode], None]
-) -> None:
-    def walk(node: FsNode) -> None:
-        fn(node)
-        if node.parent is not None:
-            walk(node.parent)
+    @staticmethod
+    def runOnFsNodeAndAscendantNodes(
+        startingNode: FsNode, fn: Callable[[FsNode], None]
+    ) -> None:
+        def walk(node: FsNode) -> None:
+            fn(node)
+            if node.parent is not None:
+                walk(node.parent)
 
-    walk(startingNode)
+        walk(startingNode)
 
+    @staticmethod
+    def _isHidden(name: str) -> bool:
+        return name.startswith(".")
 
-def isHidden(name: str) -> bool:
-    return name.startswith(".")
+    @staticmethod
+    def _defaultShouldIgnore(name: str, isDir: bool) -> bool:
+        # pylint: disable=unused-argument
+        if Fs._isHidden(name):
+            return True
+        if name in {"__pycache__"}:
+            return True
+        _, fileExt = os.path.splitext(name)
+        if fileExt == ".pyc":
+            return True
+        if name != Fs.configFileName and fileExt == ".py":
+            return True
+        return False
 
+    @staticmethod
+    def _defaultSkipForRegistry(name: str) -> bool:
+        if name == Fs.configFileName:
+            return True
+        return False
 
-def defaultShouldIgnore(name: str, isDir: bool) -> bool:
-    # pylint: disable=unused-argument
-    if isHidden(name):
-        return True
-    if name in {"__pycache__"}:
-        return True
-    _, fileExt = os.path.splitext(name)
-    if fileExt == ".pyc":
-        return True
-    if name != config_py_file and fileExt == ".py":
-        return True
-    return False
+    @staticmethod
+    def crawl(
+        # Signature -- shouldIgnore(name: str, isDir: bool) -> bool
+        shouldIgnore: Callable[[str, bool], bool] = _defaultShouldIgnore,
+        skipForRegistry: Callable[[str], bool] = _defaultSkipForRegistry,
+    ) -> Tuple[DirNode, NameRegistry]:
+        """
+        Crawl the current directory. Construct & return an FsNode tree and NameRegistry.
+        """
+        dirPath: str = os.curdir
+        rootDir: DirNode = DirNode(
+            None,
+            dirPath,
+            lambda s, b: shouldIgnore(s, b) or Fs._defaultShouldIgnore(s, b),
+        )
 
+        nameRegistry = NameRegistry(
+            rootDir, lambda s: skipForRegistry(s) and Fs._defaultSkipForRegistry(s)
+        )
 
-def defaultSkipForRegistry(name: str) -> bool:
-    if name == config_py_file:
-        return True
-    return False
-
-
-def fsCrawl(
-    # Signature -- shouldIgnore(name: str, isDir: bool) -> bool
-    shouldIgnore: Callable[[str, bool], bool] = defaultShouldIgnore,
-    skipForRegistry: Callable[[str], bool] = defaultSkipForRegistry,
-) -> Tuple[DirNode, NameRegistry]:
-    """
-    Crawl the current directory. Construct & return an FsNode tree and NameRegistry.
-    """
-    dirPath: str = os.curdir
-    rootDir: DirNode = DirNode(
-        None, dirPath, lambda s, b: shouldIgnore(s, b) or defaultShouldIgnore(s, b)
-    )
-
-    nameRegistry = NameRegistry(
-        rootDir, lambda s: skipForRegistry(s) and defaultSkipForRegistry(s)
-    )
-
-    return rootDir, nameRegistry
+        return rootDir, nameRegistry

@@ -13,14 +13,12 @@ from .fs import (
     DirNode,
     NameRegistry,
     AltezaException,
-    fsCrawl,
     Md,
-    PageNode,
     NonMd,
-    readfile,
-    config_py_file,
+    Fs,
     Fore,
     Style,
+    PyPageNode,
 )
 
 
@@ -45,15 +43,15 @@ class Content:
 
         self.linkDepth: Union[Literal[2], Literal[4]] = 2
 
-    def link(self, srcFile: FileNode, name: str) -> str:
+    def link(self, srcFile: PyPageNode, name: str) -> str:
         print(" " * self.linkDepth + f"{Fore.grey_42}Linking to:{Style.reset}", name)
         dstFile: FileNode = self.nameRegistry.lookup(name)
         dstFile.makePublic()  # FixMe: Circular links can make pages public.
 
         dstFileName = dstFile.fileName
-        if isinstance(dstFile.page, NonMd):
-            dstFileName = dstFile.page.rectifiedFileName
-        elif isinstance(dstFile.page, Md):
+        if isinstance(dstFile, NonMd):
+            dstFileName = dstFile.rectifiedFileName
+        elif isinstance(dstFile, Md):
             dstFileName = (
                 dstFile.realName
                 # Add a "/" trailing slash if arg requests it
@@ -75,15 +73,14 @@ class Content:
                 relativePath.append("..")
         for p in remainingPath:
             relativePath.append(p)
-        if isinstance(srcFile.page, Md):
+        if isinstance(srcFile, Md):
             relativePath = [".."] + relativePath
 
         relativePathStr = os.path.join("", *relativePath)
 
         return relativePathStr
 
-    def invokePyPage(self, fileNode: FileNode, env: dict[str, Any]) -> None:
-        assert fileNode.page is not None
+    def invokePyPage(self, fileNode: PyPageNode, env: dict[str, Any]) -> None:
         print(f"{Fore.gold_1}Processing:{Style.reset}", fileNode.fullPath)
         env = env.copy()
 
@@ -91,10 +88,10 @@ class Content:
         env |= {"file": fileNode}
 
         toProcessFurther: str
-        if isinstance(fileNode.page, (Md, NonMd)):
-            toProcessFurther = readfile(fileNode.absoluteFilePath)
+        if isinstance(fileNode, (Md, NonMd)):
+            toProcessFurther = Fs.readfile(fileNode.absoluteFilePath)
         else:
-            raise AltezaException(f"{fileNode} pyPage attribute is invalid.")
+            raise AltezaException(f"{fileNode} Unsupported type of PyPageNode.")
 
         # Inject link
         def link(name: str) -> str:
@@ -102,20 +99,18 @@ class Content:
 
         env |= {"link": link}
 
-        if isinstance(fileNode.page, PageNode):
-            lastUpdatedDatetime = fileNode.page.lastUpdated
-            # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
-            lastUpdated = lastUpdatedDatetime.strftime("%Y %b %-d at %-H:%M %p")
-            env |= {"lastUpdatedDatetime": lastUpdatedDatetime}
-            env |= {"lastUpdated": lastUpdated}
-        if isinstance(fileNode.page, Md) and fileNode.page.draftDate is not None:
-            env |= {"ideaDate": fileNode.page.draftDate}
+        env |= {"lastUpdatedDatetime": fileNode.lastUpdated}
+        # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
+        env |= {"lastUpdated": fileNode.lastUpdated.strftime("%Y %b %-d at %-H:%M %p")}
+
+        if isinstance(fileNode, Md):
+            env |= {"ideaDate": fileNode.ideaDate}
 
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)
 
         # Perform Markdown processing
-        if isinstance(fileNode.page, Md):
+        if isinstance(fileNode, Md):
             mdResult = Md.processMarkdown(pyPageOutput)
             env.update(mdResult.metadata)
             pyPageOutput = mdResult.html
@@ -126,7 +121,7 @@ class Content:
             elif env["public"] is False:
                 fileNode.shouldPublish = False
 
-        if isinstance(fileNode.page, Md):
+        if isinstance(fileNode, Md):
             print(
                 f"  {Fore.purple_3}Applying template...{Style.reset}"
             )  # TODO (see ideas.md)
@@ -136,7 +131,7 @@ class Content:
             pyPageOutput = pypage(templateHtml, env | {"body": pyPageOutput})
             self.linkDepth = 2
 
-        fileNode.pyPageOutput = pyPageOutput
+        fileNode.setPyPageOutput(pyPageOutput)
 
     def process(self) -> None:
         def walk(node: DirNode, env: dict[str, Any]) -> None:
@@ -147,12 +142,12 @@ class Content:
 
             # Run a __config__.py file, if one exists.
             configEnv = env.copy()
-            if config_py_file in (f.fileName for f in node.files):
+            if Fs.configFileName in (f.fileName for f in node.files):
                 print(
                     f"{Fore.dark_orange}Running:{Style.reset}",
-                    os.path.join(node.fullPath, config_py_file),
+                    os.path.join(node.fullPath, Fs.configFileName),
                 )
-                exec(readfile(config_py_file), configEnv)
+                exec(Fs.readfile(Fs.configFileName), configEnv)
             env |= self.getModuleVars(configEnv)
 
             # Ordering Note: We must recurse into the subdirectories first.
@@ -164,7 +159,7 @@ class Content:
             # all subdirectories have been processed so that they have access to
             # information about the subdirectories.
             for f in node.files:
-                if f.page is not None:
+                if isinstance(f, PyPageNode):
                     self.invokePyPage(f, env)
 
         initial_env = self.getBasicHelpers()
@@ -189,7 +184,7 @@ class Content:
 
     @staticmethod
     def getBasicHelpers() -> Dict[str, Any]:
-        return {"readfile": readfile, "sh": sh}
+        return {"readfile": Fs.readfile, "sh": sh}
 
     @staticmethod
     def splitPath(path: str) -> List[str]:
@@ -230,7 +225,7 @@ def run(args: Args) -> None:
         )
 
     with enterDir(args.content):
-        rootDir, nameRegistry = fsCrawl()
+        rootDir, nameRegistry = Fs.crawl()
         print(nameRegistry)
         content = Content(args, rootDir, nameRegistry)
         print("Processing...\n")
@@ -259,23 +254,21 @@ def generate(args: Args, content: Content) -> None:
 
         for fileNode in curDir.files:
             if fileNode.shouldPublish:
-                if fileNode.page is not None:
-                    assert fileNode.pyPageOutput is not None
-                    assert isinstance(fileNode.pyPageOutput, str)
-
-                    if isinstance(fileNode.page, Md):
+                if isinstance(fileNode, PyPageNode):
+                    if isinstance(fileNode, Md):
                         os.mkdir(fileNode.realName)
                         with enterDir(fileNode.realName):
                             with open("index.html", "w", encoding="utf-8") as pageHtml:
-                                pageHtml.write(fileNode.pyPageOutput)
-                    elif isinstance(fileNode.page, NonMd):
-                        fileName = fileNode.page.rectifiedFileName
+                                pageHtml.write(fileNode.getPyPageOutput())
+
+                    elif isinstance(fileNode, NonMd):
+                        fileName = fileNode.rectifiedFileName
                         if os.path.exists(fileName):
                             raise AltezaException(
                                 f"File {fileName} already exists, and conflicts with {fileNode}."
                             )
                         with open(fileName, "w", encoding="utf-8") as nonMdPage:
-                            nonMdPage.write(fileNode.pyPageOutput)
+                            nonMdPage.write(fileNode.getPyPageOutput())
 
                     else:
                         raise AltezaException(
