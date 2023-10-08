@@ -10,6 +10,7 @@ download_url = "%s/archive/v%s.tar.gz" % (repo_url, version)
 setup(
     name=name,
     version=version,
+    python_requires=">=3.10",
     description="Super-flexible Static Site Generator",
     # Ref: https://packaging.python.org/en/latest/discussions/install-requires-vs-requirements/
     install_requires=[
@@ -36,7 +37,7 @@ setup(
         "console_scripts": [f"{name}=alteza.__main__:main"],
     },
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: Content Management System",
