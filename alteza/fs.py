@@ -96,15 +96,15 @@ class FileNode(FsNode):
             rectifiedParentDirName: str = self.getParentDir().getRectifiedName()
             return rectifiedParentDirName
 
-        else:
-            if isinstance(self, Md) or (
-                isinstance(self, NonMd) and self.extension == ".html"
-            ):
-                return self.realName
-            elif isinstance(self, NonMd):
-                return self.rectifiedFileName
-            else:
-                return self.fileName
+        if isinstance(self, Md) or (
+            isinstance(self, NonMd) and self.extension == ".html"
+        ):
+            return self.realName
+
+        if isinstance(self, NonMd):
+            return self.rectifiedFileName
+
+        return self.fileName
 
     def colorize(self, r: str) -> str:
         if colored_logs:
