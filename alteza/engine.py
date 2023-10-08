@@ -43,9 +43,9 @@ class Content:
 
         self.linkDepth: Union[Literal[2], Literal[4]] = 2
 
-    def link(self, srcFile: PyPageNode, name: str) -> str:
-        print(" " * self.linkDepth + f"{Fore.grey_42}Linking to:{Style.reset}", name)
-        dstFile: FileNode = self.nameRegistry.lookup(name)
+    def linkNode(self, srcFile: PyPageNode, dstFile: FileNode) -> str:
+        dstName = dstFile.getLinkName()
+        print(" " * self.linkDepth + f"{Fore.grey_42}Linking to:{Style.reset}", dstName)
         dstFile.makePublic()  # FixMe: Circular links can make pages public.
 
         dstFileName = dstFile.fileName
@@ -80,6 +80,10 @@ class Content:
 
         return relativePathStr
 
+    def link(self, srcFile: PyPageNode, name: str) -> str:
+        dstFile: FileNode = self.nameRegistry.lookup(name)
+        return self.linkNode(srcFile, dstFile)
+
     def invokePyPage(self, fileNode: PyPageNode, env: dict[str, Any]) -> None:
         print(f"{Fore.gold_1}Processing:{Style.reset}", fileNode.fullPath)
         env = env.copy()
@@ -93,11 +97,14 @@ class Content:
         else:
             raise AltezaException(f"{fileNode} Unsupported type of PyPageNode.")
 
-        # Inject link
         def link(name: str) -> str:
             return self.link(fileNode, name)
 
+        def linkNode(dstFile: FileNode) -> str:
+            return self.linkNode(fileNode, dstFile)
+
         env |= {"link": link}
+        env |= {"linkNode": linkNode}
 
         env |= {"lastUpdatedDatetime": fileNode.lastUpdated}
         # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430

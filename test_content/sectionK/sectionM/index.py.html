@@ -17,7 +17,7 @@ public = True
     {% for file in dir.files if file.baseName != '__config__' %}
     {% if file.realName != 'index' %} <!-- FIXME / TODO -->
     <li>
-        <a href="{{ link(file.realName) }}">
+        <a href="{{ linkNode(file) }}">
             {{file.realName}}
         </a>
     </li>
