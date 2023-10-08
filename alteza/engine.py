@@ -33,17 +33,16 @@ class Args(Tap):  # pyre-ignore[13]
 
 
 class Content:
-    def __init__(
-        self, args: Args, rootDir: DirNode, nameRegistry: NameRegistry
-    ) -> None:
+    def __init__(self, args: Args, fs: Fs) -> None:
         self.args = args
-        self.rootDir: DirNode = rootDir
-        self.nameRegistry = nameRegistry
+        self.rootDir: DirNode = fs.rootDir
+        self.nameRegistry = fs.nameRegistry
         self.fixSysPath()
 
         self.linkDepth: Union[Literal[2], Literal[4]] = 2
 
-    def linkNode(self, srcFile: PyPageNode, dstFile: FileNode) -> str:
+    def linkObj(self, srcFile: PyPageNode, dstFile: FileNode) -> str:
+        assert isinstance(dstFile, FileNode)
         dstName = dstFile.getLinkName()
         print(" " * self.linkDepth + f"{Fore.grey_42}Linking to:{Style.reset}", dstName)
         dstFile.makePublic()  # FixMe: Circular links can make pages public.
@@ -82,7 +81,7 @@ class Content:
 
     def link(self, srcFile: PyPageNode, name: str) -> str:
         dstFile: FileNode = self.nameRegistry.lookup(name)
-        return self.linkNode(srcFile, dstFile)
+        return self.linkObj(srcFile, dstFile)
 
     def invokePyPage(self, fileNode: PyPageNode, env: dict[str, Any]) -> None:
         print(f"{Fore.gold_1}Processing:{Style.reset}", fileNode.fullPath)
@@ -100,11 +99,11 @@ class Content:
         def link(name: str) -> str:
             return self.link(fileNode, name)
 
-        def linkNode(dstFile: FileNode) -> str:
-            return self.linkNode(fileNode, dstFile)
+        def linkObj(dstFile: FileNode) -> str:
+            return self.linkObj(fileNode, dstFile)
 
         env |= {"link": link}
-        env |= {"linkNode": linkNode}
+        env |= {"linkObj": linkObj}
 
         env |= {"lastUpdatedDatetime": fileNode.lastUpdated}
         # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
@@ -234,7 +233,7 @@ def run(args: Args) -> None:
     with enterDir(args.content):
         fs = Fs()
         print(fs.nameRegistry)
-        content = Content(args, fs.rootDir, fs.nameRegistry)
+        content = Content(args, fs)
         print("Processing...\n")
         content.process()
         print("\nSuccessfully completed processing.\n")
