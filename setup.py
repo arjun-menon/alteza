@@ -1,6 +1,6 @@
 from setuptools import setup
 
-version = "0.7.3"
+version = "0.7.4"
 
 name = "alteza"
 
