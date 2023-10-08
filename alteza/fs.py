@@ -17,7 +17,7 @@ from typing import (
 )
 from colored import Style, Fore  # type: ignore
 
-coloredLogs = True
+colored_logs = True
 
 
 class FsNode:
@@ -38,7 +38,7 @@ class FsNode:
         return self.colorize(self.fullPath)
 
     def colorize(self, r: str) -> str:
-        if coloredLogs:
+        if colored_logs:
             if self.shouldPublish:
                 r = f"{Style.bold}{Fore.spring_green_2b}{r}{Style.reset}"
         return r
@@ -91,7 +91,7 @@ class FileNode(FsNode):
         self.realName: str = self.baseName  # to be overwritten selectively
 
     def colorize(self, r: str) -> str:
-        if coloredLogs:
+        if colored_logs:
             if isinstance(self, PyPageNode) is not None and self.shouldPublish:
                 r = f"{Fore.spring_green_1}{r}{Style.reset}"
             elif isinstance(self, Md):
