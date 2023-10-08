@@ -90,6 +90,22 @@ class FileNode(FsNode):
         self.baseName: str = baseName
         self.realName: str = self.baseName  # to be overwritten selectively
 
+    def getLinkName(self):
+        if self.realName == "index" and (self.extension in (".md", ".html")):
+            # Index pages (i.e. `index.md` or `index[.py].html` files):
+            rectifiedParentDirName: str = self.getParentDir().getRectifiedName()
+            return rectifiedParentDirName
+
+        else:
+            if isinstance(self, Md) or (
+                isinstance(self, NonMd) and self.extension == ".html"
+            ):
+                return self.realName
+            elif isinstance(self, NonMd):
+                return self.rectifiedFileName
+            else:
+                return self.fileName
+
     def colorize(self, r: str) -> str:
         if colored_logs:
             if isinstance(self, PyPageNode) is not None and self.shouldPublish:
@@ -280,43 +296,22 @@ class NonMd(PyPageNode):
 
 class NameRegistry:
     def __init__(self, root: DirNode, skipForRegistry: Callable[[str], bool]) -> None:
-        self.allFiles: Dict[str, FileNode] = {}
-        self.skipForRegistry = skipForRegistry
-
         allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
 
-        def record(fileNode: FileNode) -> None:
-            if fileNode.realName == "index" and (
-                fileNode.extension in (".md", ".html")
-            ):
-                # Index pages (i.e. `index.md` or `index[.py].html` files):
-                rectifiedParentDirName: str = fileNode.getParentDir().getRectifiedName()
-                allFilesMulti[rectifiedParentDirName].add(fileNode)
-
-            else:
-                if isinstance(fileNode, Md) or (
-                    isinstance(fileNode, NonMd) and fileNode.extension == ".html"
-                ):
-                    allFilesMulti[fileNode.realName].add(fileNode)
-                elif isinstance(fileNode, NonMd):
-                    allFilesMulti[fileNode.rectifiedFileName].add(fileNode)
-                else:
-                    allFilesMulti[fileNode.fileName].add(fileNode)
-
         def walk(node: DirNode) -> None:
-            for f in node.files:
-                if not self.skipForRegistry(f.fileName):
-                    record(f)
+            for fileNode in node.files:
+                if not skipForRegistry(fileNode.fileName):
+                    allFilesMulti[fileNode.getLinkName()].add(fileNode)
             for d in node.subDirs:
                 walk(d)
 
         walk(root)
 
+        self.allFiles: Dict[str, FileNode] = {}
         for name, fileNodes in allFilesMulti.items():
             assert len(fileNodes) >= 1
             if len(fileNodes) > 1:
                 self.errorOut(name, fileNodes)
-
             self.allFiles[name] = fileNodes.pop()
 
     def lookup(self, name: str) -> FileNode:
