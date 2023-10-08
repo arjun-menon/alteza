@@ -90,7 +90,7 @@ class FileNode(FsNode):
         self.baseName: str = baseName
         self.realName: str = self.baseName  # to be overwritten selectively
 
-    def getLinkName(self):
+    def getLinkName(self) -> str:
         if self.realName == "index" and (self.extension in (".md", ".html")):
             # Index pages (i.e. `index.md` or `index[.py].html` files):
             rectifiedParentDirName: str = self.getParentDir().getRectifiedName()
