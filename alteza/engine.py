@@ -36,7 +36,7 @@ class Content:
     def __init__(self, args: Args, fs: Fs) -> None:
         self.args = args
         self.rootDir: DirNode = fs.rootDir
-        self.nameRegistry = fs.nameRegistry
+        self.nameRegistry: NameRegistry = fs.nameRegistry
         self.fixSysPath()
 
         self.linkDepth: Union[Literal[2], Literal[4]] = 2
