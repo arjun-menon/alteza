@@ -3,11 +3,7 @@ Flexible Static Site Generator
 ------------------------------
 
 #### Ideas...
-* Next up:
-  * Fix multi index
-  * Implement --seed
-  * Support index flag
-  * Fix circular (low priority?)
+* Implement --seed for seeding the initial environment. 
 * Require full path when there is a name registry name conflict?
 * Need to have dev dependencies listed somewhere separately somehow, to avoid pulling needless deps when users install.
 * Move support with a root-level `move.json` file and `--move` file. Auto-generating a redirect page, with a built-in redirect HTML template that can be overriden with a user-provided template.
@@ -15,7 +11,7 @@ Flexible Static Site Generator
   * One more minor thing: figure out whether to call it `layout` or ` template`.
 * Add a `dateTimeFormat` option, and add a `lastUpdated` which uses it to transform `lastUpdatedDatetime` into a pretty string.
 * (For the far future, for when a site starts taking in the order 5 minutes or more to generate; Strictly An Site Generation Speed Optimization): `__skip_if_no_git_diff__: True` in `__config.py__`: Provided an "old output" reference exists (e.g. a `gh-pages`-like branch on the repo); Skip processing a subdirectory if the `git diff` for that directory between the current commit and the previous commit indicates that nothing has changed, and simply retain the contents of the existing output directory.
-* An `index` bool (that is set to `True` by default on pages with a `realBasename` of `index) which causes it to processed after all other files have been processed.
+* Index Flag: An `index` bool (that is set to `True` by default on pages with a `realBasename` of `index) which causes it to processed after all other files have been processed.
 * (For the future) Optional publishing of a non-canonical copy to Medium using Medium’s Publishing API, with the canonical URLs set to point to the canonical host domain.
 * Use pip compile, to freeze package versions.
   * Don't forget to add it to dependabot.yml.
@@ -35,7 +31,7 @@ Flexible Static Site Generator
 * Development `--dev` options which turns on both `--watch` and `--serve`.
   * Maybe a WebSocket that tells the listener if a site rebuild is _in progress_.
 * Obsidian Vault internal links recognition?
-* Fix the `link` circular issue by tracing links after processing, from every `public` node.
+* Fix the `link` circular issue by tracing links after processing, from every `public` node. (low priority?)
 * Generating a "Site Structure" Mermaid output, and adding it to the GitHub Action summary, based on page links?
 * (Low value) Use some graph visualization library to draw a visual map of the website.
 * Limit pypage processing to `.py.html` (and `.md`) files.
