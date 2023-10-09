@@ -3,7 +3,15 @@ Flexible Static Site Generator
 ------------------------------
 
 #### Ideas...
-* Implement --seed for seeding the initial environment. 
+* Next up:
+  * Rectify `linkName` (if necessary).
+  * In addition to the `files`  field, we'll need some other fields.
+    * Add `pages` (for Md & HTML), and `pyPages` (for all pypages).
+      * Maybe eliminate `Page` node, and merge the `lastUpdated` feature to `FileNode`, since `Page` doesn't really make sense as a parent class of `NonMd`.
+    * Enrich `FileNode`, `PyPageNode`, etc., with any other information that might be helpful (e.g. the page's output).
+      * Enhance `FileNode` with the page's title? (What about plain HTML pages -- is BeautifulSoup-based title extraction warranted here?)
+  * Implement --seed for seeding the initial environment.
+  * Obsidian Vault recognition.
 * Require full path when there is a name registry name conflict?
 * Need to have dev dependencies listed somewhere separately somehow, to avoid pulling needless deps when users install.
 * Move support with a root-level `move.json` file and `--move` file. Auto-generating a redirect page, with a built-in redirect HTML template that can be overriden with a user-provided template.
