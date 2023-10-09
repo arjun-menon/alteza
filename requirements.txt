@@ -8,7 +8,7 @@ colored==2.2.3
     # via alteza (setup.py)
 docstring-parser==0.15
     # via typed-argument-parser
-markdown==3.4.4
+markdown==3.5
     # via alteza (setup.py)
 mypy-extensions==1.0.0
     # via typing-inspect
