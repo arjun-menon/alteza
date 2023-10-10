@@ -12,6 +12,7 @@ Flexible Static Site Generator
       * Enhance `FileNode` with the page's title? (What about plain HTML pages -- is BeautifulSoup-based title extraction warranted here?)
   * Implement --seed for seeding the initial environment.
   * Obsidian Vault recognition.
+  * Auto site gen symlink swap. Have a `site-gen-output` directory. Gen output to a time-stamped directory inside it, e.g. `site-gen-2023-11-15-HH-MM-milliseconds`. Create a `current` symlink inside the `site-gen-output` directory that points to it. If a `current` already exists, make a copy of it called `previous` (overwriting any old `previous`). Then, create `current` (overwriting, if necessary). But, before overwriting an existing `previous`, get the directory it points, and `shutil.rmtree` that directory. Thus, outside use can simply be achieved by pointing to `site-gen-output/output`.
 * Require full path when there is a name registry name conflict?
 * Need to have dev dependencies listed somewhere separately somehow, to avoid pulling needless deps when users install.
 * Move support with a root-level `move.json` file and `--move` file. Auto-generating a redirect page, with a built-in redirect HTML template that can be overriden with a user-provided template.
