@@ -25,6 +25,9 @@ from .fs import (
 class Args(Tap):  # pyre-ignore[13]
     content: str  # Directory to read the input content from.
     output: str  # Directory to send the output to. WARNING: This will be deleted.
+    delete_output_dir_if_exists: bool = (
+        False  # Delete output directory, if it already exists. (TODO)
+    )
     copy_assets: bool = False  # Copy assets instead of symlinking to them
     trailing_slash: bool = (
         False  # Include a trailing slash for links to markdown page directories
