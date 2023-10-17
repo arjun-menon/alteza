@@ -127,7 +127,7 @@ pyre check  # should have zero errors as well
 pyright alteza  # should have zero errors also
 pytype alteza  # should have zero errors too
 ```
-Or, all at once with: `mypy alteza ; pyre check ; pyright alteza ; pytype alteza ; pyflakes alteza`.
+Or, all at once with: `mypy alteza ; pyflakes alteza ; pyre check ; pyright alteza ; pytype alteza`. Pytype is pretty slow, so feel free to omit it.
 
 #### Linting
 Linting policy is very strict. [Pylint](https://pylint.pycqa.org/en/latest/index.html) must issue a perfect 10/10 score, otherwise the [Pylint CI check](https://github.com/arjun-menon/alteza/actions/workflows/pylint.yml) will fail.
@@ -136,7 +136,9 @@ To test whether lints are passing, simply run:
 ```
 pylint -j 0 alteza
 ```
-Of course, when it makes sense, lints are suppressed next to the relevant line, in code. Also, unlike typical Python code, the naming convention generally-followed in this codebase is `camelCase`. Pylint checks have been mostly disabled for names.
+To run it along with all the type checks (excluding `pytype`), just run: `mypy alteza ; pyre check ; pyright alteza ; pyflakes alteza ; pylint -j 0 alteza`. I run this often.
+
+Of course, when it makes sense, lints should be suppressed next to the relevant line, in code. Also, unlike typical Python code, the naming convention generally-followed in this codebase is `camelCase`. Pylint checks for names have mostly been disabled.
 
 ### Dependencies
 
