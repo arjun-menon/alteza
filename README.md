@@ -42,9 +42,7 @@ Try running `alteza -h` to see the command-line options available.
     * Markdown Files:
         * Markdown files are first processed to have their "front matter" extracted using [Meta-Data](https://python-markdown.github.io/extensions/meta_data/).
           * The first blank line or `---` ends the front matter section.
-          * The front matter is processed as YAML, and the fields are injected into the `pypage` environment.
-        * ~~The Markdown file is processed using `pypage`, with its Python environment enhanced by the YAML fields from the front matter~~.
-        * The environment dictionary after the Markdown is processed by pypage is treated as the "return value" of this `.md` file. ~~This "return value" dictionary has a `content` key added to it which maps to the `pypage` output for this `.md` file~~. 
+          * The front matter is processed as YAML, and the fields are injected into the `pypage` environment. 
         * This Markdown file is passed to a **template** specified in configuration, for a second round of processing by PyPage.
           * Templates are HTML files processed by PyPage. The PyPage-processed Markdown HTML output is passed to the template as the variable `body` variable. The template itself is executed by PyPage.
             * The template should use this `body` value via PyPage (with `{{ boydy }}` in order to render the `body`'s contents.
