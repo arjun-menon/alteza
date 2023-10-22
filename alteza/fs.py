@@ -318,7 +318,6 @@ class NameRegistry:
         if name not in self.allFiles:
             print(
                 f"Link error: `{name}` was not found in the name registry."
-                # f" The {self}"
             )
             raise AltezaException(f"Link error: {name}")
 
