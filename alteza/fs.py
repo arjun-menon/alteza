@@ -85,7 +85,7 @@ class FileNode(FsNode):
         super().__init__(parent, dirPath, fileName)
         baseName, extension = FileNode.splitFileName(fileName)
         self.absoluteFilePath: str = os.path.join(os.getcwd(), self.fullPath)
-        self.fileName: str = fileName
+        self.fileName: str = fileName  # pyright: ignore
         self.extension: str = extension
         self.baseName: str = baseName
         self.realName: str = self.baseName  # to be overwritten selectively
@@ -316,9 +316,7 @@ class NameRegistry:
 
     def lookup(self, name: str) -> FileNode:
         if name not in self.allFiles:
-            print(
-                f"Link error: `{name}` was not found in the name registry."
-            )
+            print(f"Link error: `{name}` was not found in the name registry.")
             raise AltezaException(f"Link error: {name}")
 
         return self.allFiles[name]
