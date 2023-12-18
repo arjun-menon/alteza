@@ -47,7 +47,7 @@ runs:
         alteza --content "$INPUT_PATH" --output alteza-output
 
     - name: Upload website ZIP file
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: alteza-output
         path: alteza-output
