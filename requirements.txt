@@ -4,7 +4,7 @@
 #
 #    pip-compile
 #
-colored==2.2.3
+colored==2.2.4
     # via alteza (setup.py)
 docstring-parser==0.15
     # via typed-argument-parser
