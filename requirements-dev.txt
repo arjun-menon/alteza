@@ -3,7 +3,7 @@ pylint
 pip-tools
 mypy ~= 1.7.1
 pyre-check ~= 0.9.19
-pyright ~= 1.1.340
+pyright ~= 1.1.343
 pytype ~= 2023.12.8
 pyflakes ~= 3.1.0
 types-PyYAML >= 6.0.12.12
