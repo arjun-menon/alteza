@@ -1,13 +1,15 @@
 import os
+import shutil
 import sys
 import types
-import shutil
-import sh  # type: ignore
-from tap import Tap
-from time import time_ns
 from contextlib import contextmanager
+from time import time_ns
 from typing import Generator, List, Dict, Any, Union, Literal
+
+import sh  # type: ignore
 from pypage import pypage  # type: ignore
+from tap import Tap
+
 from .fs import (
     FileNode,
     DirNode,
@@ -42,12 +44,13 @@ class Content:
         self.nameRegistry: NameRegistry = fs.nameRegistry
         self.fixSysPath()
 
-        self.linkDepth: Union[Literal[2], Literal[4]] = 2
+        self.indentSpaces: Union[Literal[2], Literal[4]] = 2
 
     def linkObj(self, srcFile: PyPageNode, dstFile: FileNode) -> str:
         assert isinstance(dstFile, FileNode)
         dstName = dstFile.getLinkName()
-        print(" " * self.linkDepth + f"{Fore.grey_42}Linking to:{Style.reset}", dstName)
+        indentSpaces = " " * self.indentSpaces
+        print(indentSpaces + f"{Fore.grey_42}Linking to:{Style.reset}", dstName)
         dstFile.makePublic()  # FixMe: Circular links can make pages public.
 
         dstFileName = dstFile.fileName
@@ -55,9 +58,9 @@ class Content:
             dstFileName = dstFile.rectifiedFileName
         elif isinstance(dstFile, Md):
             dstFileName = (
-                dstFile.realName
-                # Add a "/" trailing slash if arg requests it
-                + ("/" if self.args.trailing_slash else "")
+                    dstFile.realName
+                    # Add a "/" trailing slash if arg requests it
+                    + ("/" if self.args.trailing_slash else "")
             )
 
         srcPath = self.splitPath(srcFile.fullPath)[:-1]
@@ -132,10 +135,10 @@ class Content:
                 f"  {Fore.purple_3}Applying template...{Style.reset}"
             )  # TODO (see ideas.md)
             templateHtml = Content.getTemplateHtml(env)
-            self.linkDepth = 4
+            self.indentSpaces = 4
             # Re-process against `templateHtml` with PyPage:
             pyPageOutput = pypage(templateHtml, env | {"body": pyPageOutput})
-            self.linkDepth = 2
+            self.indentSpaces = 2
 
         fileNode.setPyPageOutput(pyPageOutput)
 
@@ -243,7 +246,7 @@ def run(args: Args) -> None:
 
     generate(args, content)
 
-    elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
+    elapsedMilliseconds = (time_ns() - startTimeNs) / 10 ** 6
     # pylint: disable=consider-using-f-string
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
 
