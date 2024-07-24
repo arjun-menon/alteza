@@ -4,14 +4,13 @@ import sys
 import types
 from contextlib import contextmanager
 from time import time_ns
-from typing import Generator, List, Dict, Any, Union, Literal
+from typing import Optional, Generator, List, Dict, Any, Union, Literal
 
 import sh  # type: ignore
 from pypage import pypage  # type: ignore
 from tap import Tap
 
 from .fs import (
-    Optional,
     FileNode,
     DirNode,
     NameRegistry,
