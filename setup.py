@@ -16,10 +16,10 @@ setup(
     install_requires=[
         # Standard dependencies:
         "pypage >= 2.0.8",
-        "markdown >= 3.4.4",
+        "markdown >= 3.6",
         "pygments >= 2.16.1",
         "pyyaml >= 6.0.1",
-        "colored >= 2.2.3",
+        "colored >= 2.2.4",
         "sh >= 2.0.6",
         "typed-argument-parser >= 1.8.1",
     ],
