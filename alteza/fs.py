@@ -35,6 +35,7 @@ class FsNode:
             else os.path.join(dirPath, fileName)
         )
         self.shouldPublish: bool = False
+        self.linksTo: List["FsNode"] = []
 
     def __repr__(self) -> str:
         return self.colorize(self.fullPath)

@@ -1,16 +1,18 @@
+import contextlib
+import itertools
 import os
 import shutil
 import sys
+import time
 import types
-from contextlib import contextmanager
-from time import time_ns
-from typing import Optional, Generator, List, Dict, Any, Union, Literal
+from typing import Optional, Generator, List, Dict, Set, Any, Union, Literal
 
 import sh  # type: ignore
 from pypage import pypage  # type: ignore
 from tap import Tap
 
 from .fs import (
+    FsNode,
     FileNode,
     DirNode,
     NameRegistry,
@@ -51,7 +53,8 @@ class Content:
         dstName = dstFile.getLinkName()
         indentSpaces = " " * self.indentSpaces
         print(indentSpaces + f"{Fore.grey_42}Linking to:{Style.reset}", dstName)
-        dstFile.makePublic()  # FixMe: Circular links can make pages public.
+        srcFile.linksTo.append(dstFile)
+        # dstFile.makePublic()  # FixMe: Circular links can make pages public.
 
         dstFileName = dstFile.fileName
         if isinstance(dstFile, NonMd):
@@ -180,6 +183,40 @@ class Content:
         initial_env = self.getBasicHelpers()
         walk(self.rootDir, initial_env)
 
+        self.makeNodesReachableFromPublicNodesPublic()
+
+    def makeNodesReachableFromPublicNodesPublic(self) -> None:
+        publicNodes: List["FsNode"] = []
+
+        def gatherPublicNodes(fsNode: FsNode) -> None:
+            if isinstance(fsNode, DirNode):
+                for dirNode in itertools.chain(fsNode.subDirs, fsNode.files):
+                    gatherPublicNodes(dirNode)
+            if fsNode.shouldPublish:
+                publicNodes.append(fsNode)
+
+        gatherPublicNodes(self.rootDir)
+
+        print("\nPublic nodes:")
+        for node in publicNodes:
+            print(node, "->", node.linksTo)
+
+        seen: Set["FsNode"] = set()
+
+        def makeReachableNodesPublic(fsNode: FsNode) -> None:
+            if fsNode in seen:
+                return
+            seen.add(fsNode)
+
+            if not fsNode.shouldPublish:
+                fsNode.makePublic()
+
+            for linkedToNode in fsNode.linksTo:
+                makeReachableNodesPublic(linkedToNode)
+
+        for node in publicNodes:
+            makeReachableNodesPublic(node)
+
     @staticmethod
     def fixSysPath() -> None:
         """
@@ -220,7 +257,7 @@ class Content:
         return template
 
 
-@contextmanager
+@contextlib.contextmanager
 def enterDir(newDir: str) -> Generator[None, None, None]:
     # https://stackoverflow.com/a/13847807/908430
     oldDir = os.getcwd()
@@ -232,7 +269,7 @@ def enterDir(newDir: str) -> Generator[None, None, None]:
 
 
 def run(args: Args) -> None:
-    startTimeNs = time_ns()
+    startTimeNs = time.time_ns()
     contentDir = args.content
     if not os.path.isdir(contentDir):
         raise AltezaException(
@@ -252,7 +289,7 @@ def run(args: Args) -> None:
 
     generate(args, content)
 
-    elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
+    elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
     # pylint: disable=consider-using-f-string
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
 
