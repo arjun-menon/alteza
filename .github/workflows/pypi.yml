@@ -43,7 +43,7 @@ jobs:
 
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/pypage
+      url: https://test.pypi.org/p/alteza
 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
@@ -68,7 +68,7 @@ jobs:
 
     environment:
       name: pypi
-      url: https://pypi.org/p/pypage
+      url: https://pypi.org/p/alteza
 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
