@@ -20,7 +20,7 @@ pyyaml==6.0.1
     # via alteza (setup.py)
 sh==2.0.6
     # via alteza (setup.py)
-typed-argument-parser==1.9.0
+typed-argument-parser==1.10.1
     # via alteza (setup.py)
 typing-extensions==4.9.0
     # via typing-inspect
