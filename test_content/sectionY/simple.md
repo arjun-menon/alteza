@@ -1,11 +1,11 @@
 Title:   My Document
 Summary: A brief description of my document.
 Authors:
-- Waylan Limberg
+- Arjun Menon
 - John Doe
-  Date: 2001-11-23 15:03:17 -5
+  Date: 2024-07-24 15:03:17 -5
   blank-value:
-  base_url: http://example.com
+  base_url: http://arjun-menon.com
   public: true
 ---
 
