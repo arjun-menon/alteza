@@ -34,48 +34,83 @@ Try running `alteza -h` to see the command-line options available.
 
 2. By default, nothing is copied/published to the generated site.
     * A file must explicitly indicate using a `public: true` variable/field that it is to be published.
-      * So directories with no public files, are non-existent in the generated site.
+      * Therefore, directories with no public files do not exist in the generated site.
     * Files _reachable_ from marked-as-public files will also be publicly accessible.
       * Here, reachability is discovered when a provided `link` function is used to link to other files.
 
-3. There are two kinds of files that are subject to processing with [PyPage](https://github.com/arjun-menon/pypage): Markdown files (ending with `.md`) and any file with a `.py` before its actual extension.
-    * Markdown Files:
-        * Markdown files are first processed to have their "front matter" extracted using [Meta-Data](https://python-markdown.github.io/extensions/meta_data/).
-          * The first blank line or `---` ends the front matter section.
-          * The front matter is processed as YAML, and the fields are injected into the `pypage` environment. 
-        * This Markdown file is passed to a **template** specified in configuration, for a second round of processing by PyPage.
-          * Templates are HTML files processed by PyPage. The PyPage-processed Markdown HTML output is passed to the template as the variable `body` variable. The template itself is executed by PyPage.
-            * The template should use this `body` value via PyPage (with `{{ boydy }}` in order to render the `body`'s contents.
-          * (See more on configuration files in the next section.)
-          * The template is defined using a `template` variable declared in a `__config__.py` file.
-          * The `template`'s value must be the entire contents of a template HTML file. A convenience function `readfile` is provided for this. So you can write `template = readfile('some_template.html')` in a config file.
-          * Templates may be overriden in descendant `__config__.py` files, or in the Markdown _**itself**_ using a PyPage multiline code tag (not inline code tag).
-        * Markdown files result in **_a directory_**, with an `index.html` file containing the Markdown's output.
-    * Other Dynamic Files (_i.e. any file with a `.py` before the last `.` in its file name_):
-      * These files are processed with PyPage _once_ with no template application step afterward.
-    * Other content files are not read. They are _selectively_ either **symlink**ed or **copied**.
+3. All file and directory names, except for index page files, _at all depth levels_ must be unique. This is to simplify use of the `link(name)` function. With unique file and directory names, one can simply link to a file or directory with just its name, without needing to disambiguate a non-unique name with its path. Note: Directories can only be linked to if the directory contains an index page.
 
-4. Python Environment and Configuration:
-   * _Note:_ Python code in both `.md` and other `.py.*` files are run using Python's built-in [`exec`](https://docs.python.org/3/library/functions.html#exec) (and [`eval`](https://docs.python.org/3/library/functions.html#eval)) functions, and when they're run, we passed in a dictionary for their `globals` argument. We call that dict the **environment**, or `env`.
-   * Configuration is done through file(s) called `__config__.py`.
-     * First, we recursively go through all directories top-down.
-     * At each directory (descending downward), we execute an `__config__.py` file, if one is present. After
-   execution, we absorb any variables in it that do not start with a `_` into the `env` dict.
-       * This behavior cna be used to override values. For example a top-level directory can define a `default_template`, which can then be overriden by inner directories.
-   * The deepest `.md`/`.py.*` files get executed first. After it executes, we check if a `env` contains a field `public` that is set as `True`. If it does, we mark that file for publication. Other than recording the value of `public` after each dynamic file is executed, any modification to `env` made by a dynamic file are discarded (and not absorbed, unlike with `__config__.py`).
-     * I would recommend not using `__config__.py` to set `public` as `True`, as that would make the entire directory and all its descendants public (unless that behavior is exactly what is desired). Reachability with `link` (described below) is, in my opinion, a better way to make _only reachable_ content public.
+4. There are two kinds of files: **static asset** files, and **PyPage** (i.e. dynamic *template* or *content*) files. PyPage files get processed by the [PyPage](https://github.com/arjun-menon/pypage) template engine.
 
-5. Name Registry and `link`.
-    * The name of every file in the input content is stored in a "name registry" of sorts that's used by `link`.
-      * Currently, names, without their file extension, have to be unique across input content. This might change in the future.
-      * The Name Registry will error out if it encounters any non-unique names. (I understand this is a significant limitation, so I might support marking this simply opt-in behavior with a `--unique` flag in the future.)
-    * Any non-dynamic content file that has been `link`-ed to is marked for publication (i.e. copying or symlinking).
-    * A Python function named `link` is injected into the top level `env`.
-      * This function can be used to get relative links to any other file. `link` will automatically determine & return the relative path to a file.
-        * For example, one can do `<a href="{{link('some-other-blog-post')}}">`, and the generated site will have a relative link to it (i.e. to its directory if a Markdown file, and to the file itself otherwise).
-      * Reachability of files is determined using this function, and unreachable files will be treated as non-public (and thus not exist in the generated site).
-    * Extensions may be omitted for dynamic files (i.e. `.md` for Markdown, and `.py*` for any file with `.py` before its extension).
-      * I.e. one can write both `link('magic-turtle')` or `link('magic-turtle.md')` for the file `magic-turtle.md`, and `link('pygments-styles')` or `link('pygments-styles.py.css')` for the file `pygments-styles.py.css`.
+5. **Static asset** files are **_not_** read by Alteza. They are _selectively_ either **symlink**ed or **copied** to the output directory (you can choose which, with a command-line argument). Here, _selectively_ means that they are exposed in the output directory _only if they are linked to_ from a PyPage file using a special Alteza-provided `link(name)` function.
+
+6. PyPage files are determined based on their file name extension. They are of two kinds:
+   1. **Markdown** files (i.e. files ending with `.md`).
+   2. Any file with a `.py` before its actual extension (_i.e. any file with a `.py` before the last `.` in its file name_). These are **Non-Markdown Pypage files**.
+
+7. There is an inherited "environment"/`env` (this is just a collection of Python variables) that is injected into the lexical scope of every PyPage file, before it is processed/executed by PyPage. This `env` is a little different for each PyPage invocation--a copy of the inherited is `env` is created for each PyPage file. More on `env` in a later point below.
+
+8. **Non-Markdown Pypage files** are simply processed with PyPage as-is (and there is no template application step for non-Markdown PyPage files). The `.py` part is removed from their name, and the output/result is copied to the generated site.
+
+9. **Markdown** files:
+    1. Markdown files are first processed with PyPage, with a copy of the inherited `env`.
+
+    2. After this, the Markdown file is converted to HTML using the [Python-Markdown](https://python-markdown.github.io/reference/) library.
+
+    3. Third, they have their "front matter" (if any) extracted using the Python-Markdown's library [Meta-Data](https://python-markdown.github.io/extensions/meta_data/) extension/feature.
+       1. The first line with a `---` in the Markdown file ends the front matter section.
+       2. The front matter is processed by Alteza as YAML using the [PyYAML](https://pyyaml.org/wiki/PyYAML).
+
+    4. The fields from the YAML front matter the fields are injected into the `env`/environment.
+
+    5. The HTML is injected into a `content` variable in `env`, and this `env` is passed to a **template** specified _in configuration_, for a second round of processing by PyPage. (Note: PyPage here is invoked on the template.)
+
+       1. Templates are HTML files processed by PyPage. The PyPage-processed Markdown HTML output is passed to the template as the `content` variable. The template itself is then executed by PyPage.
+
+       2. The template should use this `content` value via PyPage (with `{{ content }}`) in order to inject the `content` into itself.
+
+       3. The template is defined using a `template` variable declared in a `__config__.py` file. (More on configuration files in a later point below.)
+
+       4. The `template`'s value must be the entire contents of a template PyPage-HTML file. A convenience function `readfile` is provided for this. So you can write something like `template = readfile('some_template.html')` in a config file.
+
+       5. Templates may be overriden in descendant `__config__.py` files. Or, may be overridden in the Markdown file _**itself**_ using a PyPage multiline code tag (not an inline code tag).
+
+   6. Markdown files result in **_a directory_** with the base name (_i.e. without the `.md` extension_), with an `index.html` file containing the Markdown's output.
+
+10. The **Environment** (`env`) and **Configuration** (`__config__.py`, etc.):
+
+    1. _Note:_ Python code in both `.md` and other `.py.*` files are run using Python's built-in [`exec`](https://docs.python.org/3/library/functions.html#exec) (and [`eval`](https://docs.python.org/3/library/functions.html#eval)) functions, and when they're run, we passed in a dictionary for their `globals` argument. We call that dict the **environment**, or `env`.
+
+    2. Configuration is done through file(s) called `__config__.py`.
+
+       1. First, we recursively go through all directories top-down.
+
+       2. At each directory (descending downward), we execute an `__config__.py` file, if one is present. After
+         execution, we absorb any variables in it that do not start with a `_` into the `env` dict.
+         * This behavior cna be used to override values. For example a top-level directory can define a `default_template`, which can then be overriden by inner directories.
+
+    3. The deepest `.md`/`.py.*` files get executed first. After it executes, we check if a `env` contains a field `public` that is set as `True`. If it does, we mark that file for publication. Other than recording the value of `public` after each dynamic file is executed, any modification to `env` made by a dynamic file are discarded (and not absorbed, unlike with `__config__.py`).
+       * I would not recommend using `__config__.py` to set `public` as `True`, as that would make the entire directory and all its descendants public (unless that behavior is exactly what is desired). Reachability with `link` (described below) is, in my opinion, a better way to make _only reachable_ content publicly exposed.
+
+11. The **Name Registry** and the **`link`** function.
+
+    1. The name of every file in the input content is stored in a "name registry" of sorts that's used by `link`.
+
+       1. Currently, names, without their file extension, have to be unique across input content. This might change in the future.
+
+       2. The Name Registry will error out if it encounters any non-unique names. (I understand this is a significant limitation, so I might support marking this simply opt-in behavior with a `--unique` flag in the future.)
+
+    2. Any non-dynamic content file that has been `link`-ed to is marked for publication (i.e. copying or symlinking).
+
+    3. A Python function named `link` is injected into the top level `env`.
+
+       1. This function can be used to get relative links to any other file. `link` will automatically determine and return the relative path to a file.
+          * For example, one can do `<a href="{{link('some-other-blog-post')}}">`, and the generated site will have a relative link to it (i.e. to its directory if a Markdown file, and to the file itself otherwise).
+
+       2. Reachability of files is determined using this function, and unreachable files will be treated as non-public (and thus not exist in the generated site).
+
+    4. Extensions may be omitted for dynamic files (i.e. `.md` for Markdown, and `.py*` for any file with `.py` before its extension).
+       * I.e. one can write both `link('magic-turtle')` or `link('magic-turtle.md')` for the file `magic-turtle.md`, and `link('pygments-styles')` or `link('pygments-styles.py.css')` for the file `pygments-styles.py.css`.
 
 ### Usage, Testing & Development
 
