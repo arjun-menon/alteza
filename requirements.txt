@@ -6,7 +6,7 @@
 #
 colored==2.2.4
     # via alteza (setup.py)
-docstring-parser==0.15
+docstring-parser==0.16
     # via typed-argument-parser
 markdown==3.6
     # via alteza (setup.py)
