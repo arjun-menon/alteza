@@ -169,13 +169,11 @@ class Content:
             # Ordering Note: Files in the current directory must be processed after
             # all subdirectories have been processed so that they have access to
             # information about the subdirectories.
-            indexFile: Optional[FileNode] = next(
-                filter(lambda f: f.isIndex(), dirNode.files), None
-            )
-            for f in filter(
-                lambda f: not f.isIndex() and isinstance(f, PyPageNode), dirNode.files
-            ):
-                self.invokePyPage(f, env)
+            indexFilter = filter(lambda f: f.isIndex(), dirNode.files)
+            indexFile: Optional[FileNode] = next(indexFilter, None)
+            for f in filter(lambda f: not f.isIndex(), dirNode.files):
+                if isinstance(f, PyPageNode):
+                    self.invokePyPage(f, env)
             if indexFile is not None and isinstance(indexFile, PyPageNode):
                 self.invokePyPage(indexFile, env)
 

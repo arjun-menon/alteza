@@ -217,7 +217,7 @@ class PyPageNode(PageNode):
     def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
         self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
-        self.env: dict[str, Any] = dict()
+        self.env: dict[str, Any] = {}
 
     def setPyPageOutput(self, output: str) -> None:
         self._pyPageOutput = output
