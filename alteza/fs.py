@@ -5,6 +5,7 @@ from datetime import date, datetime
 from subprocess import check_output, CalledProcessError, STDOUT
 from typing import (
     Optional,
+    Any,
     List,
     Dict,
     DefaultDict,
@@ -91,11 +92,13 @@ class FileNode(FsNode):
         self.baseName: str = baseName
         self.realName: str = self.baseName  # to be overwritten selectively
 
+    def isIndex(self) -> bool:
+        # Index pages are `index.md` or `index[.py].html` files.
+        return self.realName == "index" and (self.extension in (".md", ".html"))
+
     def getLinkName(self) -> str:
-        if self.realName == "index" and (self.extension in (".md", ".html")):
-            # Index pages (i.e. `index.md` or `index[.py].html` files):
-            rectifiedParentDirName: str = self.getParentDir().getRectifiedName()
-            return rectifiedParentDirName
+        if self.isIndex():
+            return self.getParentDir().getRectifiedName()
 
         if isinstance(self, Md) or (
             isinstance(self, NonMd) and self.extension == ".html"
@@ -107,9 +110,12 @@ class FileNode(FsNode):
 
         return self.fileName
 
+    def isPyPage(self) -> bool:
+        return isinstance(self, PyPageNode)
+
     def colorize(self, r: str) -> str:
         if colored_logs:
-            if isinstance(self, PyPageNode) is not None and self.shouldPublish:
+            if self.isPyPage() is not None and self.shouldPublish:
                 r = f"{Fore.spring_green_1}{r}{Style.reset}"
             elif isinstance(self, Md):
                 r = f"{Fore.purple_4b}{r}{Style.reset}"
@@ -211,6 +217,7 @@ class PyPageNode(PageNode):
     def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
         self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
+        self.env: dict[str, Any] = dict()
 
     def setPyPageOutput(self, output: str) -> None:
         self._pyPageOutput = output

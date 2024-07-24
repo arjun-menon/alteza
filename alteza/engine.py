@@ -11,6 +11,7 @@ from pypage import pypage  # type: ignore
 from tap import Tap
 
 from .fs import (
+    Optional,
     FileNode,
     DirNode,
     NameRegistry,
@@ -141,35 +142,42 @@ class Content:
             self.indentSpaces = 2
 
         fileNode.setPyPageOutput(pyPageOutput)
+        fileNode.env = env
 
     def process(self) -> None:
-        def walk(node: DirNode, env: dict[str, Any]) -> None:
+        def walk(dirNode: DirNode, env: dict[str, Any]) -> None:
             env = env.copy()
 
             # Enrich with current dir:
-            env |= {"dir": node}
+            env |= {"dir": dirNode}
 
             # Run a __config__.py file, if one exists.
             configEnv = env.copy()
-            if Fs.configFileName in (f.fileName for f in node.files):
+            if Fs.configFileName in (f.fileName for f in dirNode.files):
                 print(
                     f"{Fore.dark_orange}Running:{Style.reset}",
-                    os.path.join(node.fullPath, Fs.configFileName),
+                    os.path.join(dirNode.fullPath, Fs.configFileName),
                 )
                 exec(Fs.readfile(Fs.configFileName), configEnv)
             env |= self.getModuleVars(configEnv)
 
             # Ordering Note: We must recurse into the subdirectories first.
-            for d in node.subDirs:
+            for d in dirNode.subDirs:
                 with enterDir(d.dirName):
                     walk(d, env)
 
             # Ordering Note: Files in the current directory must be processed after
             # all subdirectories have been processed so that they have access to
             # information about the subdirectories.
-            for f in node.files:
-                if isinstance(f, PyPageNode):
-                    self.invokePyPage(f, env)
+            indexFile: Optional[FileNode] = next(
+                filter(lambda f: f.isIndex(), dirNode.files), None
+            )
+            for f in filter(
+                lambda f: not f.isIndex() and isinstance(f, PyPageNode), dirNode.files
+            ):
+                self.invokePyPage(f, env)
+            if indexFile is not None and isinstance(indexFile, PyPageNode):
+                self.invokePyPage(indexFile, env)
 
         initial_env = self.getBasicHelpers()
         walk(self.rootDir, initial_env)
