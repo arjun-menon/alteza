@@ -58,9 +58,9 @@ class Content:
             dstFileName = dstFile.rectifiedFileName
         elif isinstance(dstFile, Md):
             dstFileName = (
-                    dstFile.realName
-                    # Add a "/" trailing slash if arg requests it
-                    + ("/" if self.args.trailing_slash else "")
+                dstFile.realName
+                # Add a "/" trailing slash if arg requests it
+                + ("/" if self.args.trailing_slash else "")
             )
 
         srcPath = self.splitPath(srcFile.fullPath)[:-1]
@@ -246,7 +246,7 @@ def run(args: Args) -> None:
 
     generate(args, content)
 
-    elapsedMilliseconds = (time_ns() - startTimeNs) / 10 ** 6
+    elapsedMilliseconds = (time_ns() - startTimeNs) / 10**6
     # pylint: disable=consider-using-f-string
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
 

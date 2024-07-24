@@ -1,7 +1,5 @@
-import re
 import os
-import yaml
-import markdown
+import re
 from collections import defaultdict
 from datetime import date, datetime
 from subprocess import check_output, CalledProcessError, STDOUT
@@ -15,6 +13,9 @@ from typing import (
     Callable,
     NamedTuple,
 )
+
+import markdown
+import yaml
 from colored import Style, Fore  # type: ignore
 
 colored_logs = True
