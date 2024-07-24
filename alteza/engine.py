@@ -137,7 +137,7 @@ class Content:
             templateHtml = Content.getTemplateHtml(env)
             self.indentSpaces = 4
             # Re-process against `templateHtml` with PyPage:
-            pyPageOutput = pypage(templateHtml, env | {"body": pyPageOutput})
+            pyPageOutput = pypage(templateHtml, env | {"content": pyPageOutput})
             self.indentSpaces = 2
 
         fileNode.setPyPageOutput(pyPageOutput)
