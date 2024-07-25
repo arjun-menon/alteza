@@ -1,4 +1,3 @@
-public: {{ 't' + 'r' + 'u' + 'e' }}
 title: {{ title + " about a Squirrel" }}
 ---
 

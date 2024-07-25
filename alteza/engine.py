@@ -186,6 +186,11 @@ class Content:
         self._makeNodesReachableFromPublicNodesPublic()
 
     def _makeNodesReachableFromPublicNodesPublic(self) -> None:
+        if "/" in self.nameRegistry.allFiles:
+            # Make the root (/) level index page public, if it exists.
+            rootIndex = self.nameRegistry.allFiles["/"]
+            rootIndex.makePublic()
+
         publicNodes: List["FsNode"] = []
 
         def gatherPublicNodes(fsNode: FsNode) -> None:

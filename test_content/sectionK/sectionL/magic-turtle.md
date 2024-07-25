@@ -1,7 +1,6 @@
 ---
 title: A Magic Turtle
 draft: true
-public: true
 ---
 
 Magic Turtle

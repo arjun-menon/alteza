@@ -1,11 +1,7 @@
 {{
-
-import sys
 from some_helper import title_for_this_dir
 
 title = title_for_this_dir
-public = True
-
 }}
 
 <html>
@@ -25,7 +21,7 @@ public = True
     {% if file.realName != 'index' %} <!-- FIXME / TODO -->
     <li>
         <a href="{{ linkObj(file) }}">
-            {{file.env['title'] if file.isPyPage() and ('title' in file.env) else file.realName}}
+            {{file.getTitle()}}
         </a>
     </li>
     {% %}

@@ -35,7 +35,9 @@ class FsNode:
             else os.path.join(dirPath, fileName)
         )
         self.shouldPublish: bool = False
+        # These fields are populated later by engine:
         self.linksTo: List["FsNode"] = []
+        self.env: dict[str, Any] = {}
 
     def __repr__(self) -> str:
         return self.colorize(self.fullPath)
@@ -110,6 +112,11 @@ class FileNode(FsNode):
             return self.rectifiedFileName
 
         return self.fileName
+
+    def getTitle(self) -> str:
+        if "title" in self.env:
+            return self.env["title"]
+        return self.realName
 
     def isPyPage(self) -> bool:
         return isinstance(self, PyPageNode)
@@ -218,7 +225,6 @@ class PyPageNode(PageNode):
     def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
         self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
-        self.env: dict[str, Any] = {}
 
     def setPyPageOutput(self, output: str) -> None:
         self._pyPageOutput = output

@@ -1,12 +1,9 @@
+Welcome to Section L
 
-
-Hello
-
+<ol>
 {{
-public = True
-
 for file in dir.files:
-    print(file)
-
+    write('<li><a href="%s">%s</a></li>' % 
+        (linkObj(file), file.getTitle()))
 }}
-
+</ol>
