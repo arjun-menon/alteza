@@ -1,3 +1,4 @@
+import functools
 import os
 import re
 from collections import defaultdict
@@ -195,15 +196,27 @@ class AltezaException(Exception):
 
 
 class PageNode(FileNode):
-    def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
-        super().__init__(parent, dirPath, fileName)
-        # TODO/FIXME: Convert these to function calls:
-        self.lastUpdated: datetime = self.getLastUpdated(self.fullPath)
-        self.ideaDate: Optional[date] = self.getGitFileFirstAuthDate(self.fullPath)
+    default_date_format: str = "%Y %b %-d"
+    default_datetime_format: str = default_date_format + " at %-H:%M %p"
 
-    @staticmethod
-    def getLastUpdated(path: str) -> datetime:
+    def getLastModified(self, f: str = default_datetime_format) -> str:
+        # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
+        return self.lastModifiedObj.strftime(f)
+
+    def getIdeaDate(self, f: str = default_date_format) -> str:
+        ideaDate = self.getIdeaDateObj()
+        return ideaDate.strftime(f) if ideaDate else ""
+
+    def getIdeaDateObj(self) -> Optional[date]:
+        if isinstance(self, Md):
+            if self.ideaDate is not None:
+                return self.ideaDate
+        return self.gitFirstAuthDate
+
+    @functools.cached_property
+    def lastModifiedObj(self) -> datetime:
         """Get last modified date from: (a) git history, or (b) system modified time."""
+        path = self.fileName
         if PageNode.isGitRepo():
             lastUpdated = PageNode.getGitFileLastAuthDate(path)
             if lastUpdated is not None:
@@ -212,6 +225,7 @@ class PageNode(FileNode):
 
     @staticmethod
     def isGitRepo() -> bool:
+        # TODO refactor: Move this method to parent DirNode?
         try:
             check_output(["git", "status"], stderr=STDOUT).decode()
             return True
@@ -228,8 +242,9 @@ class PageNode(FileNode):
         except Exception:
             return None
 
-    @staticmethod
-    def getGitFileFirstAuthDate(path: str) -> Optional[date]:
+    @functools.cached_property
+    def gitFirstAuthDate(self) -> Optional[date]:
+        path = self.fileName
         if PageNode.isGitRepo():
             try:
                 git_output = check_output(
@@ -261,6 +276,7 @@ class Md(PyPageNode):
     def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
 
+        self.ideaDate: Optional[date] = None
         # Handle file names that start with a date:
         dateFragmentLength = len("YYYY-MM-DD-")
         if len(self.baseName) > dateFragmentLength:
@@ -268,7 +284,7 @@ class Md(PyPageNode):
             remainingBasename = self.baseName[dateFragmentLength:]
             if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}-$", dateFragment_):
                 dateFragment = dateFragment_[:-1]
-                self.ideaDate: Optional[date] = date.fromisoformat(dateFragment)
+                self.ideaDate = date.fromisoformat(dateFragment)
                 self.realName: str = remainingBasename
 
     class Result(NamedTuple):

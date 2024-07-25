@@ -111,21 +111,10 @@ class Content:
         env |= {"link": link}
         env |= {"linkObj": linkObj}
 
-        env |= {"lastUpdatedObj": pyPageNode.lastUpdated}
-        # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
-        env |= {
-            "lastUpdated": pyPageNode.lastUpdated.strftime("%Y %b %-d at %-H:%M %p")
-        }
-
-        if isinstance(pyPageNode, Md):
-            env |= {"ideaDateObj": pyPageNode.ideaDate}
-            env |= {
-                "ideaDate": (
-                    pyPageNode.ideaDate.strftime("%Y %b %-d at %-H:%M %p")
-                    if pyPageNode.ideaDate is not None
-                    else ""
-                )
-            }
+        env |= {"getLastModifiedObj": lambda: pyPageNode.lastModifiedObj}
+        env |= {"getLastModified": pyPageNode.getLastModified}
+        env |= {"getIdeaDateObj": pyPageNode.getIdeaDateObj}
+        env |= {"getIdeaDate": pyPageNode.getIdeaDate}
 
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)
