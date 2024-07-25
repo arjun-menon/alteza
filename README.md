@@ -109,8 +109,9 @@ Try running `alteza -h` to see the command-line options available.
 
        2. Reachability of files is determined using this function, and unreachable files will be treated as non-public (and thus not exist in the generated site).
 
-    4. Extensions may be omitted for dynamic files (i.e. `.md` for Markdown, and `.py*` for any file with `.py` before its extension).
-       * I.e. one can write both `link('magic-turtle')` or `link('magic-turtle.md')` for the file `magic-turtle.md`, and `link('pygments-styles')` or `link('pygments-styles.py.css')` for the file `pygments-styles.py.css`.
+    4. The extension must be omitted for dynamic PyPage files; specifically, the `.md` for Markdown, and the `.py*` for any file with `.py` before its extension.
+       * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles.css')` for the file `pygments-styles.py.css`.
+       * Directions with index files should just be referred to by the directory name. For example, the index page `about-me/hobbies/index.md` (or `about-me/hobbies/index.py.html`) should just be linked to with a `link('hobbies')`.
 
 ### Usage, Testing & Development
 

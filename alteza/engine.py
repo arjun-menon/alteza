@@ -183,9 +183,9 @@ class Content:
         initial_env = self.getBasicHelpers()
         walk(self.rootDir, initial_env)
 
-        self.makeNodesReachableFromPublicNodesPublic()
+        self._makeNodesReachableFromPublicNodesPublic()
 
-    def makeNodesReachableFromPublicNodesPublic(self) -> None:
+    def _makeNodesReachableFromPublicNodesPublic(self) -> None:
         publicNodes: List["FsNode"] = []
 
         def gatherPublicNodes(fsNode: FsNode) -> None:
