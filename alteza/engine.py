@@ -88,39 +88,41 @@ class Content:
 
         return relativePathStr
 
-    def invokePyPage(self, fileNode: PyPageNode, env: dict[str, Any]) -> None:
-        print(f"{Fore.gold_1}Processing:{Style.reset}", fileNode.fullPath)
+    def invokePyPage(self, pyPageNode: PyPageNode, env: dict[str, Any]) -> None:
+        print(f"{Fore.gold_1}Processing:{Style.reset}", pyPageNode.fullPath)
         env = env.copy()
 
         # Enrich with current file:
-        env |= {"file": fileNode}
+        env |= {"file": pyPageNode}
 
         toProcessFurther: str
-        if isinstance(fileNode, (Md, NonMd)):
-            toProcessFurther = Fs.readfile(fileNode.absoluteFilePath)
+        if isinstance(pyPageNode, (Md, NonMd)):
+            toProcessFurther = Fs.readfile(pyPageNode.absoluteFilePath)
         else:
-            raise AltezaException(f"{fileNode} Unsupported type of PyPageNode.")
+            raise AltezaException(f"{pyPageNode} Unsupported type of PyPageNode.")
 
         def link(name: str) -> str:
             dstFile: FileNode = self.nameRegistry.lookup(name)
-            return self.linkObj(fileNode, dstFile)
+            return self.linkObj(pyPageNode, dstFile)
 
         def linkObj(dstFile: FileNode) -> str:
-            return self.linkObj(fileNode, dstFile)
+            return self.linkObj(pyPageNode, dstFile)
 
         env |= {"link": link}
         env |= {"linkObj": linkObj}
 
-        env |= {"lastUpdatedObj": fileNode.lastUpdated}
+        env |= {"lastUpdatedObj": pyPageNode.lastUpdated}
         # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
-        env |= {"lastUpdated": fileNode.lastUpdated.strftime("%Y %b %-d at %-H:%M %p")}
+        env |= {
+            "lastUpdated": pyPageNode.lastUpdated.strftime("%Y %b %-d at %-H:%M %p")
+        }
 
-        if isinstance(fileNode, Md):
-            env |= {"ideaDateObj": fileNode.ideaDate}
+        if isinstance(pyPageNode, Md):
+            env |= {"ideaDateObj": pyPageNode.ideaDate}
             env |= {
                 "ideaDate": (
-                    fileNode.ideaDate.strftime("%Y %b %-d at %-H:%M %p")
-                    if fileNode.ideaDate is not None
+                    pyPageNode.ideaDate.strftime("%Y %b %-d at %-H:%M %p")
+                    if pyPageNode.ideaDate is not None
                     else ""
                 )
             }
@@ -129,18 +131,18 @@ class Content:
         pyPageOutput = pypage(toProcessFurther, env)
 
         # Perform Markdown processing
-        if isinstance(fileNode, Md):
+        if isinstance(pyPageNode, Md):
             mdResult = Md.processMarkdown(pyPageOutput)
             env.update(mdResult.metadata)
             pyPageOutput = mdResult.html
 
         if "public" in env:
             if env["public"] is True:
-                fileNode.makePublic()
+                pyPageNode.makePublic()
             elif env["public"] is False:
-                fileNode.shouldPublish = False
+                pyPageNode.shouldPublish = False
 
-        if isinstance(fileNode, Md):
+        if isinstance(pyPageNode, Md):
             print(
                 f"  {Fore.purple_3}Applying template...{Style.reset}"
             )  # TODO (see ideas.md)
@@ -150,8 +152,8 @@ class Content:
             pyPageOutput = pypage(templateHtml, env | {"content": pyPageOutput})
             self.indentSpaces = 2
 
-        fileNode.setPyPageOutput(pyPageOutput)
-        fileNode.env = env
+        pyPageNode.setPyPageOutput(pyPageOutput)
+        pyPageNode.env = env
 
     def process(self) -> None:
         def walk(dirNode: DirNode, env: dict[str, Any]) -> None:
