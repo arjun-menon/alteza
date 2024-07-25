@@ -111,12 +111,19 @@ class Content:
         env |= {"link": link}
         env |= {"linkObj": linkObj}
 
-        env |= {"lastUpdatedDatetime": fileNode.lastUpdated}
+        env |= {"lastUpdatedObj": fileNode.lastUpdated}
         # The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
         env |= {"lastUpdated": fileNode.lastUpdated.strftime("%Y %b %-d at %-H:%M %p")}
 
         if isinstance(fileNode, Md):
-            env |= {"ideaDate": fileNode.ideaDate}
+            env |= {"ideaDateObj": fileNode.ideaDate}
+            env |= {
+                "ideaDate": (
+                    fileNode.ideaDate.strftime("%Y %b %-d at %-H:%M %p")
+                    if fileNode.ideaDate is not None
+                    else ""
+                )
+            }
 
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)

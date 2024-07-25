@@ -7,6 +7,10 @@ Here's a joyful squirrel.
 
 Want to learn about a [magic turtle]({{link("magic-turtle")}})?
 
-This is ["just" a test]({{link("just_a_test")}}).
+This is [what a "megabyte" is]({{link("just_a_test")}}).
+
+This page was started on {{ideaDate}}.
+
+This page was started on {{lastUpdated}}.
 
 Back [home](..).

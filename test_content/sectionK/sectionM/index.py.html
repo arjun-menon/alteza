@@ -17,15 +17,13 @@ title = title_for_this_dir
 </h4>
 
 <ul>
-    {% for file in dir.files if file.baseName != '__config__' %}
-    {% if file.realName != 'index' %} <!-- FIXME / TODO -->
+    {% for file in dir.getPages() %}
     <li>
         <a href="{{ linkObj(file) }}">
             {{file.getTitle()}}
         </a>
     </li>
-    {% %}
-    {% %}
+    {% endfor %}
 </ul>
 
 This is the <a href="{{ link('css') }}">css</a> folder.

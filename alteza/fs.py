@@ -7,6 +7,7 @@ from typing import (
     Optional,
     Any,
     List,
+    Sequence,
     Dict,
     DefaultDict,
     Set,
@@ -78,6 +79,9 @@ class FileNode(FsNode):
                 realName = fileName[:pySubExtPos]
                 rectifiedFileName = realName + extension
                 return NonMd(realName, rectifiedFileName, parent, dirPath, fileName)
+
+        if extension == ".html":
+            return PageNode(parent, dirPath, fileName)
 
         return FileNode(parent, dirPath, fileName)
 
@@ -169,6 +173,9 @@ class DirNode(FsNode):
         # Note: if `dirName` is an empty string (""), that means we're at the root (/).
         return self.dirName if len(self.dirName) > 0 else "/"
 
+    def getPages(self) -> Sequence["PageNode"]:
+        return [f for f in self.files if (isinstance(f, PageNode) and not f.isIndex())]
+
     @staticmethod
     def _displayDir(dirNode: "DirNode", indent: int = 0) -> str:
         return (
@@ -190,7 +197,9 @@ class AltezaException(Exception):
 class PageNode(FileNode):
     def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
+        # TODO/FIXME: Convert these to function calls:
         self.lastUpdated: datetime = self.getLastUpdated(self.fullPath)
+        self.ideaDate: Optional[date] = self.getGitFileFirstAuthDate(self.fullPath)
 
     @staticmethod
     def getLastUpdated(path: str) -> datetime:
@@ -212,13 +221,25 @@ class PageNode(FileNode):
     @staticmethod
     def getGitFileLastAuthDate(path: str) -> Optional[datetime]:
         try:
-            return datetime.fromisoformat(
-                check_output(
-                    ["git", "log", "-n", "1", "--pretty=format:%aI", path]
-                ).decode()
-            )
+            git_output = check_output(
+                ["git", "log", "-n", "1", "--pretty=format:%aI", path]
+            ).decode()
+            return datetime.fromisoformat(git_output)
         except Exception:
             return None
+
+    @staticmethod
+    def getGitFileFirstAuthDate(path: str) -> Optional[date]:
+        if PageNode.isGitRepo():
+            try:
+                git_output = check_output(
+                    ["git", "log", "--reverse", "--pretty=format:%aI", path]
+                ).decode()
+                first_commit_date = git_output.splitlines()[0]
+                return datetime.fromisoformat(first_commit_date).date()
+            except Exception:
+                return None
+        return None
 
 
 class PyPageNode(PageNode):
@@ -240,7 +261,6 @@ class Md(PyPageNode):
     def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
 
-        self.ideaDate: Optional[date] = None
         # Handle file names that start with a date:
         dateFragmentLength = len("YYYY-MM-DD-")
         if len(self.baseName) > dateFragmentLength:
@@ -248,7 +268,7 @@ class Md(PyPageNode):
             remainingBasename = self.baseName[dateFragmentLength:]
             if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}-$", dateFragment_):
                 dateFragment = dateFragment_[:-1]
-                self.ideaDate = date.fromisoformat(dateFragment)
+                self.ideaDate: Optional[date] = date.fromisoformat(dateFragment)
                 self.realName: str = remainingBasename
 
     class Result(NamedTuple):
