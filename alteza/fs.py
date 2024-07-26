@@ -26,7 +26,7 @@ colored_logs = True
 
 class FsNode:
     def __init__(
-        self, parent: Optional["FsNode"], dirPath: str, fileName: Optional[str]
+        self, parent: Optional["DirNode"], dirPath: str, fileName: Optional[str]
     ) -> None:
         self.parent = parent
         self.fileName: Optional[str] = fileName
@@ -56,10 +56,17 @@ class FsNode:
     def makePublic(self) -> None:
         Fs.runOnFsNodeAndAscendantNodes(self, lambda fsNode: fsNode.setNodeAsPublic())
 
+    def isParentGitRepo(self) -> bool:
+        if self.parent is None:
+            return DirNode.isPwdGitRepo()
+        return self.parent.isInGitRepo
+
 
 class FileNode(FsNode):
     @staticmethod
-    def construct(parent: Optional[FsNode], dirPath: str, fileName: str) -> "FileNode":
+    def construct(
+        parent: Optional["DirNode"], dirPath: str, fileName: str
+    ) -> "FileNode":
         """Constructs an object of type FileNode or one of its subclasses.
         Check if fileName needs to be processed with pypage.
             If is a Md page, we return a Md object.
@@ -90,7 +97,9 @@ class FileNode(FsNode):
     def splitFileName(fileName: str) -> Tuple[str, str]:
         return os.path.splitext(fileName)
 
-    def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
+    def __init__(
+        self, parent: Optional["DirNode"], dirPath: str, fileName: str
+    ) -> None:
         """Do not use this constructor directly. Use the static method construct instead."""
         super().__init__(parent, dirPath, fileName)
         baseName, extension = FileNode.splitFileName(fileName)
@@ -150,7 +159,7 @@ class FileNode(FsNode):
 class DirNode(FsNode):
     def __init__(
         self,
-        parent: Optional[FsNode],
+        parent: Optional["DirNode"],
         dirPath: str,
         # shouldIgnore(name: str, isDir: bool) -> bool
         shouldIgnore: Callable[[str, bool], bool],
@@ -173,6 +182,20 @@ class DirNode(FsNode):
     def getRectifiedName(self) -> str:
         # Note: if `dirName` is an empty string (""), that means we're at the root (/).
         return self.dirName if len(self.dirName) > 0 else "/"
+
+    @functools.cached_property
+    def isInGitRepo(self) -> bool:
+        # We recheck if it's a git repo for each directory, in case
+        # there's a symlink to a directory outside a git repo.
+        return DirNode.isPwdGitRepo()
+
+    @staticmethod
+    def isPwdGitRepo() -> bool:
+        try:
+            check_output(["git", "status"], stderr=STDOUT).decode()
+            return True
+        except CalledProcessError:
+            return False
 
     def getPages(self) -> Sequence["PageNode"]:
         return [f for f in self.files if (isinstance(f, PageNode) and not f.isIndex())]
@@ -217,20 +240,11 @@ class PageNode(FileNode):
     def lastModifiedObj(self) -> datetime:
         """Get last modified date from: (a) git history, or (b) system modified time."""
         path = self.fileName
-        if PageNode.isGitRepo():
+        if self.isParentGitRepo():
             lastUpdated = PageNode.getGitFileLastAuthDate(path)
             if lastUpdated is not None:
                 return lastUpdated
         return datetime.fromtimestamp(os.path.getmtime(path))
-
-    @staticmethod
-    def isGitRepo() -> bool:
-        # TODO refactor: Move this method to parent DirNode?
-        try:
-            check_output(["git", "status"], stderr=STDOUT).decode()
-            return True
-        except CalledProcessError:
-            return False
 
     @staticmethod
     def getGitFileLastAuthDate(path: str) -> Optional[datetime]:
@@ -245,7 +259,7 @@ class PageNode(FileNode):
     @functools.cached_property
     def gitFirstAuthDate(self) -> Optional[date]:
         path = self.fileName
-        if PageNode.isGitRepo():
+        if self.isParentGitRepo():
             try:
                 git_output = check_output(
                     ["git", "log", "--reverse", "--pretty=format:%aI", path]
@@ -258,7 +272,7 @@ class PageNode(FileNode):
 
 
 class PyPageNode(PageNode):
-    def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
+    def __init__(self, parent: Optional[DirNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
         self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
@@ -273,7 +287,7 @@ class PyPageNode(PageNode):
 
 
 class Md(PyPageNode):
-    def __init__(self, parent: Optional[FsNode], dirPath: str, fileName: str) -> None:
+    def __init__(self, parent: Optional[DirNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
 
         self.ideaDate: Optional[date] = None
@@ -336,7 +350,7 @@ class NonMd(PyPageNode):
         self,
         realName: str,
         rectifiedFileName: str,
-        parent: Optional[FsNode],
+        parent: Optional[DirNode],
         dirPath: str,
         fileName: str,
     ) -> None:
