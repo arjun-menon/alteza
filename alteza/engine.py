@@ -33,9 +33,6 @@ class Args(Tap):  # pyre-ignore[13]
         False  # Delete the output directory, if it already exists. (TODO)
     )
     copy_assets: bool = False  # Copy assets instead of symlinking to them
-    trailing_slash: bool = (
-        False  # Include a trailing slash for links to markdown page directories
-    )
     seed: str = "{}"  # seed data to add to the initial/root env (TODO!)
 
 
@@ -59,11 +56,7 @@ class Content:
         if isinstance(dstFile, NonMd):
             dstFileName = dstFile.rectifiedFileName
         elif isinstance(dstFile, Md):
-            dstFileName = (
-                dstFile.realName
-                # Add a "/" trailing slash if arg requests it
-                + ("/" if self.args.trailing_slash else "")
-            )
+            dstFileName = dstFile.realName
 
         srcPath = self.splitPath(srcFile.fullPath)[:-1]
         dstPath = self.splitPath(dstFile.fullPath)[:-1]

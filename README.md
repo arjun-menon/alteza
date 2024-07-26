@@ -126,11 +126,10 @@ If you're working on Alteza itself, then run the `alteza` module itself, from th
 #### Command-line Arguments
 The `-h` argument above will print the list of available arguments:
 ```
-usage: __main__.py [--copy_assets] [--trailing_slash] [--content CONTENT] [--output OUTPUT] [-h]
+usage: __main__.py [--copy_assets] [--content CONTENT] [--output OUTPUT] [-h]
 
 options:
   --copy_assets         (bool, default=False) Copy assets instead of symlinking to them
-  --trailing_slash      (bool, default=False) Include a trailing slash in links to markdown pages
   --content CONTENT
                         (str, default=test_content) Directory to read the input content from.
   --output OUTPUT
