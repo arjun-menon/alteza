@@ -54,7 +54,6 @@ class Content:
         indentSpaces = " " * self.indentSpaces
         print(indentSpaces + f"{Fore.grey_42}Linking to:{Style.reset}", dstName)
         srcFile.linksTo.append(dstFile)
-        # dstFile.makePublic()  # FixMe: Circular links can make pages public.
 
         dstFileName = dstFile.fileName
         if isinstance(dstFile, NonMd):
@@ -200,9 +199,9 @@ class Content:
 
         gatherPublicNodes(self.rootDir)
 
-        print("\nPublic nodes:")
-        for node in publicNodes:
-            print(node, "->", node.linksTo)
+        print("\nInitial pre-reachability public files:")
+        for node in filter(lambda pNode: isinstance(pNode, FileNode), publicNodes):
+            print("/" + node.fullPath)
 
         seen: Set["FsNode"] = set()
 
