@@ -1,5 +1,6 @@
 import contextlib
 import itertools
+import json
 import os
 import shutil
 import sys
@@ -31,7 +32,7 @@ class Args(Tap):  # pyre-ignore[13]
     output: str  # Directory to send the output to. WARNING: This will be deleted.
     clear_output_dir: bool = False  # Delete the output directory, if it already exists.
     copy_assets: bool = False  # Copy static assets instead of symlinking to them.
-    seed: str = "{}"  # seed data to add to the initial/root env (TODO!)
+    seed: str = "{}"  # Seed JSON data to add to the initial root env.
 
 
 class Content:
@@ -40,6 +41,7 @@ class Content:
         self.indentSpaces: int = 2
         self.rootDir: DirNode = fs.rootDir
         self.nameRegistry: NameRegistry = fs.nameRegistry
+        self.seed: Dict[str, Any] = json.loads(args.seed)
         self.fixSysPath()
 
     def linkObj(self, srcFile: PyPageNode, dstFile: FileNode) -> str:
@@ -171,7 +173,7 @@ class Content:
             if indexFile is not None and isinstance(indexFile, PyPageNode):
                 self.invokePyPage(indexFile, env)
 
-        initial_env = self.getBasicHelpers()
+        initial_env = self.seed | self.getBasicHelpers()
         walk(self.rootDir, initial_env)
 
         self._makeNodesReachableFromPublicNodesPublic()
@@ -314,9 +316,8 @@ class Generate:
         if os.path.isdir(outputDir):
             if not shouldDelete:
                 raise AltezaException(
-                    "Specified output directory '%s' already exists."
+                    f"Specified output directory {outputDir} already exists.\n"
                     "Please use --clear_output_dir to delete it prior to site generation."
-                    % outputDir
                 )
             print(
                 f"Deleting directory {Fore.dark_red_2}%s{Style.reset} and all of its content...\n"

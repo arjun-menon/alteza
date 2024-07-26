@@ -126,13 +126,14 @@ If you're working on Alteza itself, then run the `alteza` module itself, from th
 #### Command-line Arguments
 The `-h` argument above will print the list of available arguments:
 ```
-usage: __main__.py [--copy_assets] [--content CONTENT] [--output OUTPUT] [-h]
+usage: __main__.py --content CONTENT --output OUTPUT [--clear_output_dir] [--copy_assets] [--seed SEED] [-h]
 
 options:
   --content CONTENT   (str, required) Directory to read the input content from.
   --output OUTPUT     (str, required) Directory to send the output to. WARNING: This will be deleted.
   --clear_output_dir  (bool, default=False) Delete the output directory, if it already exists.
   --copy_assets       (bool, default=False) Copy static assets instead of symlinking to them.
+  --seed SEED         (str, default={}) Seed JSON data to add to the initial root env.
   -h, --help          show this help message and exit
 ```
 As might be obvious above, you set the `content` to your content directory. The output directory will be deleted entirely, before being written to.
