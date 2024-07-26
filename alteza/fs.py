@@ -116,16 +116,7 @@ class FileNode(FsNode):
     def getLinkName(self) -> str:
         if self.isIndex():
             return self.getParentDir().getRectifiedName()
-
-        if isinstance(self, Md) or (
-            isinstance(self, NonMd) and self.extension == ".html"
-        ):
-            return self.realName
-
-        if isinstance(self, NonMd):
-            return self.rectifiedFileName
-
-        return self.fileName
+        return self.realName
 
     def getTitle(self) -> str:
         if "title" in self.env:

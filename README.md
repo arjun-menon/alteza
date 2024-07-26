@@ -98,7 +98,7 @@ Try running `alteza -h` to see the command-line options available.
 
        1. Currently, names, without their file extension, have to be unique across input content. This might change in the future.
 
-       2. The Name Registry will error out if it encounters any non-unique names. (I understand this is a significant limitation, so I might support marking this simply opt-in behavior with a `--unique` flag in the future.)
+       2. The Name Registry will error out if it encounters any non-unique names. (I understand this is a significant limitation, so I _might_ support making this opt-out behavior with a `--nonunique` flag in the future.)
 
     2. Any non-dynamic content file that has been `link`-ed to is marked for publication (i.e. copying or symlinking).
 
@@ -109,9 +109,9 @@ Try running `alteza -h` to see the command-line options available.
 
        2. Reachability of files is determined using this function, and unreachable files will be treated as non-public (and thus not exist in the generated site).
 
-    4. The extension must be omitted for dynamic PyPage files; specifically, the `.md` for Markdown, and the `.py*` for any file with `.py` before its extension.
-       * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles.css')` for the file `pygments-styles.py.css`.
-       * Directions with index files should just be referred to by the directory name. For example, the index page `about-me/hobbies/index.md` (or `about-me/hobbies/index.py.html`) should just be linked to with a `link('hobbies')`.
+    4. A file name's extension must be omitted while using `link` (including the `.py*` for any file with `.py` before its extension).
+       * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`.
+       * Directories containing index files should just be referred to by the directory name. For example, the index page `about-me/hobbies/index.md` (or `about-me/hobbies/index.py.html`) should just be linked to with a `link('hobbies')`.
 
 ### Usage, Testing & Development
 

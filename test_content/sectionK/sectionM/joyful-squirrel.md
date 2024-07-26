@@ -3,7 +3,7 @@ title: {{ title + " about a Squirrel" }}
 
 Here's a joyful squirrel.
 
-<img src="{{link("squirrel.png")}}">
+<img src="{{link("squirrel")}}">
 
 Want to learn about a [magic turtle]({{link("magic-turtle")}})?
 
