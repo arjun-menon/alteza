@@ -129,18 +129,17 @@ The `-h` argument above will print the list of available arguments:
 usage: __main__.py [--copy_assets] [--content CONTENT] [--output OUTPUT] [-h]
 
 options:
-  --copy_assets         (bool, default=False) Copy assets instead of symlinking to them
-  --content CONTENT
-                        (str, default=test_content) Directory to read the input content from.
-  --output OUTPUT
-                        (str, default=test_output) Directory to send the output. WARNING: This will be deleted first.
-  -h, --help            show this help message and exit
+  --content CONTENT   (str, required) Directory to read the input content from.
+  --output OUTPUT     (str, required) Directory to send the output to. WARNING: This will be deleted.
+  --clear_output_dir  (bool, default=False) Delete the output directory, if it already exists.
+  --copy_assets       (bool, default=False) Copy static assets instead of symlinking to them.
+  -h, --help          show this help message and exit
 ```
 As might be obvious above, you set the `content` to your content directory. The output directory will be deleted entirely, before being written to.
 
 To test against `test_content` (and generate output to `test_output`), run it like this:
 ```sh
-python -m alteza --content test_content --output test_output
+python -m alteza --content test_content --output test_output --clear_output_dir
 ```
 
 #### Code Style
@@ -163,7 +162,7 @@ pytype alteza  # should have zero errors too
 Or, all at once with: `mypy alteza ; pyflakes alteza ; pyre check ; pyright alteza ; pytype alteza`. Pytype is pretty slow, so feel free to omit it.
 
 #### Linting
-Linting policy is very strict. [Pylint](https://pylint.pycqa.org/en/latest/index.html) must issue a perfect 10/10 score, otherwise the [Pylint CI check](https://github.com/arjun-menon/alteza/actions/workflows/pylint.yml) will fail.
+Linting policy is very strict. [Pylint](https://pylint.pycqa.org/en/latest/index.html) must issue a perfect 10/10 score, otherwise the Pylint CI check will fail.  On a side note, you can see **a UML diagram** of the Alteza code if you click on any one of the completed workflow runs for the [Pylint CI check](https://github.com/arjun-menon/alteza/actions/workflows/pylint.yml).
 
 To test whether lints are passing, simply run:
 ```

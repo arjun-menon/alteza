@@ -29,10 +29,8 @@ from .fs import (
 class Args(Tap):  # pyre-ignore[13]
     content: str  # Directory to read the input content from.
     output: str  # Directory to send the output to. WARNING: This will be deleted.
-    reset_output_dir: bool = (
-        False  # Delete the output directory, if it already exists. (TODO)
-    )
-    copy_assets: bool = False  # Copy assets instead of symlinking to them
+    clear_output_dir: bool = False  # Delete the output directory, if it already exists.
+    copy_assets: bool = False  # Copy static assets instead of symlinking to them.
     seed: str = "{}"  # seed data to add to the initial/root env (TODO!)
 
 
@@ -307,13 +305,19 @@ class Generate:
             os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
 
     @staticmethod
-    def _resetOutputDir(outputDir: str) -> None:
+    def _resetOutputDir(outputDir: str, shouldDelete: bool) -> None:
         if os.path.isfile(outputDir):
             raise AltezaException(
                 f"A file named {outputDir} already exists. Please move it or delete it. "
                 "Note that if this had been a directory, we would have erased it."
             )
         if os.path.isdir(outputDir):
+            if not shouldDelete:
+                raise AltezaException(
+                    "Specified output directory '%s' already exists."
+                    "Please use --clear_output_dir to delete it prior to site generation."
+                    % outputDir
+                )
             print(
                 f"Deleting directory {Fore.dark_red_2}%s{Style.reset} and all of its content...\n"
                 % outputDir
@@ -336,7 +340,7 @@ class Generate:
                     Generate._linkStaticAsset(fileNode, args.copy_assets)
 
         outputDir = args.output
-        Generate._resetOutputDir(outputDir)
+        Generate._resetOutputDir(outputDir, args.clear_output_dir)
 
         print("Generating...")
         with enterDir(outputDir):
