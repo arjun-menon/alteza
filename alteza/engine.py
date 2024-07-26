@@ -39,6 +39,7 @@ class Content:
     def __init__(self, args: Args, fs: Fs) -> None:
         self.args = args
         self.inTemplate: bool = False
+        self.templateCache: Dict[str, str] = {}
         self.seenTemplateLinks: Set[FileNode] = set()
         self.rootDir: DirNode = fs.rootDir
         self.nameRegistry: NameRegistry = fs.nameRegistry
@@ -139,10 +140,7 @@ class Content:
                 pyPageNode.shouldPublish = False
 
         if isinstance(pyPageNode, Md):
-            print(
-                f"  {Fore.purple_3}Applying template...{Style.reset}"
-            )  # TODO (see ideas.md)
-            templateHtml = Content.getTemplateHtml(env)
+            templateHtml = self.getTemplateHtml(env)
             self.inTemplate = True
             # Re-process against `templateHtml` with PyPage:
             pyPageOutput = pypage(templateHtml, env | {"content": pyPageOutput})
@@ -270,16 +268,28 @@ class Content:
             return [path]
         return Content.splitPath(head) + [tail]
 
-    @staticmethod
-    def getTemplateHtml(env: dict[str, Any]) -> str:
-        if "template" not in env:
-            raise AltezaException(
-                "You must define a `template` var in some ancestral `__config__.py` file."
+    def getTemplateHtml(self, env: dict[str, Any]) -> str:
+        if "templateRaw" in env:
+            templateRaw = env["templateRaw"]
+            if not isinstance(templateRaw, str):
+                raise AltezaException("The `templateRaw` must be a string.")
+            print(f"  {Fore.purple_3}Applying raw template...{Style.reset}")
+            return templateRaw
+        if "template" in env:
+            templateName = env["template"]
+            print(
+                f"  {Fore.purple_3}Applying template: "
+                f"{Fore.blue_violet}{templateName}{Fore.purple_3}...{Style.reset}"
             )
-        template = env["template"]
-        if not isinstance(template, str):
-            raise AltezaException("The `template` must be a string.")
-        return template
+            if templateName in self.templateCache:
+                return self.templateCache[templateName]
+            templateFile = self.nameRegistry.lookup(templateName)
+            templateRaw = Fs.readfile(templateFile.absoluteFilePath)
+            self.templateCache[templateName] = templateRaw
+            return templateRaw
+        raise AltezaException(
+            "You must define a `template` or `templateRaw` in some ancestral `__config__.py` file."
+        )
 
 
 class Generate:

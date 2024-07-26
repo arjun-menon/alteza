@@ -69,9 +69,19 @@ Try running `alteza -h` to see the command-line options available.
 
        2. The template should use this `content` value via PyPage (with `{{ content }}`) in order to inject the `content` into itself.
 
-       3. The template is defined using a `template` variable declared in a `__config__.py` file. (More on configuration files in a later point below.)
+       3. The template is specified using a `template` or `templateRaw` variable declared in a `__config__.py` file. (More on configuration files in a later point below.)
 
-       4. The `template`'s value must be the entire contents of a template PyPage-HTML file. A convenience function `readfile` is provided for this. So you can write something like `template = readfile('some_template.html')` in a config file.
+       4. A `template` variable's value must be the name of a template.
+
+          1. For example, you can write `template: ordinary-page` in the YAML front matter of a Markdown file.
+
+          2. Or, alternatively, you can also write `template = "ordinary_page"` in a `__config__.py` file. If a `template` variable is defined like this in a `__config__.py` all adjacent and descendant files will inherit this `template` value.
+
+             1. This can be used as a way of defining a _**default**_ template.
+
+             2. Of course, the default can be overridden in a Markdown file by specifying a template name in the YAML front matter, or with a new default in a descendant `__config__.py`.
+
+          3. Lastly, alternatively, a `templateRaw` can also be defined whose value must be the entire contents of a template PyPage-HTML file. A convenience function `readfile` is provided for this. For example, you can write something like `template = readfile('some_template.html')` in a config file. A `templateRaw`, if specified, takes precedence over `template`. Using this `templateRaw` approach is not recommended.
 
        5. Templates may be overriden in descendant `__config__.py` files. Or, may be overridden in the Markdown file _**itself**_ using a PyPage multiline code tag (not an inline code tag).
 

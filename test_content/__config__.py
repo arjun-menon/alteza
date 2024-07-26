@@ -5,4 +5,4 @@ pygments_style = "sas"
 
 mood = "joy"
 
-template = getTemplate("ordinary_page")
+template = "ordinary_page"
