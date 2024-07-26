@@ -5,7 +5,7 @@ import shutil
 import sys
 import time
 import types
-from typing import Optional, Generator, List, Dict, Set, Any, Union, Literal
+from typing import Optional, Generator, List, Dict, Set, Any
 
 import sh  # type: ignore
 from pypage import pypage  # type: ignore
@@ -39,11 +39,10 @@ class Args(Tap):  # pyre-ignore[13]
 class Content:
     def __init__(self, args: Args, fs: Fs) -> None:
         self.args = args
+        self.indentSpaces: int = 2
         self.rootDir: DirNode = fs.rootDir
         self.nameRegistry: NameRegistry = fs.nameRegistry
         self.fixSysPath()
-
-        self.indentSpaces: Union[Literal[2], Literal[4]] = 2
 
     def linkObj(self, srcFile: PyPageNode, dstFile: FileNode) -> str:
         assert isinstance(dstFile, FileNode)
@@ -52,11 +51,14 @@ class Content:
         print(indentSpaces + f"{Fore.grey_42}Linking to:{Style.reset}", dstName)
         srcFile.linksTo.append(dstFile)
 
-        dstFileName = dstFile.fileName
-        if isinstance(dstFile, NonMd):
-            dstFileName = dstFile.rectifiedFileName
+        if dstFile.isIndex():
+            dstFileName = ""
         elif isinstance(dstFile, Md):
             dstFileName = dstFile.realName
+        elif isinstance(dstFile, NonMd):
+            dstFileName = dstFile.rectifiedFileName
+        else:
+            dstFileName = dstFile.fileName
 
         srcPath = self.splitPath(srcFile.fullPath)[:-1]
         dstPath = self.splitPath(dstFile.fullPath)[:-1]
@@ -73,9 +75,10 @@ class Content:
                 relativePath.append("..")
         for p in remainingPath:
             relativePath.append(p)
-        if isinstance(srcFile, Md):
+        if isinstance(srcFile, Md) and not srcFile.isIndex():
             relativePath = [".."] + relativePath
 
+        print("relPath:", relativePath)
         relativePathStr = os.path.join("", *relativePath)
 
         return relativePathStr
@@ -128,10 +131,10 @@ class Content:
                 f"  {Fore.purple_3}Applying template...{Style.reset}"
             )  # TODO (see ideas.md)
             templateHtml = Content.getTemplateHtml(env)
-            self.indentSpaces = 4
+            self.indentSpaces += 2
             # Re-process against `templateHtml` with PyPage:
             pyPageOutput = pypage(templateHtml, env | {"content": pyPageOutput})
-            self.indentSpaces = 2
+            self.indentSpaces -= 2
 
         pyPageNode.setPyPageOutput(pyPageOutput)
         pyPageNode.env = env
@@ -268,8 +271,11 @@ class Generate:
 
     @staticmethod
     def _writeMd(md: Md) -> None:
-        os.mkdir(md.realName)
-        with enterDir(md.realName):
+        if not md.isIndex():
+            os.mkdir(md.realName)
+            with enterDir(md.realName):
+                Generate._writeMdContents(md)
+        else:
             Generate._writeMdContents(md)
 
     @staticmethod
