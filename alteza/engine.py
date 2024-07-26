@@ -38,7 +38,8 @@ class Args(Tap):  # pyre-ignore[13]
 class Content:
     def __init__(self, args: Args, fs: Fs) -> None:
         self.args = args
-        self.indentSpaces: int = 2
+        self.inTemplate: bool = False
+        self.seenTemplateLinks: Set[FileNode] = set()
         self.rootDir: DirNode = fs.rootDir
         self.nameRegistry: NameRegistry = fs.nameRegistry
         self.seed: Dict[str, Any] = json.loads(args.seed)
@@ -49,19 +50,15 @@ class Content:
     ) -> str:
         if not pathOnly:
             srcFile.linksTo.append(dstFile)  # This is used to determine reachability.
-            print(
-                " " * self.indentSpaces
-                + f"{Fore.grey_42}Linking to:{Style.reset} {dstFile.getLinkName()}",
-            )
+            if dstFile not in self.seenTemplateLinks:
+                print(
+                    " " * (4 if self.inTemplate else 2)
+                    + f"{Fore.grey_42}Linking to:{Style.reset} {dstFile.getLinkName()}",
+                )
+                if self.inTemplate:
+                    self.seenTemplateLinks.add(dstFile)
 
-        if dstFile.isIndex():
-            dstFileName = ""
-        elif isinstance(dstFile, Md):
-            dstFileName = dstFile.realName
-        elif isinstance(dstFile, NonMd):
-            dstFileName = dstFile.rectifiedFileName
-        else:
-            dstFileName = dstFile.fileName
+        dstFileName = self.getFileUrlName(dstFile)
 
         srcPath = self.splitPath(srcFile.fullPath)[:-1]
         dstPath = self.splitPath(dstFile.fullPath)[:-1]
@@ -83,6 +80,16 @@ class Content:
 
         relativePathStr = os.path.join("", *relativePath)
         return relativePathStr
+
+    @staticmethod
+    def getFileUrlName(dstFile: FileNode) -> str:
+        if dstFile.isIndex():
+            return ""
+        if isinstance(dstFile, Md):
+            return dstFile.realName
+        if isinstance(dstFile, NonMd):
+            return dstFile.rectifiedFileName
+        return dstFile.fileName
 
     def invokePyPage(self, pyPageNode: PyPageNode, env: dict[str, Any]) -> None:
         print(f"{Fore.gold_1}Processing:{Style.reset}", pyPageNode.fullPath)
@@ -136,10 +143,10 @@ class Content:
                 f"  {Fore.purple_3}Applying template...{Style.reset}"
             )  # TODO (see ideas.md)
             templateHtml = Content.getTemplateHtml(env)
-            self.indentSpaces += 2
+            self.inTemplate = True
             # Re-process against `templateHtml` with PyPage:
             pyPageOutput = pypage(templateHtml, env | {"content": pyPageOutput})
-            self.indentSpaces -= 2
+            self.inTemplate = False
 
         pyPageNode.setPyPageOutput(pyPageOutput)
         pyPageNode.env = env
