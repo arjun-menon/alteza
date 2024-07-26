@@ -29,8 +29,8 @@ from .fs import (
 class Args(Tap):  # pyre-ignore[13]
     content: str  # Directory to read the input content from.
     output: str  # Directory to send the output to. WARNING: This will be deleted.
-    delete_output_dir_if_exists: bool = (
-        False  # Delete output directory, if it already exists. (TODO)
+    reset_output_dir: bool = (
+        False  # Delete the output directory, if it already exists. (TODO)
     )
     copy_assets: bool = False  # Copy assets instead of symlinking to them
     trailing_slash: bool = (
@@ -260,6 +260,91 @@ class Content:
         return template
 
 
+class Generate:
+    # pylint: disable=too-few-public-methods
+    # This class is just here to organize a bunch of related functions together.
+    # This class should never be instantiated. Generate.generate should
+    # be called to write the output of a processed Content object.
+    @staticmethod
+    def _writeMdContents(md: Md) -> None:
+        if os.path.exists("index.html"):
+            raise AltezaException(
+                f"An index.html already exists, and conflicts with {md}, at {os.getcwd()}."
+            )
+        with open("index.html", "w", encoding="utf-8") as pageHtml:
+            pageHtml.write(md.getPyPageOutput())
+
+    @staticmethod
+    def _writeMd(md: Md) -> None:
+        os.mkdir(md.realName)
+        with enterDir(md.realName):
+            Generate._writeMdContents(md)
+
+    @staticmethod
+    def _writeNonMd(nonMd: NonMd) -> None:
+        fileName = nonMd.rectifiedFileName
+        if os.path.exists(fileName):
+            raise AltezaException(
+                f"File {fileName} already exists, and conflicts with {nonMd}."
+            )
+        with open(fileName, "w", encoding="utf-8") as nonMdPageFile:
+            nonMdPageFile.write(nonMd.getPyPageOutput())
+
+    @staticmethod
+    def _writePyPageNode(pyPageNode: PyPageNode) -> None:
+        if isinstance(pyPageNode, Md):
+            Generate._writeMd(pyPageNode)
+
+        elif isinstance(pyPageNode, NonMd):
+            Generate._writeNonMd(pyPageNode)
+
+        else:
+            raise AltezaException(f"{pyPageNode} pyPage attribute is invalid.")
+
+    @staticmethod
+    def _linkStaticAsset(fileNode: FileNode, shouldCopy: bool) -> None:
+        if shouldCopy:
+            shutil.copyfile(fileNode.absoluteFilePath, fileNode.fileName)
+        else:
+            os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
+
+    @staticmethod
+    def _resetOutputDir(outputDir: str) -> None:
+        if os.path.isfile(outputDir):
+            raise AltezaException(
+                f"A file named {outputDir} already exists. Please move it or delete it. "
+                "Note that if this had been a directory, we would have erased it."
+            )
+        if os.path.isdir(outputDir):
+            print(
+                f"Deleting directory {Fore.dark_red_2}%s{Style.reset} and all of its content...\n"
+                % outputDir
+            )
+            shutil.rmtree(outputDir)
+        os.mkdir(outputDir)
+
+    @staticmethod
+    def generate(args: Args, content: Content) -> None:
+        def walk(curDir: DirNode) -> None:
+            for subDir in filter(lambda node: node.shouldPublish, curDir.subDirs):
+                os.mkdir(subDir.dirName)
+                with enterDir(subDir.dirName):
+                    walk(subDir)
+
+            for fileNode in filter(lambda node: node.shouldPublish, curDir.files):
+                if isinstance(fileNode, PyPageNode):
+                    Generate._writePyPageNode(fileNode)
+                else:
+                    Generate._linkStaticAsset(fileNode, args.copy_assets)
+
+        outputDir = args.output
+        Generate._resetOutputDir(outputDir)
+
+        print("Generating...")
+        with enterDir(outputDir):
+            walk(content.rootDir)
+
+
 @contextlib.contextmanager
 def enterDir(newDir: str) -> Generator[None, None, None]:
     # https://stackoverflow.com/a/13847807/908430
@@ -290,70 +375,8 @@ def run(args: Args) -> None:
     print("File Tree:")
     print(fs.rootDir.displayDir())
 
-    generate(args, content)
+    Generate.generate(args, content)
 
     elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
     # pylint: disable=consider-using-f-string
     print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
-
-
-def generate(args: Args, content: Content) -> None:
-    outputDir = args.output
-
-    def walk(curDir: DirNode) -> None:
-        for subDir in curDir.subDirs:
-            if subDir.shouldPublish:
-                os.mkdir(subDir.dirName)
-                with enterDir(subDir.dirName):
-                    walk(subDir)
-
-        for fileNode in curDir.files:
-            if fileNode.shouldPublish:
-                if isinstance(fileNode, PyPageNode):
-                    if isinstance(fileNode, Md):
-                        os.mkdir(fileNode.realName)
-                        with enterDir(fileNode.realName):
-                            with open("index.html", "w", encoding="utf-8") as pageHtml:
-                                pageHtml.write(fileNode.getPyPageOutput())
-
-                    elif isinstance(fileNode, NonMd):
-                        fileName = fileNode.rectifiedFileName
-                        if os.path.exists(fileName):
-                            raise AltezaException(
-                                f"File {fileName} already exists, and conflicts with {fileNode}."
-                            )
-                        with open(fileName, "w", encoding="utf-8") as nonMdPage:
-                            nonMdPage.write(fileNode.getPyPageOutput())
-
-                    else:
-                        raise AltezaException(
-                            f"{fileNode} pyPage attribute is invalid."
-                        )
-
-                else:
-                    if args.copy_assets:
-                        shutil.copyfile(fileNode.absoluteFilePath, fileNode.fileName)
-                    else:
-                        os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
-
-    resetOutputDir(outputDir)
-
-    print("Generating...")
-
-    with enterDir(outputDir):
-        walk(content.rootDir)
-
-
-def resetOutputDir(outputDir: str) -> None:
-    if os.path.isfile(outputDir):
-        raise AltezaException(
-            f"A file named {outputDir} already exists. Please move it or delete it. "
-            "Note that if this had been a directory, we would have erased it."
-        )
-    if os.path.isdir(outputDir):
-        print(
-            f"Deleting directory {Fore.dark_red_2}%s{Style.reset} and all of its content...\n"
-            % outputDir
-        )
-        shutil.rmtree(outputDir)
-    os.mkdir(outputDir)
