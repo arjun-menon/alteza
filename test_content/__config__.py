@@ -5,4 +5,4 @@ pygments_style = "sas"
 
 mood = "joy"
 
-template = readfile(path("ordinary_page.html"))
+template = getTemplate("ordinary_page.html")
