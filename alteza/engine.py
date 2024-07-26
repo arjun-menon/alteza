@@ -45,7 +45,7 @@ class Content:
         self.fixSysPath()
 
     def linkObj(
-        self, srcFile: PyPageNode, dstFile: FileNode, pathOnly: bool = False
+        self, srcFile: FileNode, dstFile: FileNode, pathOnly: bool = False
     ) -> str:
         if not pathOnly:
             srcFile.linksTo.append(dstFile)  # This is used to determine reachability.
@@ -144,6 +144,25 @@ class Content:
         pyPageNode.setPyPageOutput(pyPageOutput)
         pyPageNode.env = env
 
+    def runConfigIfAny(self, dirNode: DirNode, env: dict[str, Any]) -> Dict[str, Any]:
+        # Run a __config__.py file, if one exists.
+        configEnv = env.copy()
+        configFileL = [f for f in dirNode.files if f.fileName == Fs.configFileName]
+        if configFileL:
+            configFile: FileNode = configFileL[0]
+
+            def path(name: str) -> str:
+                return self.linkObj(configFile, self.nameRegistry.lookup(name), True)
+
+            configEnv |= {"path": path}
+
+            print(
+                f"{Fore.dark_orange}Running:{Style.reset}",
+                os.path.join(dirNode.fullPath, Fs.configFileName),
+            )
+            exec(Fs.readfile(Fs.configFileName), configEnv)
+        return configEnv
+
     def process(self) -> None:
         def walk(dirNode: DirNode, env: dict[str, Any]) -> None:
             env = env.copy()
@@ -151,15 +170,7 @@ class Content:
             # Enrich with current dir:
             env |= {"dir": dirNode}
 
-            # Run a __config__.py file, if one exists.
-            configEnv = env.copy()
-            if Fs.configFileName in (f.fileName for f in dirNode.files):
-                print(
-                    f"{Fore.dark_orange}Running:{Style.reset}",
-                    os.path.join(dirNode.fullPath, Fs.configFileName),
-                )
-                exec(Fs.readfile(Fs.configFileName), configEnv)
-            env |= self.getModuleVars(configEnv)
+            env |= self.getModuleVars(self.runConfigIfAny(dirNode, env))
 
             # Ordering Note: We must recurse into the subdirectories first.
             for d in dirNode.subDirs:
