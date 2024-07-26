@@ -11,6 +11,6 @@ This is [what a "megabyte" is]({{link("just_a_test")}}).
 
 This page was started on {{getIdeaDate("%B %-d, %Y")}}.
 
-This page was started on {{getLastModified()}}.
+This page was last modified on {{getLastModified()}}.
 
 Back [home](..).

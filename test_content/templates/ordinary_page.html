@@ -1,15 +1,6 @@
-<html>
-<head>
-    <title>
-        {% if exists('title') %}
-        {{ title }}
-        {% else %}
-        No title
-        {% %}
-    </title>
-    <link rel="stylesheet" href="{{link('pygments-styles.css')}}">
-</head>
-<body>
-{{ content }}
-</body>
-</html>
+{% capture body %}
+{% if exists('title') %}
+<h4>{{ title }}</h4>
+{% endif %}
+{{ content }}{% endcapture %}
+{{ inject(path('skeleton.html')) }}

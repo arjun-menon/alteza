@@ -44,12 +44,15 @@ class Content:
         self.seed: Dict[str, Any] = json.loads(args.seed)
         self.fixSysPath()
 
-    def linkObj(self, srcFile: PyPageNode, dstFile: FileNode) -> str:
-        assert isinstance(dstFile, FileNode)
-        dstName = dstFile.getLinkName()
-        indentSpaces = " " * self.indentSpaces
-        print(indentSpaces + f"{Fore.grey_42}Linking to:{Style.reset}", dstName)
-        srcFile.linksTo.append(dstFile)
+    def linkObj(
+        self, srcFile: PyPageNode, dstFile: FileNode, pathOnly: bool = False
+    ) -> str:
+        if not pathOnly:
+            srcFile.linksTo.append(dstFile)  # This is used to determine reachability.
+            print(
+                " " * self.indentSpaces
+                + f"{Fore.grey_42}Linking to:{Style.reset} {dstFile.getLinkName()}",
+            )
 
         if dstFile.isIndex():
             dstFileName = ""
@@ -75,12 +78,10 @@ class Content:
                 relativePath.append("..")
         for p in remainingPath:
             relativePath.append(p)
-        if isinstance(srcFile, Md) and not srcFile.isIndex():
+        if isinstance(srcFile, Md) and not srcFile.isIndex() and not pathOnly:
             relativePath = [".."] + relativePath
 
-        print("relPath:", relativePath)
         relativePathStr = os.path.join("", *relativePath)
-
         return relativePathStr
 
     def invokePyPage(self, pyPageNode: PyPageNode, env: dict[str, Any]) -> None:
@@ -96,15 +97,19 @@ class Content:
         else:
             raise AltezaException(f"{pyPageNode} Unsupported type of PyPageNode.")
 
-        def link(name: str) -> str:
-            dstFile: FileNode = self.nameRegistry.lookup(name)
-            return self.linkObj(pyPageNode, dstFile)
+        def linkObj(dstFile: FileNode, pathOnly: bool = False) -> str:
+            return self.linkObj(pyPageNode, dstFile, pathOnly)
 
-        def linkObj(dstFile: FileNode) -> str:
-            return self.linkObj(pyPageNode, dstFile)
+        def link(name: str, pathOnly: bool = False) -> str:
+            dstFile: FileNode = self.nameRegistry.lookup(name)
+            return linkObj(dstFile, pathOnly)
+
+        def path(name: str) -> str:
+            return link(name, True)
 
         env |= {"link": link}
         env |= {"linkObj": linkObj}
+        env |= {"path": path}
 
         env |= {"getLastModifiedObj": lambda: pyPageNode.lastModifiedObj}
         env |= {"getLastModified": pyPageNode.getLastModified}

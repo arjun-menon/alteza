@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>
+        {% if exists('title') %}
+            {{ title }}
+        {% else %}
+            A PyPage
+        {% endif %}
+    </title>
+    <link rel="stylesheet" href="{{link('pygments-styles.css')}}">
+</head>
+<body>
+{{ body }}
+</body>
+</html>
