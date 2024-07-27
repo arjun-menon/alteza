@@ -72,7 +72,7 @@ runs:
         echo "GitHub Pages site full base path: $GH_PAGES_BASE_PATH"
 
     - name: Upload artifact to GitHub Pages
-      uses: actions/upload-pages-artifact@v2
+      uses: actions/upload-pages-artifact@v3
       with:
         path: alteza-output
 
