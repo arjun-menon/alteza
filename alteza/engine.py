@@ -291,10 +291,10 @@ class Content:
 class Generate:
     # pylint: disable=too-few-public-methods
     # This class is just here to organize a bunch of related functions together.
-    # This class should never be instantiated. Generate.generate should
+    # This class should never be instantiated. Generate.generate(...) should
     # be called to write the output of a processed Content object.
     @staticmethod
-    def _writeMdContents(md: Md) -> None:
+    def writeMdContents(md: Md) -> None:
         if os.path.exists("index.html"):
             raise AltezaException(
                 f"An index.html already exists, and conflicts with {md}, at {os.getcwd()}."
@@ -303,16 +303,16 @@ class Generate:
             pageHtml.write(md.getPyPageOutput())
 
     @staticmethod
-    def _writeMd(md: Md) -> None:
+    def writeMd(md: Md) -> None:
         if not md.isIndex():
             os.mkdir(md.realName)
             with enterDir(md.realName):
-                Generate._writeMdContents(md)
+                Generate.writeMdContents(md)
         else:
-            Generate._writeMdContents(md)
+            Generate.writeMdContents(md)
 
     @staticmethod
-    def _writeNonMd(nonMd: NonMd) -> None:
+    def writeNonMd(nonMd: NonMd) -> None:
         fileName = nonMd.rectifiedFileName
         if os.path.exists(fileName):
             raise AltezaException(
@@ -322,25 +322,25 @@ class Generate:
             nonMdPageFile.write(nonMd.getPyPageOutput())
 
     @staticmethod
-    def _writePyPageNode(pyPageNode: PyPageNode) -> None:
+    def writePyPageNode(pyPageNode: PyPageNode) -> None:
         if isinstance(pyPageNode, Md):
-            Generate._writeMd(pyPageNode)
+            Generate.writeMd(pyPageNode)
 
         elif isinstance(pyPageNode, NonMd):
-            Generate._writeNonMd(pyPageNode)
+            Generate.writeNonMd(pyPageNode)
 
         else:
             raise AltezaException(f"{pyPageNode} pyPage attribute is invalid.")
 
     @staticmethod
-    def _linkStaticAsset(fileNode: FileNode, shouldCopy: bool) -> None:
+    def linkStaticAsset(fileNode: FileNode, shouldCopy: bool) -> None:
         if shouldCopy:
             shutil.copyfile(fileNode.absoluteFilePath, fileNode.fileName)
         else:
             os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
 
     @staticmethod
-    def _resetOutputDir(outputDir: str, shouldDelete: bool) -> None:
+    def resetOutputDir(outputDir: str, shouldDelete: bool) -> None:
         if os.path.isfile(outputDir):
             raise AltezaException(
                 f"A file named {outputDir} already exists. Please move it or delete it. "
@@ -369,12 +369,12 @@ class Generate:
 
             for fileNode in filter(lambda node: node.shouldPublish, curDir.files):
                 if isinstance(fileNode, PyPageNode):
-                    Generate._writePyPageNode(fileNode)
+                    Generate.writePyPageNode(fileNode)
                 else:
-                    Generate._linkStaticAsset(fileNode, args.copy_assets)
+                    Generate.linkStaticAsset(fileNode, args.copy_assets)
 
         outputDir = args.output
-        Generate._resetOutputDir(outputDir, args.clear_output_dir)
+        Generate.resetOutputDir(outputDir, args.clear_output_dir)
 
         print("Generating...")
         with enterDir(outputDir):

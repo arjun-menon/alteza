@@ -415,13 +415,13 @@ class Fs:
         walk(startingNode)
 
     @staticmethod
-    def _isHidden(name: str) -> bool:
+    def isHidden(name: str) -> bool:
         return name.startswith(".")
 
     @staticmethod
-    def _defaultShouldIgnore(name: str, isDir: bool) -> bool:
+    def defaultShouldIgnore(name: str, isDir: bool) -> bool:
         # pylint: disable=unused-argument
-        if Fs._isHidden(name):
+        if Fs.isHidden(name):
             return True
         if name in {"__pycache__"}:
             return True
@@ -433,16 +433,16 @@ class Fs:
         return False
 
     @staticmethod
-    def _defaultSkipForRegistry(name: str) -> bool:
+    def defaultSkipForRegistry(name: str) -> bool:
         if name == Fs.configFileName:
             return True
         return False
 
     @staticmethod
-    def _crawl(
+    def crawl(
         # Signature -- shouldIgnore(name: str, isDir: bool) -> bool
-        shouldIgnore: Callable[[str, bool], bool] = _defaultShouldIgnore,
-        skipForRegistry: Callable[[str], bool] = _defaultSkipForRegistry,
+        shouldIgnore: Callable[[str, bool], bool] = defaultShouldIgnore,
+        skipForRegistry: Callable[[str], bool] = defaultSkipForRegistry,
     ) -> Tuple[DirNode, NameRegistry]:
         """
         Crawl the current directory. Construct & return an FsNode tree and NameRegistry.
@@ -455,6 +455,6 @@ class Fs:
         return rootDir, nameRegistry
 
     def __init__(self) -> None:
-        rootDir, nameRegistry = Fs._crawl()
+        rootDir, nameRegistry = Fs.crawl()
         self.rootDir: DirNode = rootDir
         self.nameRegistry: NameRegistry = nameRegistry
