@@ -1,4 +1,7 @@
 name: "Build Alteza for GitHub Pages"
+branding:
+  icon: 'book-open'
+  color: 'green'
 description: "A simple GitHub action that builds and deploys an Alteza website to GitHub pages"
 author: "Arjun Menon"
 
