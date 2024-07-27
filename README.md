@@ -40,7 +40,7 @@ Try running `alteza -h` to see the command-line options available.
 
 3. All file and directory names, except for index page files, _at all depth levels_ must be unique. This is to simplify use of the `link(name)` function. With unique file and directory names, one can simply link to a file or directory with just its name, without needing to disambiguate a non-unique name with its path. Note: Directories can only be linked to if the directory contains an index page.
 
-4. There are two kinds of files: **static asset** files, and **PyPage** (i.e. dynamic *template* or *content*) files. PyPage files get processed by the [PyPage](https://github.com/arjun-menon/pypage) template engine.
+4. There are two kinds of files: **static asset** files, and **PyPage** (i.e. dynamic *template/layout* or *content*) files. PyPage files get processed by the [PyPage](https://github.com/arjun-menon/pypage) template engine.
 
 5. **Static asset** files are **_not_** read by Alteza. They are _selectively_ either **symlink**ed or **copied** to the output directory (you can choose which, with a command-line argument). Here, _selectively_ means that they are exposed in the output directory _only if they are linked to_ from a PyPage file using a special Alteza-provided `link(name)` function.
 
@@ -63,27 +63,27 @@ Try running `alteza -h` to see the command-line options available.
 
     4. The fields from the YAML front matter the fields are injected into the `env`/environment.
 
-    5. The HTML is injected into a `content` variable in `env`, and this `env` is passed to a **template** specified _in configuration_, for a second round of processing by PyPage. (Note: PyPage here is invoked on the template.)
+    5. The HTML is injected into a `content` variable in `env`, and this `env` is passed to a `layout` **template** specified _in configuration_, for a second round of processing by PyPage. (Note: PyPage here is invoked on the template.)
 
-       1. Templates are HTML files processed by PyPage. The PyPage-processed Markdown HTML output is passed to the template as the `content` variable. The template itself is then executed by PyPage.
+       1. Templates are HTML files processed by PyPage. The PyPage-processed Markdown HTML output is passed to the template/layout as the `content` variable. The template itself is then executed by PyPage.
 
-       2. The template should use this `content` value via PyPage (with `{{ content }}`) in order to inject the `content` into itself.
+       2. The template/layout should use this `content` value via PyPage (with `{{ content }}`) in order to inject the `content` into itself.
 
-       3. The template is specified using a `template` or `templateRaw` variable declared in a `__config__.py` file. (More on configuration files in a later point below.)
+       3. The template is specified using a `layout` or `layoutRaw` variable declared in a `__config__.py` file. (More on configuration files in a later point below.)
 
-       4. A `template` variable's value must be the name of a template.
+       4. A `layout` variable's value must be the name of a template.
 
-          1. For example, you can write `template: ordinary-page` in the YAML front matter of a Markdown file.
+          1. For example, you can write `layout: ordinary-page` in the YAML front matter of a Markdown file.
 
-          2. Or, alternatively, you can also write `template = "ordinary_page"` in a `__config__.py` file. If a `template` variable is defined like this in a `__config__.py` all adjacent and descendant files will inherit this `template` value.
+          2. Or, alternatively, you can also write `layout = "ordinary_page"` in a `__config__.py` file. If a `layout` variable is defined like this in a `__config__.py` all adjacent and descendant files will inherit this `layout` value.
 
-             1. This can be used as a way of defining a _**default**_ template.
+             1. This can be used as a way of defining a _**default**_ layout/template.
 
-             2. Of course, the default can be overridden in a Markdown file by specifying a template name in the YAML front matter, or with a new default in a descendant `__config__.py`.
+             2. Of course, the default can be overridden in a Markdown file by specifying a layout name in the YAML front matter, or with a new default in a descendant `__config__.py`.
 
-          3. Lastly, alternatively, a `templateRaw` can also be defined whose value must be the entire contents of a template PyPage-HTML file. A convenience function `readfile` is provided for this. For example, you can write something like `template = readfile('some_template.html')` in a config file. A `templateRaw`, if specified, takes precedence over `template`. Using this `templateRaw` approach is not recommended.
+          3. Lastly, alternatively, a `layoutRaw` can also be defined whose value must be the entire contents of a template PyPage-HTML file. A convenience function `readfile` is provided for this. For example, you can write something like `layout = readfile('some_layout.html')` in a config file. A `layoutRaw`, if specified, takes precedence over `layout`. Using this `layoutRaw` approach is not recommended.
 
-       5. Templates may be overriden in descendant `__config__.py` files. Or, may be overridden in the Markdown file _**itself**_ using a PyPage multiline code tag (not an inline code tag).
+       5. Layouts/templates may be overridden in descendant `__config__.py` files. Or, may be overridden in the Markdown file _**itself**_ using YAML front matter (by specifying a `layout: ...`), or even in a PyPage multiline code tag (not an inline code tag) inside a PyPage file (with a `layout = ...`).
 
    6. Markdown files result in **_a directory_** with the base name (_i.e. without the `.md` extension_), with an `index.html` file containing the Markdown's output.
 
@@ -95,9 +95,7 @@ Try running `alteza -h` to see the command-line options available.
 
        1. First, we recursively go through all directories top-down.
 
-       2. At each directory (descending downward), we execute an `__config__.py` file, if one is present. After
-         execution, we absorb any variables in it that do not start with a `_` into the `env` dict.
-         * This behavior cna be used to override values. For example a top-level directory can define a `default_template`, which can then be overriden by inner directories.
+       2. At each directory (descending downward), we execute an `__config__.py` file, if one is present. After execution, we absorb any variables in it that do not start with a `_` into the `env` dict.
 
     3. The deepest `.md`/`.py.*` files get executed first. After it executes, we check if a `env` contains a field `public` that is set as `True`. If it does, we mark that file for publication. Other than recording the value of `public` after each dynamic file is executed, any modification to `env` made by a dynamic file are discarded (and not absorbed, unlike with `__config__.py`).
        * I would not recommend using `__config__.py` to set `public` as `True`, as that would make the entire directory and all its descendants public (unless that behavior is exactly what is desired). Reachability with `link` (described below) is, in my opinion, a better way to make _only reachable_ content publicly exposed.

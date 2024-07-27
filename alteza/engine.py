@@ -269,14 +269,14 @@ class Content:
         return Content.splitPath(head) + [tail]
 
     def getTemplateHtml(self, env: dict[str, Any]) -> str:
-        if "templateRaw" in env:
-            templateRaw = env["templateRaw"]
+        if "layoutRaw" in env:
+            templateRaw = env["layoutRaw"]
             if not isinstance(templateRaw, str):
-                raise AltezaException("The `templateRaw` must be a string.")
+                raise AltezaException("The `layoutRaw` must be a string.")
             print(f"  {Fore.purple_3}Applying raw template...{Style.reset}")
             return templateRaw
-        if "template" in env:
-            templateName = env["template"]
+        if "layout" in env:
+            templateName = env["layout"]
             print(
                 f"  {Fore.purple_3}Applying template: "
                 f"{Fore.blue_violet}{templateName}{Fore.purple_3}...{Style.reset}"
@@ -288,7 +288,7 @@ class Content:
             self.templateCache[templateName] = templateRaw
             return templateRaw
         raise AltezaException(
-            "You must define a `template` or `templateRaw` in some ancestral `__config__.py` file."
+            "You must define a `layout` or `layoutRaw` in some ancestral `__config__.py` file."
         )
 
 

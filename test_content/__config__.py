@@ -5,4 +5,4 @@ pygments_style = "sas"
 
 mood = "joy"
 
-template = "ordinary_page"
+layout = "ordinary_page"
