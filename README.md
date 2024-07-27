@@ -19,14 +19,7 @@ site can contain arbitrary Python that is executed at the time of site generatio
 in particular, makes it seamless to include actual Python code inside page templates. (This of
 course means that you must run Alteza with trusted code, or in an isolated container.)
 
-#### Installation
-
-You can [install](https://docs.python.org/3/installing/) Alteza easily with [pip](https://pip.pypa.io/en/stable/):
-
-```
-pip install alteza
-```
-Try running `alteza -h` to see the command-line options available.
+Alteza will be available as GitHub action soon for use with GitHub Pages.
 
 ## User Guide
 
@@ -121,9 +114,22 @@ Try running `alteza -h` to see the command-line options available.
        * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`.
        * Directories containing index files should just be referred to by the directory name. For example, the index page `about-me/hobbies/index.md` (or `about-me/hobbies/index.py.html`) should just be linked to with a `link('hobbies')`.
 
-### Usage, Testing & Development
+## Installation & Command-Line Usage
 
-#### Running
+### GitHub Action
+
+Alteza will be available as a GitHub action soon. This will be the best way to use Alteza, especially if you intend to use it along with GitHub Pages. Using the GitHub action will avoid needing to install or configure Alteza.
+
+### Installation
+
+You can [install](https://docs.python.org/3/installing/) Alteza easily with [pip](https://pip.pypa.io/en/stable/):
+
+```
+pip install alteza
+```
+Try running `alteza -h` to see the command-line options available.
+
+### Running
 
 If you've installed Alteza with pip, you can just run `alteza`, e.g.:
 ```sh
@@ -131,7 +137,7 @@ alteza -h
 ```
 If you're working on Alteza itself, then run the `alteza` module itself, from the project directory directly, e.g. `python3 -m alteza -h`.
 
-#### Command-line Arguments
+### Command-line Arguments
 The `-h` argument above will print the list of available arguments:
 ```
 usage: __main__.py --content CONTENT --output OUTPUT [--clear_output_dir] [--copy_assets] [--seed SEED] [-h]
@@ -151,7 +157,11 @@ To test against `test_content` (and generate output to `test_output`), run it li
 python -m alteza --content test_content --output test_output --clear_output_dir
 ```
 
-#### Code Style
+## Development & Testing
+
+Feel free to send me PRs for this project.
+
+### Code Style
 
 I'm using `black`. To re-format the code, just run: `black alteza`.
 Fwiw, I've configured my IDE (_PyCharm_) to always auto-format with `black`.
@@ -170,7 +180,7 @@ pytype alteza  # should have zero errors too
 ```
 Or, all at once with: `mypy alteza ; pyflakes alteza ; pyre check ; pyright alteza ; pytype alteza`. Pytype is pretty slow, so feel free to omit it.
 
-#### Linting
+### Linting
 Linting policy is very strict. [Pylint](https://pylint.pycqa.org/en/latest/index.html) must issue a perfect 10/10 score, otherwise the Pylint CI check will fail.  On a side note, you can see **a UML diagram** of the Alteza code if you click on any one of the completed workflow runs for the [Pylint CI check](https://github.com/arjun-menon/alteza/actions/workflows/pylint.yml).
 
 To test whether lints are passing, simply run:
@@ -199,5 +209,5 @@ deactive # end the venv
 
 ---
 
-#### License
+### License
 This project is licensed under the AGPL v3, but I'm reserving the right to re-license it under a license with fewer restrictions, e.g. the Apache License 2.0, and any PRs constitute consent to re-license as such.
