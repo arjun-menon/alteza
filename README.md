@@ -181,7 +181,7 @@ pytype alteza  # should have zero errors too
 Or, all at once with: `mypy alteza ; pyflakes alteza ; pyre check ; pyright alteza ; pytype alteza`. Pytype is pretty slow, so feel free to omit it.
 
 ### Linting
-Linting policy is very strict. [Pylint](https://pylint.pycqa.org/en/latest/index.html) must issue a perfect 10/10 score, otherwise the Pylint CI check will fail.  On a side note, you can see **a UML diagram** of the Alteza code if you click on any one of the completed workflow runs for the [Pylint CI check](https://github.com/arjun-menon/alteza/actions/workflows/pylint.yml).
+Linting policy is very strict. [Pylint](https://pylint.pycqa.org/en/latest/index.html) must issue a perfect 10/10 score, otherwise the Pylint CI check will fail.  On a side note, you can see a UML diagram of the Alteza code if you click on any one of the completed workflow runs for the [Pylint CI check](https://github.com/arjun-menon/alteza/actions/workflows/pylint.yml).
 
 To test whether lints are passing, simply run:
 ```
@@ -190,6 +190,10 @@ pylint -j 0 alteza
 To run it along with all the type checks (excluding `pytype`), just run: `mypy alteza ; pyre check ; pyright alteza ; pyflakes alteza ; pylint -j 0 alteza`. I run this often.
 
 Of course, when it makes sense, lints should be suppressed next to the relevant line, in code. Also, unlike typical Python code, the naming convention generally-followed in this codebase is `camelCase`. Pylint checks for names have mostly been disabled.
+
+Here's the Pylint-generated UML diagram of Alteza's code (that's current as of v0.7.8):
+
+![](https://raw.githubusercontent.com/arjun-menon/alteza/master/uml-diagram.png)
 
 ### Dependencies
 
