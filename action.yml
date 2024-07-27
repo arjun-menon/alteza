@@ -1,5 +1,5 @@
-name: "Alteza"
-description: "A composite action that builds and deploys an Alteza website to GitHub pages"
+name: "Build Alteza for GitHub Pages"
+description: "A simple GitHub action that builds and deploys an Alteza website to GitHub pages"
 author: "Arjun Menon"
 
 inputs:
@@ -34,8 +34,8 @@ runs:
         # patch version release with an _even-numbered_ patch version
         # release that is limited to documentation and `action.yml`.
         #
-        # pip install -q alteza@v0.7.1
-        pip install -q git+https://github.com/arjun-menon/alteza.git@master
+        # pip install -q git+https://github.com/arjun-menon/alteza.git@master
+        pip install -q alteza@v0.7.9
 
     - name: Generate
       shell: bash
