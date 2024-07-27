@@ -20,7 +20,7 @@ setup(
         "pygments >= 2.16.1",
         "pyyaml >= 6.0.1",
         "colored >= 2.2.4",
-        "sh >= 2.0.6",
+        "sh >= 2.0.7",
         "typed-argument-parser >= 1.10.1",
     ],
     long_description=open("README.md").read(),
