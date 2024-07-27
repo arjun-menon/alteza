@@ -34,8 +34,8 @@ runs:
         # patch version release with an _even-numbered_ patch version
         # release that is limited to documentation and `action.yml`.
         #
-        # pip install -q git+https://github.com/arjun-menon/alteza.git@master
-        pip install -q alteza@v0.7.9
+        # pip install git+https://github.com/arjun-menon/alteza.git@master
+        pip install alteza==0.7.9
 
     - name: Generate
       shell: bash
