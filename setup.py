@@ -15,7 +15,7 @@ setup(
     # Ref: https://packaging.python.org/en/latest/discussions/install-requires-vs-requirements/
     install_requires=[
         # Standard dependencies:
-        "pypage >= 2.0.8",
+        "pypage >= 2.0.9",
         "markdown >= 3.6",
         "pygments >= 2.16.1",
         "pyyaml >= 6.0.1",
