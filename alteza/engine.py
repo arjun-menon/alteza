@@ -159,11 +159,7 @@ class Content:
             def path(name: str) -> str:
                 return self.linkObj(configFile, self.nameRegistry.lookup(name), True)
 
-            def getTemplate(name: str) -> str:
-                return Fs.readfile(path(name))
-
             configEnv |= {"path": path}
-            configEnv |= {"getTemplate": getTemplate}
 
             print(
                 f"{Fore.dark_orange}Running:{Style.reset}",
