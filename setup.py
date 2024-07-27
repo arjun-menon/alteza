@@ -21,7 +21,7 @@ setup(
         "pyyaml >= 6.0.1",
         "colored >= 2.2.4",
         "sh >= 2.0.6",
-        "typed-argument-parser >= 1.8.1",
+        "typed-argument-parser >= 1.10.1",
     ],
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
