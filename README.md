@@ -19,8 +19,6 @@ site can contain arbitrary Python that is executed at the time of site generatio
 in particular, makes it seamless to include actual Python code inside page templates. (This of
 course means that you must run Alteza with trusted code, or in an isolated container.)
 
-Alteza will be available as GitHub action soon for use with GitHub Pages.
-
 ## User Guide
 
 1. The directory structure is generally mirrored in the generated site.
@@ -114,11 +112,43 @@ Alteza will be available as GitHub action soon for use with GitHub Pages.
        * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`.
        * Directories containing index files should just be referred to by the directory name. For example, the index page `about-me/hobbies/index.md` (or `about-me/hobbies/index.py.html`) should just be linked to with a `link('hobbies')`.
 
-## Installation & Command-Line Usage
+## GitHub Action, Installation & Command-Line Usage
 
 ### GitHub Action
 
-Alteza will be available as a GitHub action soon. This will be the best way to use Alteza, especially if you intend to use it along with GitHub Pages. Using the GitHub action will avoid needing to install or configure Alteza.
+Alteza is available as a GitHub action, for use with GitHub Pages. This is the simplest way to use Alteza, if you intend to use it with GitHub Pages. Using the GitHub action will avoid needing to install or configure Alteza. You can easily create & deply an Alteza website onto GitHub Pages using this action.
+
+To use the GitHub action, create a workflow file called something like `.github/workflows/alteza.yml`, and paste the following in it:
+```yml
+name: Alteza
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build Website
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.generate.outputs.page_url }}
+
+    steps:
+      - name: Generate Alteza Website
+        id: generate
+        uses: arjun-menon/alteza@v0.7.9
+        with:
+          path: .
+```
+For an example of this GitHub workflow above in action, see [alteza-test](https://github.com/arjun-menon/alteza-test) ([yaml](https://github.com/arjun-menon/alteza-test/blob/main/.github/workflows/alteza.yml), [runs](https://github.com/arjun-menon/alteza-test/actions/workflows/alteza.yml)).
 
 ### Installation
 
