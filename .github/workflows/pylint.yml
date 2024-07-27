@@ -66,7 +66,7 @@ jobs:
 
       - name: Upload class structure diagrams
         #if: matrix.python-version == '3.11'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: class-structure
           path: class-structure
