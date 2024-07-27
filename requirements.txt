@@ -20,7 +20,7 @@ pypage==2.0.9
     # via alteza (setup.py)
 pyyaml==6.0.1
     # via alteza (setup.py)
-sh==2.0.6
+sh==2.0.7
     # via alteza (setup.py)
 typed-argument-parser==1.10.1
     # via alteza (setup.py)
