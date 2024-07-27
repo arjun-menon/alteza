@@ -191,7 +191,7 @@ To run it along with all the type checks (excluding `pytype`), just run: `mypy a
 
 Of course, when it makes sense, lints should be suppressed next to the relevant line, in code. Also, unlike typical Python code, the naming convention generally-followed in this codebase is `camelCase`. Pylint checks for names have mostly been disabled.
 
-Here's the Pylint-generated UML diagram of Alteza's code (that's current as of v0.7.8):
+Here's the Pylint-generated UML diagram of Alteza's code (that's current as of v0.7.9):
 
 ![](https://raw.githubusercontent.com/arjun-menon/alteza/master/uml-diagram.png)
 
