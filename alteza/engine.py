@@ -205,11 +205,12 @@ class Content:
 
         walk(self.rootDir, initial_env)
 
-        self._makeNodesReachableFromPublicNodesPublic()
+        self.tracePublic()
 
-    def _makeNodesReachableFromPublicNodesPublic(self) -> None:
+    def tracePublic(self) -> None:
+        """Make all nodes reachable from public nodes public. (Called after processing.)"""
         if "/" in self.nameRegistry.allFiles:
-            # Make the root (/) level index page public, if it exists.
+            # Always make the root (/) level index page public, if it exists.
             rootIndex = self.nameRegistry.allFiles["/"]
             rootIndex.makePublic()
 
