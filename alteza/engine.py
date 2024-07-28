@@ -133,6 +133,8 @@ class Content:
             env.update(mdResult.metadata)
             pyPageOutput = mdResult.html
 
+        # TODO: Enrich with `file` enhanced with `env`.
+
         if "public" in env:
             if env["public"] is True:
                 pyPageNode.makePublic()
@@ -177,6 +179,8 @@ class Content:
 
             env |= self.getModuleVars(self.runConfigIfAny(dirNode, env))
 
+            # TODO: Implement `skip`.
+
             # Ordering Note: We must recurse into the subdirectories first.
             for d in dirNode.subDirs:
                 with enterDir(d.dirName):
@@ -188,13 +192,17 @@ class Content:
             for f in filter(lambda f: not f.isIndex(), dirNode.files):
                 if isinstance(f, PyPageNode):
                     self.invokePyPage(f, env)
+
             # We must process the index file last.
             indexFilter = filter(lambda f: f.isIndex(), dirNode.files)
             indexFile: Optional[FileNode] = next(indexFilter, None)
             if indexFile is not None and isinstance(indexFile, PyPageNode):
                 self.invokePyPage(indexFile, env)
 
+            # TODO: Enrich dirNode with `env`/info from index?
+
         initial_env = self.seed | self.getBasicHelpers()
+
         walk(self.rootDir, initial_env)
 
         self._makeNodesReachableFromPublicNodesPublic()
