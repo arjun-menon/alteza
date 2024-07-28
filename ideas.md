@@ -16,6 +16,7 @@ Flexible Static Site Generator
     * Use a regex & validate that what's returned by `nameEncode` is acceptable for a URL.
     * Document this behavior: with Name Registry, this will make the unique names rule non-case-sensitive, at least with `defaultNameEncode` converting all chars to lower case.
 * Top 2:
+  * Enforce directory name uniqueness--currently multiple directories that are all without index pages can share the same name.
   * Rectify `linkName` (if necessary).
   * In addition to the `files`  field, we'll need some other fields.
     * Add `pages` (for Md & HTML), and `pyPages` (for all pypages).
