@@ -10,6 +10,7 @@ Flexible Static Site Generator
   * Document all the built-in functions.
   * Implement a `skip` config var.
   * Obsidian style Wiki Links.
+  * Update the `YYYY-MM-DD-` handler to allow `YYYY-MM-DD ` as well.
   * A `nameEncode` configurable function, with a `defaultNameEncode`.
     * Convert something like "Purpose of Life" to `purpose-of-life`.
     * This will allow us to use the file name as title, like in Obsidian.
