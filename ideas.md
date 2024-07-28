@@ -17,6 +17,7 @@ Flexible Static Site Generator
     * Use a regex & validate that what's returned by `nameEncode` is acceptable for a URL.
     * Document this behavior: with Name Registry, this will make the unique names rule non-case-sensitive, at least with `defaultNameEncode` converting all chars to lower case.
 * Top 2:
+  * Add a trailing `/` slash for Markdown page dirs since: (a) if a Markdown page is turned into a dir/collection of smaller essays, this would allow that change to happen naturally/seamlessly, and (b) since many web servers including the one used by GH pages add a trailing `/` slash to directories using a 301 Redirect anyways.
   * Enforce directory name uniqueness--currently multiple directories that are all without index pages can share the same name.
   * Rectify `linkName` (if necessary).
   * In addition to the `files`  field, we'll need some other fields.
