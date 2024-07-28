@@ -4,8 +4,9 @@ Flexible Static Site Generator
 
 #### Ideas...
 * Top 1:
-  * Proper YAML field capture.
   * Proper object exposed for each PyPage file.
+    * Proper YAML field capture.
+    * Maybe inject post-processing fields (gathered with `getModuleVars`) into this object with `setattr`.
   * Document all the built-in functions.
   * Implement a `skip` config var.
   * Obsidian style Wiki Links.
