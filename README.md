@@ -148,6 +148,8 @@ jobs:
         with:
           path: .
 ```
+The last parameter `path` should specify which directory in your GitHub repo should be rendered into a website. Also, note: make sure to set the `branches` for `workflow_dispatch` correctly (to your branch) so that this action is triggered on each push.
+
 For an example of this GitHub workflow above in action, see [alteza-test](https://github.com/arjun-menon/alteza-test) ([yaml](https://github.com/arjun-menon/alteza-test/blob/main/.github/workflows/alteza.yml), [runs](https://github.com/arjun-menon/alteza-test/actions/workflows/alteza.yml)).
 
 ### Installation
