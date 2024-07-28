@@ -87,6 +87,9 @@ Flexible Static Site Generator
   * ~~The Markdown file is processed using `pypage`, with its Python environment enhanced by the YAML fields from the front matter~~.
   * The environment dictionary after the Markdown is processed by pypage is treated as the "return value" of this `.md` file. ~~This "return value" dictionary has a `content` key added to it which maps to the `pypage` output for this `.md` file~~.
 * In the GitHub action: an option to pip install a `requirements.txt` file. (It'd just do `touch requirements.txt; pip install requirements.txt`.) Or maybe not an option, but always-on behavior.
+* Archiving URLs.
+  * See: https://gwern.net/archiving
+  * Perhaps with https://github.com/oduwsdl/archivenow
 
 Older Ideas 2
 =============
