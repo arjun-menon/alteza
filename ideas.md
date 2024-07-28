@@ -3,7 +3,18 @@ Flexible Static Site Generator
 ------------------------------
 
 #### Ideas...
-* Next up:
+* Top 1:
+  * Proper YAML field capture.
+  * Proper object exposed for each PyPage file.
+  * Document all the built-in functions.
+  * Implement a `skip` config var.
+  * Obsidian style Wiki Links.
+  * A `nameEncode` configurable function, with a `defaultNameEncode`.
+    * Convert something like "Purpose of Life" to `purpose-of-life`.
+    * This will allow us to use the file name as title, like in Obsidian.
+    * Use a regex & validate that what's returned by `nameEncode` is acceptable for a URL.
+    * Document this behavior: with Name Registry, this will make the unique names rule non-case-sensitive, at least with `defaultNameEncode` converting all chars to lower case.
+* Top 2:
   * Rectify `linkName` (if necessary).
   * In addition to the `files`  field, we'll need some other fields.
     * Add `pages` (for Md & HTML), and `pyPages` (for all pypages).
