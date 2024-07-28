@@ -23,6 +23,7 @@ from .fs import (
     Fs,
     Fore,
     Style,
+    PageNode,
     PyPageNode,
 )
 
@@ -189,15 +190,13 @@ class Content:
             # Ordering Note: Files in the current directory must be processed after
             # all subdirectories have been processed so that they have access to
             # information about the subdirectories.
-            for f in filter(lambda f: not f.isIndex(), dirNode.files):
-                if isinstance(f, PyPageNode):
-                    self.invokePyPage(f, env)
+            for pyPageNode in dirNode.getPyPagesOtherThanIndex():
+                self.invokePyPage(pyPageNode, env)
 
             # We must process the index file last.
-            indexFilter = filter(lambda f: f.isIndex(), dirNode.files)
-            indexFile: Optional[FileNode] = next(indexFilter, None)
-            if indexFile is not None and isinstance(indexFile, PyPageNode):
-                self.invokePyPage(indexFile, env)
+            indexPage: Optional[PageNode] = dirNode.getIndexPage()
+            if indexPage is not None and isinstance(indexPage, PyPageNode):
+                self.invokePyPage(indexPage, env)
 
             # TODO: Enrich dirNode with `env`/info from index?
 

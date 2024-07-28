@@ -9,6 +9,7 @@ from typing import (
     Any,
     List,
     Sequence,
+    Iterator,
     Dict,
     DefaultDict,
     Set,
@@ -190,6 +191,19 @@ class DirNode(FsNode):
 
     def getPages(self) -> Sequence["PageNode"]:
         return [f for f in self.files if (isinstance(f, PageNode) and not f.isIndex())]
+
+    def getPyPagesOtherThanIndex(self) -> Iterator["PyPageNode"]:
+        return (
+            f for f in self.files if (isinstance(f, PyPageNode) and not f.isIndex())
+        )
+
+    def getIndexPage(self) -> Optional["PageNode"]:
+        indexFilter = filter(lambda f: f.isIndex(), self.files)
+        indexFile: Optional[FileNode] = next(indexFilter, None)
+        if indexFile:
+            assert isinstance(indexFile, PageNode)
+            return indexFile
+        return None
 
     @staticmethod
     def _displayDir(dirNode: "DirNode", indent: int = 0) -> str:
