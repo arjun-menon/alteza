@@ -171,45 +171,43 @@ class Content:
             exec(Fs.readfile(Fs.configFileName), configEnv)
         return configEnv
 
+    @staticmethod
+    def getSkipNames(env: dict[str, Any]) -> List[str]:
+        skipNames = []
+        if "skip" in env:
+            skipVar = env["skip"]
+            if isinstance(skipVar, list):
+                for skipName in skipVar:
+                    if isinstance(skipName, str):
+                        skipNames.append(skipName)
+                    else:
+                        raise AltezaException(
+                            "`skip` must be a list of strings representing names to be skipped.\n"
+                            + f"`{skipName}` is not a string."
+                        )
+            else:
+                raise AltezaException("`skip` must be a list of names.")
+        return skipNames
+
     def process(self) -> None:
         def walk(dirNode: DirNode, env: dict[str, Any]) -> None:
-            env = env.copy()
-
-            # Enrich with current dir:
-            env |= {"dir": dirNode}
-
-            env |= self.getModuleVars(self.runConfigIfAny(dirNode, env))
-
-            # Process `skip`:
-            skipNames = []
-            if "skip" in env:
-                skipVar = env["skip"]
-                if isinstance(skipVar, list):
-                    for skipName in skipVar:
-                        if isinstance(skipName, str):
-                            skipNames.append(skipName)
-                        else:
-                            raise AltezaException(
-                                "`skip` must be a list of strings representing names to be skipped.\n"
-                                + f"`{skipName}` is not a string."
-                            )
-                else:
-                    raise AltezaException("`skip` must be a list of names.")
+            env = env.copy()  # Duplicate env.
+            env |= {"dir": dirNode}  # Enrich with current dir.
+            env |= self.getModuleVars(self.runConfigIfAny(dirNode, env))  # Run config.
+            skipNames = self.getSkipNames(env)  # Process `skip`.
 
             # Ordering Note: We must recurse into the subdirectories first.
             for d in dirNode.subDirs:
-                if d.dirName in skipNames:
-                    continue
-                with enterDir(d.dirName):
-                    walk(d, env)
+                if d.dirName not in skipNames:
+                    with enterDir(d.dirName):
+                        walk(d, env)
 
             # Ordering Note: Files in the current directory must be processed after
             # all subdirectories have been processed so that they have access to
             # information about the subdirectories.
             for pyPageNode in dirNode.getPyPagesOtherThanIndex():
-                if pyPageNode.realName in skipNames:
-                    continue
-                self.invokePyPage(pyPageNode, env)
+                if pyPageNode.getLinkName() not in skipNames:
+                    self.invokePyPage(pyPageNode, env)
 
             # We must process the index file last.
             indexPage: Optional[PageNode] = dirNode.getIndexPage()
