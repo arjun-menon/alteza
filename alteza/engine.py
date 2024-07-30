@@ -180,10 +180,26 @@ class Content:
 
             env |= self.getModuleVars(self.runConfigIfAny(dirNode, env))
 
-            # TODO: Implement `skip`.
+            # Process `skip`:
+            skipNames = []
+            if "skip" in env:
+                skipVar = env["skip"]
+                if isinstance(skipVar, list):
+                    for skipName in skipVar:
+                        if isinstance(skipName, str):
+                            skipNames.append(skipName)
+                        else:
+                            raise AltezaException(
+                                "`skip` must be a list of strings representing names to be skipped.\n"
+                                + f"`{skipName}` is not a string."
+                            )
+                else:
+                    raise AltezaException("`skip` must be a list of names.")
 
             # Ordering Note: We must recurse into the subdirectories first.
             for d in dirNode.subDirs:
+                if d.dirName in skipNames:
+                    continue
                 with enterDir(d.dirName):
                     walk(d, env)
 
@@ -191,6 +207,8 @@ class Content:
             # all subdirectories have been processed so that they have access to
             # information about the subdirectories.
             for pyPageNode in dirNode.getPyPagesOtherThanIndex():
+                if pyPageNode.realName in skipNames:
+                    continue
                 self.invokePyPage(pyPageNode, env)
 
             # We must process the index file last.
