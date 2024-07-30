@@ -381,11 +381,7 @@ class Generate:
                 else:
                     Generate.linkStaticAsset(fileNode, args.copy_assets)
 
-        outputDir = args.output
-        Generate.resetOutputDir(outputDir, args.clear_output_dir)
-
-        print("Generating...")
-        with enterDir(outputDir):
+        with enterDir(args.output):
             walk(content.rootDir)
 
 
@@ -408,6 +404,8 @@ def run(args: Args) -> None:
             f"The provided path '{contentDir}' does not exist or is not a directory."
         )
 
+    Generate.resetOutputDir(args.output, args.clear_output_dir)
+
     with enterDir(args.content):
         fs = Fs()
         print(fs.nameRegistry)
@@ -419,6 +417,7 @@ def run(args: Args) -> None:
     print("File Tree:")
     print(fs.rootDir.displayDir())
 
+    print("Generating...")
     Generate.generate(args, content)
 
     elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
