@@ -16,6 +16,7 @@ Flexible Static Site Generator
     * This will allow us to use the file name as title, like in Obsidian.
     * Use a regex & validate that what's returned by `nameEncode` is acceptable for a URL.
     * Document this behavior: with Name Registry, this will make the unique names rule non-case-sensitive, at least with `defaultNameEncode` converting all chars to lower case.
+  * Rebuild automatically with a fs watching library.
 * Top 2:
   * Add a trailing `/` slash for Markdown page dirs since: (a) if a Markdown page is turned into a dir/collection of smaller essays, this would allow that change to happen naturally/seamlessly, and (b) since many web servers including the one used by GH pages add a trailing `/` slash to directories using a 301 Redirect anyways.
   * Caching in the GitHub action. See:
