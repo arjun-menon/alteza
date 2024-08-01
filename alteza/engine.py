@@ -449,4 +449,4 @@ class Engine:
 
         elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
         # pylint: disable=consider-using-f-string
-        print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
+        print("\nSite generation complete. Time elapsed: %.2f ms" % elapsedMilliseconds)
