@@ -16,6 +16,9 @@ Flexible Static Site Generator
     * Use a regex & validate that what's returned by `nameEncode` is acceptable for a URL.
     * Document this behavior: with Name Registry, this will make the unique names rule non-case-sensitive, at least with `defaultNameEncode` converting all chars to lower case.
   * Rebuild automatically with a fs watching library.
+  * Rename `subDirs` to `dirs`, etc.?
+  * An `after` function defined in __config__.py that gets run after all children are processed.
+  * Installing pip requirements.txt for the site being built.
 * Top 2:
   * Add a trailing `/` slash for Markdown page dirs since: (a) if a Markdown page is turned into a dir/collection of smaller essays, this would allow that change to happen naturally/seamlessly, and (b) since many web servers including the one used by GH pages add a trailing `/` slash to directories using a 301 Redirect anyways.
   * Caching in the GitHub action. See:
