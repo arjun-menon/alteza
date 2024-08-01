@@ -312,75 +312,6 @@ class Content:
         )
 
 
-class Generate:
-    # pylint: disable=too-few-public-methods
-    # This class is just here to organize a bunch of related functions together.
-    # This class should never be instantiated. Generate.generate(...) should
-    # be called to write the output of a processed Content object.
-    @staticmethod
-    def writeMdContents(md: Md) -> None:
-        if os.path.exists("index.html"):
-            raise AltezaException(
-                f"An index.html already exists, and conflicts with {md}, at {os.getcwd()}."
-            )
-        with open("index.html", "w", encoding="utf-8") as pageHtml:
-            pageHtml.write(md.getPyPageOutput())
-
-    @staticmethod
-    def writeMd(md: Md) -> None:
-        if not md.isIndex():
-            os.mkdir(md.realName)
-            with enterDir(md.realName):
-                Generate.writeMdContents(md)
-        else:
-            Generate.writeMdContents(md)
-
-    @staticmethod
-    def writeNonMd(nonMd: NonMd) -> None:
-        fileName = nonMd.rectifiedFileName
-        if os.path.exists(fileName):
-            raise AltezaException(
-                f"File {fileName} already exists, and conflicts with {nonMd}."
-            )
-        with open(fileName, "w", encoding="utf-8") as nonMdPageFile:
-            nonMdPageFile.write(nonMd.getPyPageOutput())
-
-    @staticmethod
-    def writePyPageNode(pyPageNode: PyPageNode) -> None:
-        if isinstance(pyPageNode, Md):
-            Generate.writeMd(pyPageNode)
-
-        elif isinstance(pyPageNode, NonMd):
-            Generate.writeNonMd(pyPageNode)
-
-        else:
-            raise AltezaException(f"{pyPageNode} pyPage attribute is invalid.")
-
-    @staticmethod
-    def linkStaticAsset(fileNode: FileNode, shouldCopy: bool) -> None:
-        if shouldCopy:
-            shutil.copyfile(fileNode.absoluteFilePath, fileNode.fileName)
-        else:
-            os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
-
-    @staticmethod
-    def generate(args: Args, content: Content) -> None:
-        def walk(curDir: DirNode) -> None:
-            for subDir in filter(lambda node: node.shouldPublish, curDir.subDirs):
-                os.mkdir(subDir.dirName)
-                with enterDir(subDir.dirName):
-                    walk(subDir)
-
-            for fileNode in filter(lambda node: node.shouldPublish, curDir.files):
-                if isinstance(fileNode, PyPageNode):
-                    Generate.writePyPageNode(fileNode)
-                else:
-                    Generate.linkStaticAsset(fileNode, args.copy_assets)
-
-        with enterDir(args.output):
-            walk(content.rootDir)
-
-
 @contextlib.contextmanager
 def enterDir(newDir: str) -> Generator[None, None, None]:
     # https://stackoverflow.com/a/13847807/908430
@@ -393,6 +324,74 @@ def enterDir(newDir: str) -> Generator[None, None, None]:
 
 
 class Engine:
+    class Generate:
+        # These classes are just here to organize a bunch of related functions together.
+        # This class should never be instantiated. Generate.generate(...) is the entry
+        # point to be called to write the output of a processed Content object.
+        # Similarly, Engine.run(args) is used to invoke Alteza overall.
+        @staticmethod
+        def writeMdContents(md: Md) -> None:
+            if os.path.exists("index.html"):
+                raise AltezaException(
+                    f"An index.html already exists, and conflicts with {md}, at {os.getcwd()}."
+                )
+            with open("index.html", "w", encoding="utf-8") as pageHtml:
+                pageHtml.write(md.getPyPageOutput())
+
+        @staticmethod
+        def writeMd(md: Md) -> None:
+            if not md.isIndex():
+                os.mkdir(md.realName)
+                with enterDir(md.realName):
+                    Engine.Generate.writeMdContents(md)
+            else:
+                Engine.Generate.writeMdContents(md)
+
+        @staticmethod
+        def writeNonMd(nonMd: NonMd) -> None:
+            fileName = nonMd.rectifiedFileName
+            if os.path.exists(fileName):
+                raise AltezaException(
+                    f"File {fileName} already exists, and conflicts with {nonMd}."
+                )
+            with open(fileName, "w", encoding="utf-8") as nonMdPageFile:
+                nonMdPageFile.write(nonMd.getPyPageOutput())
+
+        @staticmethod
+        def writePyPageNode(pyPageNode: PyPageNode) -> None:
+            if isinstance(pyPageNode, Md):
+                Engine.Generate.writeMd(pyPageNode)
+
+            elif isinstance(pyPageNode, NonMd):
+                Engine.Generate.writeNonMd(pyPageNode)
+
+            else:
+                raise AltezaException(f"{pyPageNode} pyPage attribute is invalid.")
+
+        @staticmethod
+        def linkStaticAsset(fileNode: FileNode, shouldCopy: bool) -> None:
+            if shouldCopy:
+                shutil.copyfile(fileNode.absoluteFilePath, fileNode.fileName)
+            else:
+                os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
+
+        @staticmethod
+        def generate(args: Args, content: Content) -> None:
+            def walk(curDir: DirNode) -> None:
+                for subDir in filter(lambda node: node.shouldPublish, curDir.subDirs):
+                    os.mkdir(subDir.dirName)
+                    with enterDir(subDir.dirName):
+                        walk(subDir)
+
+                for fileNode in filter(lambda node: node.shouldPublish, curDir.files):
+                    if isinstance(fileNode, PyPageNode):
+                        Engine.Generate.writePyPageNode(fileNode)
+                    else:
+                        Engine.Generate.linkStaticAsset(fileNode, args.copy_assets)
+
+            with enterDir(args.output):
+                walk(content.rootDir)
+
     @staticmethod
     def checkContentDir(contentDir: str) -> None:
         if not os.path.isdir(contentDir):
@@ -445,7 +444,7 @@ class Engine:
 
         content = Engine.process(args)
         print("Generating...")
-        Generate.generate(args, content)
+        Engine.Generate.generate(args, content)
 
         elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
         # pylint: disable=consider-using-f-string
