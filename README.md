@@ -144,7 +144,7 @@ jobs:
     steps:
       - name: Generate Alteza Website
         id: generate
-        uses: arjun-menon/alteza@v0.8.0
+        uses: arjun-menon/alteza@v0.8.1
         with:
           path: .
 ```
