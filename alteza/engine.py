@@ -364,26 +364,6 @@ class Generate:
             os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
 
     @staticmethod
-    def resetOutputDir(outputDir: str, shouldDelete: bool) -> None:
-        if os.path.isfile(outputDir):
-            raise AltezaException(
-                f"A file named {outputDir} already exists. Please move it or delete it. "
-                "Note that if this had been a directory, we would have erased it."
-            )
-        if os.path.isdir(outputDir):
-            if not shouldDelete:
-                raise AltezaException(
-                    f"Specified output directory {outputDir} already exists.\n"
-                    "Please use --clear_output_dir to delete it prior to site generation."
-                )
-            print(
-                f"Deleting directory {Fore.dark_red_2}%s{Style.reset} and all of its content...\n"
-                % outputDir
-            )
-            shutil.rmtree(outputDir)
-        os.mkdir(outputDir)
-
-    @staticmethod
     def generate(args: Args, content: Content) -> None:
         def walk(curDir: DirNode) -> None:
             for subDir in filter(lambda node: node.shouldPublish, curDir.subDirs):
@@ -412,30 +392,61 @@ def enterDir(newDir: str) -> Generator[None, None, None]:
         os.chdir(oldDir)
 
 
-def run(args: Args) -> None:
-    startTimeNs = time.time_ns()
-    contentDir = args.content
-    if not os.path.isdir(contentDir):
-        raise AltezaException(
-            f"The provided path '{contentDir}' does not exist or is not a directory."
-        )
+class Engine:
+    @staticmethod
+    def checkContentDir(contentDir: str) -> None:
+        if not os.path.isdir(contentDir):
+            raise AltezaException(
+                f"The provided path '{contentDir}' does not exist or is not a directory."
+            )
 
-    Generate.resetOutputDir(args.output, args.clear_output_dir)
+    @staticmethod
+    def resetOutputDir(outputDir: str, shouldDelete: bool) -> None:
+        if os.path.isfile(outputDir):
+            raise AltezaException(
+                f"A file named {outputDir} already exists. Please move it or delete it. "
+                "Note that if this had been a directory, we would have erased it."
+            )
+        if os.path.isdir(outputDir):
+            if not shouldDelete:
+                raise AltezaException(
+                    f"Specified output directory {outputDir} already exists.\n"
+                    "Please use --clear_output_dir to delete it prior to site generation."
+                )
+            print(
+                f"Deleting directory {Fore.dark_red_2}%s{Style.reset} and all of its content...\n"
+                % outputDir
+            )
+            shutil.rmtree(outputDir)
+        os.mkdir(outputDir)
 
-    with enterDir(args.content):
-        fs = Fs()
-        print(fs.nameRegistry)
-        content = Content(args, fs)
-        print("Processing...\n")
-        content.process()
-        print("\nSuccessfully completed processing.\n")
+    @staticmethod
+    def process(args: Args) -> Content:
+        with enterDir(args.content):
+            print("Analyzing content directory...")
+            fs = Fs()
+            print(fs.nameRegistry)
+            content = Content(args, fs)
+            print("Processing...\n")
+            content.process()
+            print("\nSuccessfully completed processing.\n")
 
-    print("File Tree:")
-    print(fs.rootDir.displayDir())
+        print("File Tree:")
+        print(fs.rootDir.displayDir())
 
-    print("Generating...")
-    Generate.generate(args, content)
+        return content
 
-    elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
-    # pylint: disable=consider-using-f-string
-    print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
+    @staticmethod
+    def run(args: Args) -> None:
+        startTimeNs = time.time_ns()
+
+        Engine.checkContentDir(args.content)
+        Engine.resetOutputDir(args.output, args.clear_output_dir)
+
+        content = Engine.process(args)
+        print("Generating...")
+        Generate.generate(args, content)
+
+        elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
+        # pylint: disable=consider-using-f-string
+        print("\nTime elapsed: %.2f ms" % elapsedMilliseconds)
