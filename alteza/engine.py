@@ -6,11 +6,13 @@ import shutil
 import sys
 import time
 import types
-from typing import Optional, Generator, List, Dict, Set, Any
+from typing import Callable, Optional, Generator, List, Dict, Set, Any
 
 import sh  # type: ignore
 from pypage import pypage  # type: ignore
 from tap import Tap
+from watchdog.events import FileSystemEventHandler, FileSystemEvent
+from watchdog.observers import Observer as WatchdogObserver
 
 from .fs import (
     FsNode,
@@ -34,6 +36,7 @@ class Args(Tap):  # pyre-ignore[13]
     clear_output_dir: bool = False  # Delete the output directory, if it already exists.
     copy_assets: bool = False  # Copy static assets instead of symlinking to them.
     seed: str = "{}"  # Seed JSON data to add to the initial root env.
+    watch: bool = False  # Watch for content changes, and rebuild.
 
 
 class Content:
@@ -324,73 +327,72 @@ def enterDir(newDir: str) -> Generator[None, None, None]:
 
 
 class Engine:
-    class Generate:
-        # These classes are just here to organize a bunch of related functions together.
-        # This class should never be instantiated. Generate.generate(...) is the entry
-        # point to be called to write the output of a processed Content object.
-        # Similarly, Engine.run(args) is used to invoke Alteza overall.
-        @staticmethod
-        def writeMdContents(md: Md) -> None:
-            if os.path.exists("index.html"):
-                raise AltezaException(
-                    f"An index.html already exists, and conflicts with {md}, at {os.getcwd()}."
-                )
-            with open("index.html", "w", encoding="utf-8") as pageHtml:
-                pageHtml.write(md.getPyPageOutput())
+    # This class is just here to organize a bunch of related functions together.
+    # This class should never be instantiated, and most functions not called directly.
+    # Engine.generate(...) is called to write the output of a processed Content object.
+    # Similarly, Engine.run(args) is used to invoke Alteza overall.
+    @staticmethod
+    def generateMdContents(md: Md) -> None:
+        if os.path.exists("index.html"):
+            raise AltezaException(
+                f"An index.html already exists, and conflicts with {md}, at {os.getcwd()}."
+            )
+        with open("index.html", "w", encoding="utf-8") as pageHtml:
+            pageHtml.write(md.getPyPageOutput())
 
-        @staticmethod
-        def writeMd(md: Md) -> None:
-            if not md.isIndex():
-                os.mkdir(md.realName)
-                with enterDir(md.realName):
-                    Engine.Generate.writeMdContents(md)
-            else:
-                Engine.Generate.writeMdContents(md)
+    @staticmethod
+    def generateMd(md: Md) -> None:
+        if not md.isIndex():
+            os.mkdir(md.realName)
+            with enterDir(md.realName):
+                Engine.generateMdContents(md)
+        else:
+            Engine.generateMdContents(md)
 
-        @staticmethod
-        def writeNonMd(nonMd: NonMd) -> None:
-            fileName = nonMd.rectifiedFileName
-            if os.path.exists(fileName):
-                raise AltezaException(
-                    f"File {fileName} already exists, and conflicts with {nonMd}."
-                )
-            with open(fileName, "w", encoding="utf-8") as nonMdPageFile:
-                nonMdPageFile.write(nonMd.getPyPageOutput())
+    @staticmethod
+    def generateNonMd(nonMd: NonMd) -> None:
+        fileName = nonMd.rectifiedFileName
+        if os.path.exists(fileName):
+            raise AltezaException(
+                f"File {fileName} already exists, and conflicts with {nonMd}."
+            )
+        with open(fileName, "w", encoding="utf-8") as nonMdPageFile:
+            nonMdPageFile.write(nonMd.getPyPageOutput())
 
-        @staticmethod
-        def writePyPageNode(pyPageNode: PyPageNode) -> None:
-            if isinstance(pyPageNode, Md):
-                Engine.Generate.writeMd(pyPageNode)
+    @staticmethod
+    def generatePyPageNode(pyPageNode: PyPageNode) -> None:
+        if isinstance(pyPageNode, Md):
+            Engine.generateMd(pyPageNode)
 
-            elif isinstance(pyPageNode, NonMd):
-                Engine.Generate.writeNonMd(pyPageNode)
+        elif isinstance(pyPageNode, NonMd):
+            Engine.generateNonMd(pyPageNode)
 
-            else:
-                raise AltezaException(f"{pyPageNode} pyPage attribute is invalid.")
+        else:
+            raise AltezaException(f"{pyPageNode} pyPage attribute is invalid.")
 
-        @staticmethod
-        def linkStaticAsset(fileNode: FileNode, shouldCopy: bool) -> None:
-            if shouldCopy:
-                shutil.copyfile(fileNode.absoluteFilePath, fileNode.fileName)
-            else:
-                os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
+    @staticmethod
+    def generateStaticAsset(fileNode: FileNode, shouldCopy: bool) -> None:
+        if shouldCopy:
+            shutil.copyfile(fileNode.absoluteFilePath, fileNode.fileName)
+        else:
+            os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
 
-        @staticmethod
-        def generate(args: Args, content: Content) -> None:
-            def walk(curDir: DirNode) -> None:
-                for subDir in filter(lambda node: node.shouldPublish, curDir.subDirs):
-                    os.mkdir(subDir.dirName)
-                    with enterDir(subDir.dirName):
-                        walk(subDir)
+    @staticmethod
+    def generate(args: Args, content: Content) -> None:
+        def walk(curDir: DirNode) -> None:
+            for subDir in filter(lambda node: node.shouldPublish, curDir.subDirs):
+                os.mkdir(subDir.dirName)
+                with enterDir(subDir.dirName):
+                    walk(subDir)
 
-                for fileNode in filter(lambda node: node.shouldPublish, curDir.files):
-                    if isinstance(fileNode, PyPageNode):
-                        Engine.Generate.writePyPageNode(fileNode)
-                    else:
-                        Engine.Generate.linkStaticAsset(fileNode, args.copy_assets)
+            for fileNode in filter(lambda node: node.shouldPublish, curDir.files):
+                if isinstance(fileNode, PyPageNode):
+                    Engine.generatePyPageNode(fileNode)
+                else:
+                    Engine.generateStaticAsset(fileNode, args.copy_assets)
 
-            with enterDir(args.output):
-                walk(content.rootDir)
+        with enterDir(args.output):
+            walk(content.rootDir)
 
     @staticmethod
     def checkContentDir(contentDir: str) -> None:
@@ -420,7 +422,7 @@ class Engine:
         os.mkdir(outputDir)
 
     @staticmethod
-    def process(args: Args) -> Content:
+    def processContent(args: Args) -> Content:
         with enterDir(args.content):
             print("Analyzing content directory...")
             fs = Fs()
@@ -436,16 +438,61 @@ class Engine:
         return content
 
     @staticmethod
-    def run(args: Args) -> None:
+    def makeSite(args: Args) -> None:
         startTimeNs = time.time_ns()
 
         Engine.checkContentDir(args.content)
         Engine.resetOutputDir(args.output, args.clear_output_dir)
 
-        content = Engine.process(args)
+        content = Engine.processContent(args)
         print("Generating...")
-        Engine.Generate.generate(args, content)
+        Engine.generate(args, content)
 
         elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
         # pylint: disable=consider-using-f-string
         print("\nSite generation complete. Time elapsed: %.2f ms" % elapsedMilliseconds)
+
+    class WatchdogEventHandler(FileSystemEventHandler):
+        def __init__(self) -> None:
+            self.timeOfMostRecentEvent: Optional[int] = None
+
+        def on_any_event(self, event: FileSystemEvent) -> None:
+            self.timeOfMostRecentEvent = max(
+                self.timeOfMostRecentEvent or 0, time.time_ns()
+            )
+
+    @staticmethod
+    def runWatchdog(contentDir: str, action: Callable[[], None]) -> None:
+        timeIntervalNs = 2 * 10**8
+        timeIntervalSecs = 0.2
+
+        def watching() -> None:
+            print(f"\nWatching for changes in {contentDir}...")
+
+        eventHandler = Engine.WatchdogEventHandler()
+        observer = WatchdogObserver()
+        observer.schedule(eventHandler, contentDir, recursive=True)
+        observer.start()
+        try:
+            watching()
+            while True:
+                time.sleep(timeIntervalSecs)
+                if eventHandler.timeOfMostRecentEvent:
+                    timeSinceMostRecentEvent = time.time_ns() - (
+                        eventHandler.timeOfMostRecentEvent or 0
+                    )
+                    if timeSinceMostRecentEvent > timeIntervalNs:
+                        eventHandler.timeOfMostRecentEvent = None
+                        print("\nDetected a change.\n")
+                        action()
+                        watching()
+        finally:
+            observer.stop()
+            observer.join()
+
+    @staticmethod
+    def run(args: Args) -> None:
+        Engine.makeSite(args)
+
+        if args.watch:
+            Engine.runWatchdog(args.content, lambda: Engine.makeSite(args))

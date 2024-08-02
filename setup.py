@@ -22,6 +22,7 @@ setup(
         "colored >= 2.2.4",
         "sh >= 2.0.7",
         "typed-argument-parser >= 1.10.1",
+        "watchdog >= 4.0.1",
     ],
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
