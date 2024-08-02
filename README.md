@@ -3,12 +3,10 @@
 Alteza is a static site generator<sup>[<img height="10" width="10" src="https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/103px-Wikipedia-logo-v2.svg.png" />](https://en.wikipedia.org/wiki/Static_site_generator)</sup> driven by [PyPage](https://github.com/arjun-menon/pypage).
 Examples of other static site generators can be [found here](https://github.com/collections/static-site-generators).
 
-Alteza can be thought of as a simpler and more flexible alternative to static site generators like [Jekyll](https://jekyllrb.com/), [Hugo](https://gohugo.io/), [Zola](https://www.getzola.org/), [Nextra](https://nextra.site/), etc.
-
-The differentiator with Alteza is that the site author (if familiar with Python) will have a lot more 
+Alteza can be thought of as a simpler and more flexible alternative to static site generators like [Jekyll](https://jekyllrb.com/), [Hugo](https://gohugo.io/), [Zola](https://www.getzola.org/), [Nextra](https://nextra.site/), etc. The differentiator with Alteza is that the site author (if familiar with Python) will have a lot more 
 fine-grained control over the output, than what (as far as I'm aware) any of the existing options offer.
 
-The learning curve is also shorter with Alteza. I've tried to follow part of [xmonad](https://xmonad.org/)'s philosophy
+The learning curve is also shorter with Alteza. I've tried to follow [xmonad](https://xmonad.org/)'s philosophy
 of keeping things small and simple. Alteza doesn't try to do a lot of things; instead it simply offers the core crucial
 functionality that is common to most static site generators.
 
