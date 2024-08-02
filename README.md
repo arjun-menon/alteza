@@ -3,7 +3,9 @@
 Alteza is a static site generator<sup>[<img height="10" width="10" src="https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/103px-Wikipedia-logo-v2.svg.png" />](https://en.wikipedia.org/wiki/Static_site_generator)</sup> driven by [PyPage](https://github.com/arjun-menon/pypage).
 Examples of other static site generators can be [found here](https://github.com/collections/static-site-generators).
 
-Alteza can be thought of as a simpler and more flexible alternative to static site generators like [Jekyll](https://jekyllrb.com/), [Hugo](https://gohugo.io/), [Zola](https://www.getzola.org/), [Nextra](https://nextra.site/), etc. The differentiator with Alteza is that the site author (if familiar with Python) will have a lot more 
+Alteza can be thought of as a simpler and more flexible alternative to static site generators like [Jekyll](https://jekyllrb.com/), [Hugo](https://gohugo.io/), [Zola](https://www.getzola.org/), [Nextra](https://nextra.site/), etc.
+
+The differentiator with Alteza is that the site author (if familiar with Python) will have a lot more 
 fine-grained control over the output, than what (as far as I'm aware) any of the existing options offer.
 
 The learning curve is also shorter with Alteza. I've tried to follow [xmonad](https://xmonad.org/)'s philosophy
@@ -11,8 +13,8 @@ of keeping things small and simple. Alteza doesn't try to do a lot of things; in
 functionality that is common to most static site generators.
 
 Alteza also imposes very little _required_ structure or a particular "way of doing things" on your website (other than
-requiring unique names). You retain the freedom to organize your website as you wish. (The name _Alteza_ comes from
-a word that may be translated to [illustriousness](https://m.interglot.com/en/es/illustriousness) in Español.)
+requiring unique names). You retain the freedom to organize your website as you wish. The name _Alteza_ comes from
+a word that may be translated to [illustriousness](https://m.interglot.com/en/es/illustriousness) in Español.
 
 A key design aspect of Alteza is writing little scripts and executing such code to generate your website. Your static
 site can contain arbitrary Python that is executed at the time of site generation. [PyPage](https://github.com/arjun-menon/pypage),
