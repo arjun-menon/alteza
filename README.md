@@ -3,6 +3,8 @@
 Alteza is a static site generator<sup>[<img height="10" width="10" src="https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/103px-Wikipedia-logo-v2.svg.png" />](https://en.wikipedia.org/wiki/Static_site_generator)</sup> driven by [PyPage](https://github.com/arjun-menon/pypage).
 Examples of other static site generators can be [found here](https://github.com/collections/static-site-generators).
 
+Alteza can be thought of as a simpler and more flexible alternative to static site generators like [Jekyll](https://jekyllrb.com/), [Hugo](https://gohugo.io/), [Zola](https://www.getzola.org/), [Nextra](https://nextra.site/), etc.
+
 The differentiator with Alteza is that the site author (if familiar with Python) will have a lot more 
 fine-grained control over the output, than what (as far as I'm aware) any of the existing options offer.
 
@@ -17,7 +19,7 @@ a word that may be translated to [illustriousness](https://m.interglot.com/en/es
 A key design aspect of Alteza is writing little scripts and executing such code to generate your website. Your static
 site can contain arbitrary Python that is executed at the time of site generation. [PyPage](https://github.com/arjun-menon/pypage),
 in particular, makes it seamless to include actual Python code inside page templates. (This of course means that you
-must run Alteza with trusted code, or in an isolated container. For example, in a [GitHub action](#github-action)–see instructions below.)
+must run Alteza with trusted code, or in an isolated container. For example, in a [GitHub action–see instructions below](#github-action).)
 
 ## User Guide
 
