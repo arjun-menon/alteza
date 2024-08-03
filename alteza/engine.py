@@ -3,6 +3,7 @@ import itertools
 import json
 import os
 import shutil
+import signal
 import sys
 import time
 import types
@@ -331,6 +332,8 @@ class Engine:
     # This class should never be instantiated, and most functions not called directly.
     # Engine.generate(...) is called to write the output of a processed Content object.
     # Similarly, Engine.run(args) is used to invoke Alteza overall.
+    shouldExit: bool = False
+
     @staticmethod
     def generateMdContents(md: Md) -> None:
         if os.path.exists("index.html"):
@@ -475,7 +478,15 @@ class Engine:
         observer.start()
         try:
             watching()
-            while True:
+
+            def signalHandler(sig: int, frame: Optional[types.FrameType]) -> None:
+                # pylint: disable=unused-argument
+                print("\nExiting...")
+                Engine.shouldExit = True
+
+            signal.signal(signal.SIGINT, signalHandler)
+
+            while not Engine.shouldExit:
                 time.sleep(timeIntervalSecs)
                 if eventHandler.timeOfMostRecentEvent:
                     timeSinceMostRecentEvent = time.time_ns() - (
