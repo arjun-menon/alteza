@@ -12,7 +12,7 @@ from typing import Optional, Generator, List, Dict, Set, Any
 import sh  # type: ignore
 from pypage import pypage  # type: ignore
 from tap import Tap
-from watchdog.events import FileSystemEventHandler, FileSystemEvent
+from watchdog.events import FileSystemEventHandler, FileSystemEvent, DirModifiedEvent
 from watchdog.observers import Observer as WatchdogObserver
 
 from .fs import (
@@ -467,13 +467,24 @@ class Engine:
                 raise AltezaException(f"Path to ignore `{somePath}` does not exist.")
 
     class WatchdogEventHandler(FileSystemEventHandler):
-        def __init__(self) -> None:
+        def __init__(self, contentDir: str) -> None:
+            self.contentDirAbsPath: str = os.path.abspath(contentDir)
             self.timeOfMostRecentEvent: Optional[int] = None
 
         def on_any_event(self, event: FileSystemEvent) -> None:
             for ignoreAbsPath in Fs.ignoreAbsPaths:
                 if ignoreAbsPath in event.src_path or ignoreAbsPath in event.dest_path:
                     return
+            if "__pycache__" in event.src_path or "__pycache__" in event.dest_path:
+                return
+            if (
+                isinstance(event, DirModifiedEvent)
+                and event.src_path == self.contentDirAbsPath
+            ):
+                return
+
+            print("Detected a change in:", event.src_path or event.dest_path)
+
             self.timeOfMostRecentEvent = max(
                 self.timeOfMostRecentEvent or 0, time.time_ns()
             )
@@ -485,7 +496,7 @@ class Engine:
         def watching() -> None:
             print("\nWatching for changes... press Ctrl+C to exit.")
 
-        eventHandler = Engine.WatchdogEventHandler()
+        eventHandler = Engine.WatchdogEventHandler(self.contentDir)
         observer = WatchdogObserver()
         observer.schedule(eventHandler, self.contentDir, recursive=True)
         observer.start()
@@ -507,7 +518,7 @@ class Engine:
                     )
                     if timeSinceMostRecentEvent > timeIntervalNs:
                         eventHandler.timeOfMostRecentEvent = None
-                        print("\nDetected a change. Rebuilding...\n")
+                        print("\nRebuilding...\n")
                         self.makeSite()
                         watching()
         finally:
