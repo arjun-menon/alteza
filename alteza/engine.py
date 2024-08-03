@@ -7,7 +7,7 @@ import signal
 import sys
 import time
 import types
-from typing import Callable, Optional, Generator, List, Dict, Set, Any
+from typing import Optional, Generator, List, Dict, Set, Any
 
 import sh  # type: ignore
 from pypage import pypage  # type: ignore
@@ -38,11 +38,11 @@ class Args(Tap):  # pyre-ignore[13]
     copy_assets: bool = False  # Copy static assets instead of symlinking to them.
     seed: str = "{}"  # Seed JSON data to add to the initial root env.
     watch: bool = False  # Watch for content changes, and rebuild.
+    ignore: List[str] = []  # Paths to completely ignore.
 
 
 class Content:
     def __init__(self, args: Args, fs: Fs) -> None:
-        self.args = args
         self.inTemplate: bool = False
         self.templateCache: Dict[str, str] = {}
         self.seenTemplateLinks: Set[FileNode] = set()
@@ -332,7 +332,16 @@ class Engine:
     # This class should never be instantiated, and most functions not called directly.
     # Engine.generate(...) is called to write the output of a processed Content object.
     # Similarly, Engine.run(args) is used to invoke Alteza overall.
-    shouldExit: bool = False
+
+    def __init__(self, args: Args) -> None:
+        self.args: Args = args
+        # Just copying & renaming a few args:
+        self.shouldCopyAssets: bool = args.copy_assets
+        self.contentDir: str = args.content
+        self.outputDir: str = args.output
+        # Other instance variables:
+        self.shouldExit: bool = False
+        self.ignoreAbsPaths: List[str] = self.checkIgnorePaths(args)
 
     @staticmethod
     def generateMdContents(md: Md) -> None:
@@ -373,15 +382,13 @@ class Engine:
         else:
             raise AltezaException(f"{pyPageNode} pyPage attribute is invalid.")
 
-    @staticmethod
-    def generateStaticAsset(fileNode: FileNode, shouldCopy: bool) -> None:
-        if shouldCopy:
+    def generateStaticAsset(self, fileNode: FileNode) -> None:
+        if self.shouldCopyAssets:
             shutil.copyfile(fileNode.absoluteFilePath, fileNode.fileName)
         else:
             os.symlink(fileNode.absoluteFilePath, fileNode.fileName)
 
-    @staticmethod
-    def generate(args: Args, content: Content) -> None:
+    def generate(self, content: Content) -> None:
         def walk(curDir: DirNode) -> None:
             for subDir in filter(lambda node: node.shouldPublish, curDir.subDirs):
                 os.mkdir(subDir.dirName)
@@ -392,45 +399,42 @@ class Engine:
                 if isinstance(fileNode, PyPageNode):
                     Engine.generatePyPageNode(fileNode)
                 else:
-                    Engine.generateStaticAsset(fileNode, args.copy_assets)
+                    self.generateStaticAsset(fileNode)
 
-        with enterDir(args.output):
+        with enterDir(self.outputDir):
             walk(content.rootDir)
 
-    @staticmethod
-    def checkContentDir(contentDir: str) -> None:
-        if not os.path.isdir(contentDir):
+    def checkContentDir(self) -> None:
+        if not os.path.isdir(self.contentDir):
             raise AltezaException(
-                f"The provided path '{contentDir}' does not exist or is not a directory."
+                f"The provided path '{self.contentDir}' does not exist or is not a directory."
             )
 
-    @staticmethod
-    def resetOutputDir(outputDir: str, shouldDelete: bool) -> None:
-        if os.path.isfile(outputDir):
+    def resetOutputDir(self) -> None:
+        if os.path.isfile(self.outputDir):
             raise AltezaException(
-                f"A file named {outputDir} already exists. Please move it or delete it. "
+                f"A file named {self.outputDir} already exists. Please move it or delete it. "
                 "Note that if this had been a directory, we would have erased it."
             )
-        if os.path.isdir(outputDir):
-            if not shouldDelete:
+        if os.path.isdir(self.outputDir):
+            if not self.args.clear_output_dir:
                 raise AltezaException(
-                    f"Specified output directory {outputDir} already exists.\n"
+                    f"Specified output directory {self.outputDir} already exists.\n"
                     "Please use --clear_output_dir to delete it prior to site generation."
                 )
             print(
                 f"Deleting directory {Fore.dark_red_2}%s{Style.reset} and all of its content...\n"
-                % outputDir
+                % self.outputDir
             )
-            shutil.rmtree(outputDir)
-        os.mkdir(outputDir)
+            shutil.rmtree(self.outputDir)
+        os.mkdir(self.outputDir)
 
-    @staticmethod
-    def processContent(args: Args) -> Content:
-        with enterDir(args.content):
+    def processContent(self) -> Content:
+        with enterDir(self.contentDir):
             print("Analyzing content directory...")
             fs = Fs()
             print(fs.nameRegistry)
-            content = Content(args, fs)
+            content = Content(self.args, fs)
             print("Processing...\n")
             content.process()
             print("\nSuccessfully completed processing.\n")
@@ -440,16 +444,15 @@ class Engine:
 
         return content
 
-    @staticmethod
-    def makeSite(args: Args) -> None:
+    def makeSite(self) -> None:
         startTimeNs = time.time_ns()
 
-        Engine.checkContentDir(args.content)
-        Engine.resetOutputDir(args.output, args.clear_output_dir)
+        self.checkContentDir()
+        self.resetOutputDir()
 
-        content = Engine.processContent(args)
+        content = self.processContent()
         print("Generating...")
-        Engine.generate(args, content)
+        self.generate(content)
 
         elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
         # pylint: disable=consider-using-f-string
@@ -460,21 +463,21 @@ class Engine:
             self.timeOfMostRecentEvent: Optional[int] = None
 
         def on_any_event(self, event: FileSystemEvent) -> None:
+            print(event)
             self.timeOfMostRecentEvent = max(
                 self.timeOfMostRecentEvent or 0, time.time_ns()
             )
 
-    @staticmethod
-    def runWatchdog(contentDir: str, action: Callable[[], None]) -> None:
+    def runWatchdog(self) -> None:
         timeIntervalNs = 2 * 10**8
         timeIntervalSecs = 0.2
 
         def watching() -> None:
-            print(f"\nWatching for changes in {contentDir}...")
+            print("\nWatching for changes... press Ctrl+C to exit.")
 
         eventHandler = Engine.WatchdogEventHandler()
         observer = WatchdogObserver()
-        observer.schedule(eventHandler, contentDir, recursive=True)
+        observer.schedule(eventHandler, self.contentDir, recursive=True)
         observer.start()
         try:
             watching()
@@ -482,11 +485,11 @@ class Engine:
             def signalHandler(sig: int, frame: Optional[types.FrameType]) -> None:
                 # pylint: disable=unused-argument
                 print("\nExiting...")
-                Engine.shouldExit = True
+                self.shouldExit = True
 
             signal.signal(signal.SIGINT, signalHandler)
 
-            while not Engine.shouldExit:
+            while not self.shouldExit:
                 time.sleep(timeIntervalSecs)
                 if eventHandler.timeOfMostRecentEvent:
                     timeSinceMostRecentEvent = time.time_ns() - (
@@ -494,16 +497,25 @@ class Engine:
                     )
                     if timeSinceMostRecentEvent > timeIntervalNs:
                         eventHandler.timeOfMostRecentEvent = None
-                        print("\nDetected a change.\n")
-                        action()
+                        print("\nDetected a change. Rebuilding...\n")
+                        self.makeSite()
                         watching()
         finally:
             observer.stop()
             observer.join()
 
     @staticmethod
-    def run(args: Args) -> None:
-        Engine.makeSite(args)
+    def checkIgnorePaths(args: Args) -> List[str]:
+        ignoreAbsPaths = []
+        for somePath in args.ignore:
+            if os.path.exists(somePath):
+                ignoreAbsPaths.append(os.path.abspath(somePath))
+            else:
+                raise AltezaException(f"Path to ignore `{somePath}` does not exist.")
+        return ignoreAbsPaths
 
-        if args.watch:
-            Engine.runWatchdog(args.content, lambda: Engine.makeSite(args))
+    def run(self) -> None:
+        self.makeSite()
+
+        if self.args.watch:
+            self.runWatchdog()
