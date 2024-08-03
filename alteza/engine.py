@@ -23,6 +23,7 @@ from .fs import (
     AltezaException,
     Md,
     NonMd,
+    FsCrawlResult,
     Fs,
     Fore,
     Style,
@@ -42,7 +43,7 @@ class Args(Tap):  # pyre-ignore[13]
 
 
 class Content:
-    def __init__(self, args: Args, fs: Fs) -> None:
+    def __init__(self, args: Args, fs: FsCrawlResult) -> None:
         self.inTemplate: bool = False
         self.templateCache: Dict[str, str] = {}
         self.seenTemplateLinks: Set[FileNode] = set()
@@ -328,11 +329,9 @@ def enterDir(newDir: str) -> Generator[None, None, None]:
 
 
 class Engine:
-    # This class is just here to organize a bunch of related functions together.
-    # This class should never be instantiated, and most functions not called directly.
     # Engine.generate(...) is called to write the output of a processed Content object.
-    # Similarly, Engine.run(args) is used to invoke Alteza overall.
-
+    # Engine.makeSite() is called to perform a full site generation.
+    # Engine.run() is used to invoke Alteza overall.
     def __init__(self, args: Args) -> None:
         self.args: Args = args
         # Just copying & renaming a few args:
@@ -341,7 +340,7 @@ class Engine:
         self.outputDir: str = args.output
         # Other instance variables:
         self.shouldExit: bool = False
-        self.ignoreAbsPaths: List[str] = self.checkIgnorePaths(args)
+        self.setIgnoreAbsPaths(args)
 
     @staticmethod
     def generateMdContents(md: Md) -> None:
@@ -432,15 +431,15 @@ class Engine:
     def processContent(self) -> Content:
         with enterDir(self.contentDir):
             print("Analyzing content directory...")
-            fs = Fs()
-            print(fs.nameRegistry)
-            content = Content(self.args, fs)
+            fsCrawlResult = Fs.crawl()
+            print(fsCrawlResult.nameRegistry)
+            content = Content(self.args, fsCrawlResult)
             print("Processing...\n")
             content.process()
             print("\nSuccessfully completed processing.\n")
 
         print("File Tree:")
-        print(fs.rootDir.displayDir())
+        print(fsCrawlResult.rootDir.displayDir())
 
         return content
 
@@ -457,6 +456,15 @@ class Engine:
         elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
         # pylint: disable=consider-using-f-string
         print("\nSite generation complete. Time elapsed: %.2f ms" % elapsedMilliseconds)
+
+    @staticmethod
+    def setIgnoreAbsPaths(args: Args) -> None:
+        Fs.ignoreAbsPaths = []
+        for somePath in args.ignore:
+            if os.path.exists(somePath):
+                Fs.ignoreAbsPaths.append(os.path.abspath(somePath))
+            else:
+                raise AltezaException(f"Path to ignore `{somePath}` does not exist.")
 
     class WatchdogEventHandler(FileSystemEventHandler):
         def __init__(self) -> None:
@@ -503,16 +511,6 @@ class Engine:
         finally:
             observer.stop()
             observer.join()
-
-    @staticmethod
-    def checkIgnorePaths(args: Args) -> List[str]:
-        ignoreAbsPaths = []
-        for somePath in args.ignore:
-            if os.path.exists(somePath):
-                ignoreAbsPaths.append(os.path.abspath(somePath))
-            else:
-                raise AltezaException(f"Path to ignore `{somePath}` does not exist.")
-        return ignoreAbsPaths
 
     def run(self) -> None:
         self.makeSite()

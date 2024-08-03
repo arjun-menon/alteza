@@ -2,6 +2,7 @@ import functools
 import os
 import re
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import date, datetime
 from subprocess import check_output, CalledProcessError, STDOUT
 from typing import (
@@ -55,12 +56,23 @@ class FsNode:
         self.shouldPublish = True
 
     def makePublic(self) -> None:
-        Fs.runOnFsNodeAndAscendantNodes(self, lambda fsNode: fsNode.setNodeAsPublic())
+        self.runOnFsNodeAndAscendantNodes(self, lambda fsNode: fsNode.setNodeAsPublic())
 
     def isParentGitRepo(self) -> bool:
         if self.parent is None:
             return DirNode.isPwdGitRepo()
         return self.parent.isInGitRepo
+
+    @staticmethod
+    def runOnFsNodeAndAscendantNodes(
+        startingNode: "FsNode", fn: Callable[["FsNode"], None]
+    ) -> None:
+        def walk(node: FsNode) -> None:
+            fn(node)
+            if node.parent is not None:
+                walk(node.parent)
+
+        walk(startingNode)
 
 
 class FileNode(FsNode):
@@ -153,8 +165,8 @@ class DirNode(FsNode):
         self,
         parent: Optional["DirNode"],
         dirPath: str,
-        # shouldIgnore(name: str, isDir: bool) -> bool
-        shouldIgnore: Callable[[str, bool], bool],
+        # shouldIgnore(name: str, parentPath: str, isDir: bool) -> bool
+        shouldIgnore: Callable[[str, str, bool], bool],
     ) -> None:
         _, subDirNames, fileNames = next(os.walk(dirPath))
         dirPath = "" if dirPath == os.curdir else dirPath
@@ -163,12 +175,12 @@ class DirNode(FsNode):
         self.files: List[FileNode] = [
             FileNode.construct(self, dirPath, fileName)
             for fileName in fileNames
-            if not shouldIgnore(fileName, False)
+            if not shouldIgnore(fileName, self.fullPath, False)
         ]
         self.subDirs: List[DirNode] = [
             DirNode(self, os.path.join(dirPath, subDirName), shouldIgnore)
             for subDirName in subDirNames
-            if not shouldIgnore(subDirName, True)
+            if not shouldIgnore(subDirName, self.fullPath, True)
         ]
 
     def getRectifiedName(self) -> str:
@@ -409,8 +421,15 @@ class NameRegistry:
         )
 
 
+@dataclass
+class FsCrawlResult:
+    rootDir: DirNode
+    nameRegistry: NameRegistry
+
+
 class Fs:
     configFileName: str = "__config__.py"
+    ignoreAbsPaths: List[str] = []
 
     @staticmethod
     def readfile(file_path: str) -> str:
@@ -418,22 +437,11 @@ class Fs:
             return someFile.read()
 
     @staticmethod
-    def runOnFsNodeAndAscendantNodes(
-        startingNode: FsNode, fn: Callable[[FsNode], None]
-    ) -> None:
-        def walk(node: FsNode) -> None:
-            fn(node)
-            if node.parent is not None:
-                walk(node.parent)
-
-        walk(startingNode)
-
-    @staticmethod
     def isHidden(name: str) -> bool:
         return name.startswith(".")
 
     @staticmethod
-    def defaultShouldIgnore(name: str, isDir: bool) -> bool:
+    def defaultShouldIgnore(name: str, parentPath: str, isDir: bool) -> bool:
         # pylint: disable=unused-argument
         if Fs.isHidden(name):
             return True
@@ -444,6 +452,10 @@ class Fs:
             return True
         if name != Fs.configFileName and fileExt == ".py":
             return True
+        fullPath = os.path.abspath(os.path.join(parentPath, name))
+        for ignoreAbsPath in Fs.ignoreAbsPaths:
+            if fullPath in ignoreAbsPath:
+                return True
         return False
 
     @staticmethod
@@ -454,10 +466,10 @@ class Fs:
 
     @staticmethod
     def crawl(
-        # Signature -- shouldIgnore(name: str, isDir: bool) -> bool
-        shouldIgnore: Callable[[str, bool], bool] = defaultShouldIgnore,
+        # Signature -- shouldIgnore(name: str, parentPath: str, isDir: bool) -> bool
+        shouldIgnore: Callable[[str, str, bool], bool] = defaultShouldIgnore,
         skipForRegistry: Callable[[str], bool] = defaultSkipForRegistry,
-    ) -> Tuple[DirNode, NameRegistry]:
+    ) -> FsCrawlResult:
         """
         Crawl the current directory. Construct & return an FsNode tree and NameRegistry.
         """
@@ -466,9 +478,4 @@ class Fs:
         rootDir: DirNode = DirNode(None, dirPath, shouldIgnore)
         nameRegistry = NameRegistry(rootDir, skipForRegistry)
 
-        return rootDir, nameRegistry
-
-    def __init__(self) -> None:
-        rootDir, nameRegistry = Fs.crawl()
-        self.rootDir: DirNode = rootDir
-        self.nameRegistry: NameRegistry = nameRegistry
+        return FsCrawlResult(rootDir, nameRegistry)
