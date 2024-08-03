@@ -441,8 +441,7 @@ class Fs:
         return name.startswith(".")
 
     @staticmethod
-    def defaultShouldIgnore(name: str, parentPath: str, isDir: bool) -> bool:
-        # pylint: disable=unused-argument
+    def shouldIgnoreStandard(name: str) -> bool:
         if Fs.isHidden(name):
             return True
         if name in {"__pycache__"}:
@@ -452,10 +451,19 @@ class Fs:
             return True
         if name != Fs.configFileName and fileExt == ".py":
             return True
+        return False
+
+    @staticmethod
+    def defaultShouldIgnore(name: str, parentPath: str, isDir: bool) -> bool:
+        # pylint: disable=unused-argument
+        if Fs.shouldIgnoreStandard(name):
+            return True
+
         fullPath = os.path.abspath(os.path.join(parentPath, name))
         for ignoreAbsPath in Fs.ignoreAbsPaths:
             if ignoreAbsPath in fullPath:
                 return True
+
         return False
 
     @staticmethod
