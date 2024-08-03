@@ -454,7 +454,7 @@ class Fs:
             return True
         fullPath = os.path.abspath(os.path.join(parentPath, name))
         for ignoreAbsPath in Fs.ignoreAbsPaths:
-            if fullPath in ignoreAbsPath:
+            if ignoreAbsPath in fullPath:
                 return True
         return False
 

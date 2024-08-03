@@ -471,7 +471,9 @@ class Engine:
             self.timeOfMostRecentEvent: Optional[int] = None
 
         def on_any_event(self, event: FileSystemEvent) -> None:
-            print(event)
+            for ignoreAbsPath in Fs.ignoreAbsPaths:
+                if ignoreAbsPath in event.src_path or ignoreAbsPath in event.dest_path:
+                    return
             self.timeOfMostRecentEvent = max(
                 self.timeOfMostRecentEvent or 0, time.time_ns()
             )
