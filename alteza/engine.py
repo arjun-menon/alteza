@@ -477,6 +477,8 @@ class Engine:
                     return
             if "__pycache__" in event.src_path or "__pycache__" in event.dest_path:
                 return
+            if os.path.basename(os.path.normpath(event.src_path)).startswith("."):
+                return
             if (
                 isinstance(event, DirModifiedEvent)
                 and event.src_path == self.contentDirAbsPath
