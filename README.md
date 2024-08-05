@@ -30,6 +30,7 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
       * Therefore, directories with no public files do not exist in the generated site.
     * Files _reachable_ from marked-as-public files will also be publicly accessible.
       * Here, reachability is discovered when a provided `link` function is used to link to other files.
+    * All files starting with a `.` are ignored.
 
 3. All file and directory names, except for index page files, _at all depth levels_ must be unique. This is to simplify use of the `link(name)` function. With unique file and directory names, one can simply link to a file or directory with just its name, without needing to disambiguate a non-unique name with its path. Note: Directories can only be linked to if the directory contains an index page.
 
