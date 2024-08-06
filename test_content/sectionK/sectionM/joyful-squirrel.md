@@ -1,4 +1,5 @@
 title: {{ title + " about a Squirrel" }}
+x1y: :-)
 ---
 
 Here's a joyful squirrel.

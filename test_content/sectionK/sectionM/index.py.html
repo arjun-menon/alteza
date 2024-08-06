@@ -22,6 +22,10 @@ title = title_for_this_dir
         <a href="{{ link(file) }}">
             {{file.title}}
         </a>
+        {{
+        if hasattr(file, 'x1y'):
+            write('&nbsp; &nbsp;' + file.x1y)
+        }}
     </li>
     {% endfor %}
 </ul>
