@@ -134,27 +134,77 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
 </tr>
 <tr>
 <td><code>link</code></td>
-<td>...</td>
+<td>
+
+The `link` function takes **a name** or an object, and returns _a **relative** link_ to it. If a name is provided, it looks for that name in the NameRegistry (and throws an exception if the name wasn't found).
+
+The `link` function has the side effect of making the linked-to page publicly accessible, if the page that is creating the link is reachable from another publicly-accessible page. The root `/` index page is always public.
+
+</td>
 <td align="center">✅</td><td align="center">✅</td><td align="center">❌</td><td align="center">✅</td>
 </tr>
 <tr>
 <td><code>path</code></td>
-<td>...</td>
+<td>
+
+The `path` function works exactly like the `path` function above, except it _**does not**_ have the side effect of impacting the reachability graph, and making the linked-to page publicly accessible.
+
+</td>
 <td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
 <td><code>dir</code></td>
-<td>...</td>
+<td>
+
+The `dir` variables points to a `DirNode` object representing the directory that the relevant file is in.
+
+This object has a fields like `dir.pages`, which is a list of all the pages (a list of `PageNode` objects) representing all the pages in that directory. Pages means Markdown files and HTML files.
+
+</td>
 <td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
-<td>Modified Date</td>
-<td>...</td>
+<td>Last Modified Date & Time</td>
+<td>
+
+_This is only available on `PageNode` objects._
+
+The last modified date & time for a given file is taken from:
+
+  a. The date & time of _the last commit that modified that file_, in git history, if the file is inside a git repo.
+
+  b. The last modified date & time as provided by the file system. 
+
+There's a `getLastModifiedObj()` function which returns a Python `datetime` object. There's also a `getLastModified(f: str = default_datetime_format)` functon which returns a `str` with the date & time formatted.
+
+The `default_datetime_format` is `%Y %b %-d  at %-H:%M %p`.
+
+_Note:_ This function calls spawns a `git` process, so is a tiny bit slow.
+
+</td>
 <td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
 <td>Idea Date</td>
-<td>...</td>
+<td>
+
+_This is only available on `PageNode` objects._
+
+The "idea date" for a given file is either:
+
+  a. For a Markdown file, a date prefix before the markdown file's name, in the form `YYYY-MM-DD`.
+
+  b. If not a Markdown file or there's no date prefix, and _the file is in a git repo_, then the idea date is the date of the first commit that introduced the file into git history. (Note: this breaks if the file was renamed or moved.)  
+
+  c. If there is neither a date prefix and the file is not in a git repo, there is no idea date for that file (i.e. it's `None` or `""`).
+
+There's a `getIdeaDateObj()` function which returns a Python `date` object (or `None` if there's no idea). There's also a `getIdeaDate(f: str = default_date_format)` functon which returns a `str` with the date & time formatted or `""` if there's no idea date.
+
+The `default_date_format` is `%Y %b %-d`.
+
+_Note:_ This function calls spawns a `git` process, if it's not a Markdown file or if there is no date prefix in the Markdown file's name.
+
+</td>
 <td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
