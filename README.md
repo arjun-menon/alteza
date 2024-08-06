@@ -115,9 +115,9 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
        * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`.
        * Directories containing index files should just be referred to by the directory name. For example, the index page `about-me/hobbies/index.md` (or `about-me/hobbies/index.py.html`) should just be linked to with a `link('hobbies')`.
 
-12. #### Expected & Optional Special Variables/Functions
+12. #### Expected (and Optional) Special Variables/Functions
 
-    Certain fields, with certain names, hold special meaning, and are called/used by Alteza. One such variable is `layout` (and `layoutRaw`), which
+    Certain fields, with certain names, hold special meaning, and are called/used by Alteza. One such variable is `layout` (and `layoutRaw`), which points to the layout/template to be used to render the page (as explained in earlier points above). It can be overriden by descendant directories or pages.
 
     #### Built-in Functions and Fields
     <table>
