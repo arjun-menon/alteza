@@ -7,7 +7,7 @@ import signal
 import sys
 import time
 import types
-from typing import Optional, Generator, List, Dict, Set, Any
+from typing import Optional, Generator, List, Union, Dict, Set, Any
 
 import sh  # type: ignore
 from pypage import pypage  # type: ignore
@@ -52,9 +52,7 @@ class Content:
         self.seed: Dict[str, Any] = json.loads(args.seed)
         self.fixSysPath()
 
-    def linkObj(
-        self, srcFile: FileNode, dstFile: FileNode, pathOnly: bool = False
-    ) -> str:
+    def link(self, srcFile: FileNode, dstFile: FileNode, pathOnly: bool = False) -> str:
         if not pathOnly:
             srcFile.linksTo.append(dstFile)  # This is used to determine reachability.
             if dstFile not in self.seenTemplateLinks:
@@ -111,18 +109,20 @@ class Content:
         else:
             raise AltezaException(f"{pyPageNode} Unsupported type of PyPageNode.")
 
-        def linkObj(dstFile: FileNode, pathOnly: bool = False) -> str:
-            return self.linkObj(pyPageNode, dstFile, pathOnly)
-
-        def link(name: str, pathOnly: bool = False) -> str:
-            dstFile: FileNode = self.nameRegistry.lookup(name)
-            return linkObj(dstFile, pathOnly)
+        def link(destination: Union[str, FileNode], pathOnly: bool = False) -> str:
+            if isinstance(destination, str):
+                dstFile: FileNode = self.nameRegistry.lookup(destination)
+                return self.link(pyPageNode, dstFile, pathOnly)
+            if isinstance(destination, FileNode):
+                return self.link(pyPageNode, destination, pathOnly)
+            raise AltezaException(
+                f"Unknown link destination type: `{type(destination)}`."
+            )
 
         def path(name: str) -> str:
             return link(name, True)
 
         env |= {"link": link}
-        env |= {"linkObj": linkObj}
         env |= {"path": path}
 
         env |= {"getLastModifiedObj": lambda: pyPageNode.lastModifiedObj}
@@ -165,7 +165,7 @@ class Content:
             configFile: FileNode = configFileL[0]
 
             def path(name: str) -> str:
-                return self.linkObj(configFile, self.nameRegistry.lookup(name), True)
+                return self.link(configFile, self.nameRegistry.lookup(name), True)
 
             configEnv |= {"path": path}
 
