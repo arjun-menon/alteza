@@ -16,7 +16,7 @@ packaging==24.1
     # via typed-argument-parser
 pygments==2.17.2
     # via alteza (setup.py)
-pypage==2.0.9
+pypage==2.1.0
     # via alteza (setup.py)
 pyyaml==6.0.1
     # via alteza (setup.py)
