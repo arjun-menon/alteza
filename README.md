@@ -170,13 +170,18 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
 </tr>
 <tr>
 <td><code>readfile</code></td>
-<td>This is just a simple built-in function that reads the contents of a file (assuming `utf-8` encoding) into a string, and returns it.
+<td>This is just a simple built-in function that reads the contents of a file (assuming `utf-8` encoding) into a string, and returns it. It does this:
+
+```
+with open(file_path, "r", encoding="utf-8") as someFile:
+    return someFile.read()
+```
 </td>
 <td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
 <td><code>sh</code></td>
-<td>This exposes entire sh library. The current working directory (CWD) would be wherever the file being executed is located (regardless of whether the file is a regular page or index page or `__config__.py`, etc). If the file is a template, the CWD would be that of the page being processed.
+<td>This exposes entire <code>sh</code> library. The current working directory (CWD) would be wherever the file being executed is located (regardless of whether the file is a regular page or index page or `__config__.py`, etc). If the file is a template, the CWD would be that of the page being processed.
 
 See `sh`'s documentation here: https://sh.readthedocs.io/en/latest/
 </td>
