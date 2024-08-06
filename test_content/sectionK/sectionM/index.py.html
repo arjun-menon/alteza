@@ -17,7 +17,7 @@ title = title_for_this_dir
 </h4>
 
 <ul>
-    {% for file in dir.getPages() %}
+    {% for file in dir.pages %}
     <li>
         <a href="{{ linkObj(file) }}">
             {{file.title}}

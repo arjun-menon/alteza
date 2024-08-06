@@ -202,7 +202,8 @@ class DirNode(FsNode):
         except CalledProcessError:
             return False
 
-    def getPages(self) -> Sequence["PageNode"]:
+    @property
+    def pages(self) -> Sequence["PageNode"]:
         return [f for f in self.files if (isinstance(f, PageNode) and not f.isIndex())]
 
     def getPyPagesOtherThanIndex(self) -> Iterator["PyPageNode"]:
