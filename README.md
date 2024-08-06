@@ -170,7 +170,34 @@ Available everywhere.
 
 The `dir` variables points to a `DirNode` object representing the directory that the relevant file is in.
 
-This object has a fields like `dir.pages`, which is a list of all the pages (a list of `PageNode` objects) representing all the pages in that directory. Pages means Markdown files and HTML files.
+This object has a fields like `dir.pages`, which is a list of all the pages (a list of `PageNode` objects) representing all the pages in that directory. Pages means Markdown files and HTML files. Some of the fields in `dir` are:
+
+<table>
+<tr>
+<th><code>dir</code> Field</th>
+<th>Description</th>
+</tr>
+<tr>
+<td><code>dir.subDirs</code></td>
+<td>List of <code>DirNode</code> objects of child directories.</td>
+</tr>
+<tr>
+<td><code>dir.files</code></td>
+<td>List of <code>FileNode</code> objects of files in this directory.</td>
+</tr>
+<tr>
+<td><code>dir.pages</code></td>
+<td>List of <code>PageNode</code> objects of Markdown files, non-Markdown PyPage files, and HTML files.</td>
+</tr>
+<tr>
+<td><code>dir.indexPage</code></td>
+<td>A <code>PageNode</code> object of the index page, i.e. a <code>index.md</code> or a <code>index.html</code> file. If there is no index page, this is <code>None</code>.</td>
+</tr>
+<tr>
+<td><code>dir.title</code></td>
+<td>A string <code>title</code> object of the index page, only if the index page specifies a title. If there is no index page or no title specified by it, this is <code>None</code>.</td>
+</tr>
+</table>
 
 In templates, the `dir` points to the directory that the file being processed is in.
 
