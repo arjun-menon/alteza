@@ -11,7 +11,7 @@ import types
 from typing import Optional, Generator, List, Union, Dict, Set, Any
 
 import sh  # type: ignore
-from pypage import pypage, PypageSyntaxError  # type: ignore
+from pypage import pypage, PypageError  # type: ignore
 from tap import Tap
 from watchdog.events import FileSystemEventHandler, FileSystemEvent, DirModifiedEvent
 from watchdog.observers import Observer as WatchdogObserver
@@ -467,7 +467,7 @@ class Engine:
     def makeSiteWithExceptionHandling(self) -> None:
         try:
             self.makeSite()
-        except (AltezaException, PypageSyntaxError) as e:
+        except (AltezaException, PypageError) as e:
             logging.exception(e)
             print("\nSite build failed.")
 
