@@ -298,7 +298,7 @@ class PyPageNode(PageNode):
     @property
     def output(self) -> str:
         if self._pyPageOutput is None:
-            raise AltezaException("The PyPage HTML output has not been generated yet.")
+            raise AltezaException("PyPage output has not been generated yet.")
         assert isinstance(self._pyPageOutput, str)
         return self._pyPageOutput
 

@@ -206,6 +206,8 @@ Availability:
 YAML fields (and other variables defined in PyPage code) of a page are:
 * Available directly to template(s) that the page uses/invokes.
 * Stored in `pageObj.env`, for future access. The index page, for example, can use `page.env` to access these fields & variables.
+* Stored _**as attributes**_ in the `PyPageNode` page object, as long as the `env` var does not conflict with an existing attribute of `PyPageNode`.
+  * This enables referring to a  field or variable with just `page.fieldName` (instead of having to write `page.env[fieldName]`, which is also valid).
 <br />
 
 Availability (same as `title`):
