@@ -264,12 +264,11 @@ Available everywhere.
 </tr>
 <tr>
 <td><code>readfile</code></td>
-<td>This is just a simple built-in function that reads the contents of a file (assuming <code>utf-8</code> encoding) into a string, and returns it. This function is defined as:
+<td>This is just a simple built-in function that reads the contents of a file (assuming <code>utf-8</code> encoding) into a string, and returns it. I.e.:
 
 ```python
-def readfile(file_path: str) -> str:
-        with open(file_path, "r", encoding="utf-8") as someFile:
-            return someFile.read()
+with open(file_path, "r", encoding="utf-8") as someFile:
+    return someFile.read()
 ```
 
 Available everywhere.
