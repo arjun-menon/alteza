@@ -1,6 +1,7 @@
 import contextlib
 import itertools
 import json
+import logging
 import os
 import shutil
 import signal
@@ -10,7 +11,7 @@ import types
 from typing import Optional, Generator, List, Union, Dict, Set, Any
 
 import sh  # type: ignore
-from pypage import pypage  # type: ignore
+from pypage import pypage, PypageSyntaxError  # type: ignore
 from tap import Tap
 from watchdog.events import FileSystemEventHandler, FileSystemEvent, DirModifiedEvent
 from watchdog.observers import Observer as WatchdogObserver
@@ -96,6 +97,19 @@ class Content:
             return dstFile.rectifiedFileName
         return dstFile.fileName
 
+    def linkFlex(
+        self,
+        fromPyPage: PyPageNode,
+        destination: Union[str, FileNode],
+        pathOnly: bool = False,
+    ) -> str:
+        if isinstance(destination, str):
+            dstFile: FileNode = self.nameRegistry.lookup(destination)
+            return self.link(fromPyPage, dstFile, pathOnly)
+        if isinstance(destination, FileNode):
+            return self.link(fromPyPage, destination, pathOnly)
+        raise AltezaException(f"Unknown link destination type: `{type(destination)}`.")
+
     def invokePyPage(self, pyPageNode: PyPageNode, env: dict[str, Any]) -> None:
         print(f"{Fore.gold_1}Processing:{Style.reset}", pyPageNode.fullPath)
         env = env.copy()
@@ -109,18 +123,11 @@ class Content:
         else:
             raise AltezaException(f"{pyPageNode} Unsupported type of PyPageNode.")
 
-        def link(destination: Union[str, FileNode], pathOnly: bool = False) -> str:
-            if isinstance(destination, str):
-                dstFile: FileNode = self.nameRegistry.lookup(destination)
-                return self.link(pyPageNode, dstFile, pathOnly)
-            if isinstance(destination, FileNode):
-                return self.link(pyPageNode, destination, pathOnly)
-            raise AltezaException(
-                f"Unknown link destination type: `{type(destination)}`."
-            )
+        def link(destination: Union[str, FileNode]) -> str:
+            return self.linkFlex(pyPageNode, destination)
 
         def path(name: str) -> str:
-            return link(name, True)
+            return self.linkFlex(pyPageNode, name, True)
 
         env |= {"link": link}
         env |= {"path": path}
@@ -457,6 +464,13 @@ class Engine:
         # pylint: disable=consider-using-f-string
         print("\nSite generation complete. Time elapsed: %.2f ms" % elapsedMilliseconds)
 
+    def makeSiteWithExceptionHandling(self) -> None:
+        try:
+            self.makeSite()
+        except (AltezaException, PypageSyntaxError) as e:
+            logging.exception(e)
+            print("\nSite build failed.")
+
     @staticmethod
     def setIgnoreAbsPaths(args: Args) -> None:
         Fs.ignoreAbsPaths = []
@@ -492,6 +506,8 @@ class Engine:
             )
 
     def runWatchdog(self) -> None:
+        self.makeSiteWithExceptionHandling()
+
         timeIntervalNs = 2 * 10**8
         timeIntervalSecs = 0.2
 
@@ -521,14 +537,18 @@ class Engine:
                     if timeSinceMostRecentEvent > timeIntervalNs:
                         eventHandler.timeOfMostRecentEvent = None
                         print("\nRebuilding...\n")
-                        self.makeSite()
+                        try:
+                            self.makeSiteWithExceptionHandling()
+                        except AltezaException as e:
+                            logging.exception(e)
+                            print("\nSite build failed.")
                         watching()
         finally:
             observer.stop()
             observer.join()
 
     def run(self) -> None:
-        self.makeSite()
-
         if self.args.watch:
             self.runWatchdog()
+        else:
+            self.makeSite()

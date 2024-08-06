@@ -133,6 +133,8 @@ The `link` function takes **a name** or an object, and returns _a **relative** l
 
 The `link` function has the side effect of making the linked-to page publicly accessible, if the page that is creating the link is reachable from another publicly-accessible page. The root `/` index page is always public.
 
+_Note:_ for Markdown pages, an extra `../` is added at the beginning of the returned path to accomodate the fact that Markdown pages get turned into directories with the page rendered into an `index.html` inside the directory.
+
 Availability:
 <table>
 <tr>
@@ -152,7 +154,11 @@ Availability:
 <td><code>path</code></td>
 <td>
 
-The `path` function works exactly like the `path` function above, except it _**does not**_ have the side effect of impacting the reachability graph, and making the linked-to page publicly accessible.
+The `path` function is similar to the `path` function above, except that:
+* it _**does not**_ have the side effect of impacting the reachability graph, and making the linked-to page publicly accessible, and
+* it also does not add an extra `../` at the beginning of the returned path for Markdown pages.
+
+This function is good for use inside templates, to reference parent/ancestor templates for injection. For example, writing something like `{{ inject(path('skeleton')) }}`.
 
 Available everywhere.
 
