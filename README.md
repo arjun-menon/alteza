@@ -173,7 +173,13 @@ Note: the title can directly be accessed as `title` (without `pageObj.title`) in
 </tr>
 <tr>
 <td>YAML fields & other vars</td>
-<td>...</td>
+<td>
+
+YAML fields (and other variables defined in PyPage code) of a page are:
+* Available directly to template(s) that the page uses/invokes.
+* Stored in `pageObj.env`, for future access. The index page, for example, can use `page.env` to access these fields & variables.
+
+</td>
 <td align="center">❌</td><td align="center">✅</td><td align="center">❌</td><td align="center">✅</td>
 </tr>
 <tr>
