@@ -115,6 +115,79 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
        * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`.
        * Directories containing index files should just be referred to by the directory name. For example, the index page `about-me/hobbies/index.md` (or `about-me/hobbies/index.py.html`) should just be linked to with a `link('hobbies')`.
 
+12. **Built-in Functions and Fields**
+    <style>.tdc {text-align: center;}</style>
+    <table>
+<tr>
+<th rowspan="2">Built-in</th>
+<th rowspan="2">Description</th>
+<th colspan="4">Availability</th>
+</tr>
+<tr>
+<th>Page</th>
+<th>Template</th>
+<th>Config</th>
+<th>Index & <code>after</code></th>
+</tr>
+<tr>
+<td><code>link</code></td>
+<td>...</td>
+<td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">❌</td><td class="tdc">✅</td>
+</tr>
+<tr>
+<td><code>path</code></td>
+<td>...</td>
+<td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td>
+</tr>
+<tr>
+<td><code>dir</code></td>
+<td>...</td>
+<td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td>
+</tr>
+<tr>
+<td>Modified Date</td>
+<td>...</td>
+<td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td>
+</tr>
+<tr>
+<td>Idea Date</td>
+<td>...</td>
+<td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>The title is either the <code>title</code> YAML field, or if that isn't defined, the <code>.realName</code> of the file, which is the adjusted name of the file without its extension and a date prefix (if present) removed. The title isn't <em>properly</em> available to Python inside the page itself, or from <code>__config__.py</code>, since the page has not been processed when these are executed. If <code>.page</code> is accessed from these (the page or config), or if a <code>title</code> was never defined in the page, then the <code>.realName</code> of the file would be returned.
+</td>
+<td class="tdc">❌</td><td class="tdc">✅</td><td class="tdc">❌</td><td class="tdc">✅</td>
+</tr>
+<tr>
+<td>YAML fields & other vars</td>
+<td>...</td>
+<td class="tdc">❌</td><td class="tdc">✅</td><td class="tdc">❌</td><td class="tdc">✅</td>
+</tr>
+<tr>
+<td><code>readfile</code></td>
+<td>Just a simple built-in function defined as:
+
+```
+def readfile(file_path: str) -> str:
+    with open(file_path, "r", encoding="utf-8") as someFile:
+        return someFile.read()
+```
+
+</td>
+<td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td>
+</tr>
+<tr>
+<td><code>sh</code></td>
+<td>This exposes entire sh library. The current working directory (CWD) would be wherever the file being executed is located (regardless of whether the file is a regular page or index page or `__config__.py`, etc). If the file is a template, the CWD would be that of the page being processed.
+
+See `sh`'s documentation here: https://sh.readthedocs.io/en/latest/
+</td>
+<td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td><td class="tdc">✅</td>
+</tr>
+</table>
+
 ## GitHub Action, Installation & Command-Line Usage
 
 ### GitHub Action
