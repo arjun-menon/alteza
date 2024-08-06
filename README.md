@@ -165,7 +165,9 @@ This object has a fields like `dir.pages`, which is a list of all the pages (a l
 </tr>
 <tr>
 <td>Title</td>
-<td>The title is either the <code>title</code> YAML field, or if that isn't defined, the <code>.realName</code> of the file, which is the adjusted name of the file without its extension and a date prefix (if present) removed. The title isn't <em>properly</em> available to Python inside the page itself, or from <code>__config__.py</code>, since the page has not been processed when these are executed. If <code>.page</code> is accessed from these (the page or config), or if a <code>title</code> was never defined in the page, then the <code>.realName</code> of the file would be returned.
+<td>The title is accessed with <code>page.title</code>. It is picked up either from PyPage code in the page or a <code>title</code> YAML field in the file. If `title` is not defined by the page, then <code>page.realName</code> of the file is used, which is the adjusted name of the file without its extension and idea date prefix (if present) removed. The title isn't <em>properly</em> available to Python inside the page itself, or from <code>__config__.py</code>, since the page has not been processed when these are executed. If <code>page.title</code> is accessed from these (the page or config), or if a <code>title</code> was never defined in the page, then the <code>.realName</code> of the file would be returned.
+
+Note: the title can directly be accessed as `title` (without `pageObj.title`) in the template (and [inherited](https://github.com/arjun-menon/pypage?tab=readme-ov-file#inheritance-with-inject-and-exists) templates) for the page, since all environment variables from the page are passed on to the template, during template processing.
 </td>
 <td align="center">❌</td><td align="center">✅</td><td align="center">❌</td><td align="center">✅</td>
 </tr>
