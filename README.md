@@ -264,13 +264,7 @@ Available everywhere.
 </tr>
 <tr>
 <td><code>readfile</code></td>
-<td>This is just a simple built-in function that reads the contents of a file (assuming <code>utf-8</code> encoding) into a string, and returns it. I.e.:
-
-```python
-with open(file_path, "r", encoding="utf-8") as someFile:
-    return someFile.read()
-```
-
+<td>This is just a simple built-in function that reads the contents of a file (assuming <code>utf-8</code> encoding) into a string, and returns it.
 Available everywhere.
 </td>
 </tr>
