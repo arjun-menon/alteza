@@ -122,15 +122,8 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
     #### Built-in Functions and Fields
     <table>
 <tr>
-<th rowspan="2">Built-in</th>
-<th rowspan="2">Description</th>
-<th colspan="4">Availability</th>
-</tr>
-<tr>
-<th>Page</th>
-<th>Template</th>
-<th>Config</th>
-<th>Index</th>
+<th>Built-in</th>
+<th>Description</th>
 </tr>
 <tr>
 <td><code>link</code></td>
@@ -140,8 +133,20 @@ The `link` function takes **a name** or an object, and returns _a **relative** l
 
 The `link` function has the side effect of making the linked-to page publicly accessible, if the page that is creating the link is reachable from another publicly-accessible page. The root `/` index page is always public.
 
-</td>
+Availability:
+<table>
+<tr>
+<td>Page</td>
+<td>Template</td>
+<td>Config</td>
+<td>Index</td>
+</tr>
+<tr>
 <td align="center">✅</td><td align="center">✅</td><td align="center">❌</td><td align="center">✅</td>
+</tr>
+</table>
+
+</td>
 </tr>
 <tr>
 <td><code>path</code></td>
@@ -149,8 +154,9 @@ The `link` function has the side effect of making the linked-to page publicly ac
 
 The `path` function works exactly like the `path` function above, except it _**does not**_ have the side effect of impacting the reachability graph, and making the linked-to page publicly accessible.
 
+Available everywhere.
+
 </td>
-<td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
 <td><code>dir</code></td>
@@ -160,16 +166,32 @@ The `dir` variables points to a `DirNode` object representing the directory that
 
 This object has a fields like `dir.pages`, which is a list of all the pages (a list of `PageNode` objects) representing all the pages in that directory. Pages means Markdown files and HTML files.
 
+In templates, the `dir` points to the directory that the file being processed is in.
+
+Available everywhere.
+
 </td>
-<td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
 <td>Title</td>
 <td>The title is accessed with <code>page.title</code>. It is picked up either from PyPage code in the page or a <code>title</code> YAML field in the file. If `title` is not defined by the page, then <code>page.realName</code> of the file is used, which is the adjusted name of the file without its extension and idea date prefix (if present) removed. The title isn't <em>properly</em> available to Python inside the page itself, or from <code>__config__.py</code>, since the page has not been processed when these are executed. If <code>page.title</code> is accessed from these (the page or config), or if a <code>title</code> was never defined in the page, then the <code>.realName</code> of the file would be returned.
 
 Note: the title can directly be accessed as `title` (without `pageObj.title`) in the template (and [inherited](https://github.com/arjun-menon/pypage?tab=readme-ov-file#inheritance-with-inject-and-exists) templates) for the page, since all environment variables from the page are passed on to the template, during template processing.
-</td>
+
+Availability:
+<table>
+<tr>
+<td>Page</td>
+<td>Template</td>
+<td>Config</td>
+<td>Index</td>
+</tr>
+<tr>
 <td align="center">❌</td><td align="center">✅</td><td align="center">❌</td><td align="center">✅</td>
+</tr>
+</table>
+
+</td>
 </tr>
 <tr>
 <td>YAML fields & other vars</td>
@@ -179,8 +201,20 @@ YAML fields (and other variables defined in PyPage code) of a page are:
 * Available directly to template(s) that the page uses/invokes.
 * Stored in `pageObj.env`, for future access. The index page, for example, can use `page.env` to access these fields & variables.
 
-</td>
+Availability (same as `title`):
+<table>
+<tr>
+<td>Page</td>
+<td>Template</td>
+<td>Config</td>
+<td>Index</td>
+</tr>
+<tr>
 <td align="center">❌</td><td align="center">✅</td><td align="center">❌</td><td align="center">✅</td>
+</tr>
+</table>
+
+</td>
 </tr>
 <tr>
 <td>Last Modified Date & Time</td>
@@ -200,8 +234,9 @@ The `default_datetime_format` is `%Y %b %-d  at %-H:%M %p`.
 
 _Note:_ This function calls spawns a `git` process, so is a tiny bit slow.
 
+Available everywhere.
+
 </td>
-<td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
 <td>Idea Date</td>
@@ -223,22 +258,31 @@ The `default_date_format` is `%Y %b %-d`.
 
 _Note:_ This function calls spawns a `git` process, if it's not a Markdown file or if there is no date prefix in the Markdown file's name.
 
+Available everywhere.
+
 </td>
-<td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
 <td><code>readfile</code></td>
-<td>This is just a simple built-in function that reads the contents of a file (assuming <code>utf-8</code> encoding) into a string, and returns it.
+<td>This is just a simple built-in function that reads the contents of a file (assuming <code>utf-8</code> encoding) into a string, and returns it. This function is defined as:
+
+```python
+def readfile(file_path: str) -> str:
+        with open(file_path, "r", encoding="utf-8") as someFile:
+            return someFile.read()
+```
+
+Available everywhere.
 </td>
-<td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
 <td><code>sh</code></td>
-<td>This exposes entire <code>sh</code> library. The current working directory (CWD) would be wherever the file being executed is located (regardless of whether the file is a regular page or index page or <code>__config__.py</code> or template). If the file is a template, the CWD would be that of the page being processed.
+<td>This exposes the entire <code>sh</code> library. The current working directory (CWD) would be wherever the file being executed is located (regardless of whether the file is a regular page or index page or <code>__config__.py</code> or template). If the file is a template, the CWD would be that of the page being processed.
 
 See `sh`'s documentation here: https://sh.readthedocs.io/en/latest/
+
+Available everywhere.
 </td>
-<td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 </table>
 
