@@ -164,6 +164,17 @@ This object has a fields like `dir.pages`, which is a list of all the pages (a l
 <td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
 <tr>
+<td>Title</td>
+<td>The title is either the <code>title</code> YAML field, or if that isn't defined, the <code>.realName</code> of the file, which is the adjusted name of the file without its extension and a date prefix (if present) removed. The title isn't <em>properly</em> available to Python inside the page itself, or from <code>__config__.py</code>, since the page has not been processed when these are executed. If <code>.page</code> is accessed from these (the page or config), or if a <code>title</code> was never defined in the page, then the <code>.realName</code> of the file would be returned.
+</td>
+<td align="center">❌</td><td align="center">✅</td><td align="center">❌</td><td align="center">✅</td>
+</tr>
+<tr>
+<td>YAML fields & other vars</td>
+<td>...</td>
+<td align="center">❌</td><td align="center">✅</td><td align="center">❌</td><td align="center">✅</td>
+</tr>
+<tr>
 <td>Last Modified Date & Time</td>
 <td>
 
@@ -206,17 +217,6 @@ _Note:_ This function calls spawns a `git` process, if it's not a Markdown file 
 
 </td>
 <td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
-</tr>
-<tr>
-<td>Title</td>
-<td>The title is either the <code>title</code> YAML field, or if that isn't defined, the <code>.realName</code> of the file, which is the adjusted name of the file without its extension and a date prefix (if present) removed. The title isn't <em>properly</em> available to Python inside the page itself, or from <code>__config__.py</code>, since the page has not been processed when these are executed. If <code>.page</code> is accessed from these (the page or config), or if a <code>title</code> was never defined in the page, then the <code>.realName</code> of the file would be returned.
-</td>
-<td align="center">❌</td><td align="center">✅</td><td align="center">❌</td><td align="center">✅</td>
-</tr>
-<tr>
-<td>YAML fields & other vars</td>
-<td>...</td>
-<td align="center">❌</td><td align="center">✅</td><td align="center">❌</td><td align="center">✅</td>
 </tr>
 <tr>
 <td><code>readfile</code></td>
