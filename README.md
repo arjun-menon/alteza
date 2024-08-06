@@ -176,7 +176,7 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
 </tr>
 <tr>
 <td><code>sh</code></td>
-<td>This exposes entire <code>sh</code> library. The current working directory (CWD) would be wherever the file being executed is located (regardless of whether the file is a regular page or index page or `__config__.py`, etc). If the file is a template, the CWD would be that of the page being processed.
+<td>This exposes entire <code>sh</code> library. The current working directory (CWD) would be wherever the file being executed is located (regardless of whether the file is a regular page or index page or <code>__config__.py</code> or template). If the file is a template, the CWD would be that of the page being processed.
 
 See `sh`'s documentation here: https://sh.readthedocs.io/en/latest/
 </td>
