@@ -115,7 +115,11 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
        * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`.
        * Directories containing index files should just be referred to by the directory name. For example, the index page `about-me/hobbies/index.md` (or `about-me/hobbies/index.py.html`) should just be linked to with a `link('hobbies')`.
 
-12. **Built-in Functions and Fields**
+12. #### Expected & Optional Special Variables/Functions
+
+    Certain fields, with certain names, hold special meaning, and are called/used by Alteza. One such variable is `layout` (and `layoutRaw`), which
+
+    #### Built-in Functions and Fields
     <table>
 <tr>
 <th rowspan="2">Built-in</th>
@@ -166,14 +170,7 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
 </tr>
 <tr>
 <td><code>readfile</code></td>
-<td>Just a simple built-in function defined as:
-
-```
-def readfile(file_path: str) -> str:
-    with open(file_path, "r", encoding="utf-8") as someFile:
-        return someFile.read()
-```
-
+<td>This is just a simple built-in function that reads the contents of a file (assuming `utf-8` encoding) into a string, and returns it.
 </td>
 <td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td>
 </tr>
