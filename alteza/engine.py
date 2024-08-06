@@ -236,9 +236,7 @@ class Content:
             if indexPage is not None and isinstance(indexPage, PyPageNode):
                 self.invokePyPage(indexPage, env)
 
-            # Enrich dirNode with title from index. TODO: Enrich dirNode with additional `env`/info from index?
-            if indexPage and "title" in indexPage.env:
-                setattr(dirNode, "title", indexPage.title)
+            # TODO: Enrich dirNode with additional `env`/info from index?
 
         initial_env = self.seed | self.getBasicHelpers()
 

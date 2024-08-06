@@ -220,6 +220,13 @@ class DirNode(FsNode):
             return indexFile
         return None
 
+    @property
+    def title(self) -> Optional[str]:
+        indexPage = self.indexPage
+        if indexPage and "title" in indexPage.env:
+            return indexPage.title
+        return None
+
     @staticmethod
     def _displayDir(dirNode: "DirNode", indent: int = 0) -> str:
         return (
