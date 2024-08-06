@@ -295,14 +295,16 @@ class PyPageNode(PageNode):
         super().__init__(parent, dirPath, fileName)
         self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
-    def setPyPageOutput(self, output: str) -> None:
-        self._pyPageOutput = output
-
-    def getPyPageOutput(self) -> str:
+    @property
+    def output(self) -> str:
         if self._pyPageOutput is None:
-            raise AltezaException("PyPage output has not been generated yet.")
+            raise AltezaException("The PyPage HTML output has not been generated yet.")
         assert isinstance(self._pyPageOutput, str)
         return self._pyPageOutput
+
+    @output.setter
+    def output(self, htmlOutput: str) -> None:
+        self._pyPageOutput = htmlOutput
 
 
 class Md(PyPageNode):

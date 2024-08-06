@@ -140,20 +140,20 @@ class Content:
         # Invoke pypage
         pyPageOutput = pypage(toProcessFurther, env)
 
-        # Perform Markdown processing
+        # Perform initial Markdown processing:
         if isinstance(pyPageNode, Md):
             mdResult = Md.processMarkdown(pyPageOutput)
             env.update(mdResult.metadata)
             pyPageOutput = mdResult.html
 
-        # TODO: Enrich with `file` enhanced with `env`.
-
+        # Handle `public` var:
         if "public" in env:
             if env["public"] is True:
                 pyPageNode.makePublic()
             elif env["public"] is False:
                 pyPageNode.shouldPublish = False
 
+        # Perform Markdown template application:
         if isinstance(pyPageNode, Md):
             templateHtml = self.getTemplateHtml(env)
             self.inTemplate = True
@@ -161,8 +161,14 @@ class Content:
             pyPageOutput = pypage(templateHtml, env | {"content": pyPageOutput})
             self.inTemplate = False
 
-        pyPageNode.setPyPageOutput(pyPageOutput)
+        # Set the PyPageNode's output:
+        pyPageNode.output = pyPageOutput
+
+        # Enrich with `env`.
         pyPageNode.env = env
+        for k, v in self.getModuleVars(env).items():
+            if not hasattr(pyPageNode, k):
+                setattr(pyPageNode, k, v)
 
     def runConfigIfAny(self, dirNode: DirNode, env: dict[str, Any]) -> Dict[str, Any]:
         # Run a __config__.py file, if one exists.
@@ -356,7 +362,7 @@ class Engine:
                 f"An index.html already exists, and conflicts with {md}, at {os.getcwd()}."
             )
         with open("index.html", "w", encoding="utf-8") as pageHtml:
-            pageHtml.write(md.getPyPageOutput())
+            pageHtml.write(md.output)
 
     @staticmethod
     def generateMd(md: Md) -> None:
@@ -375,7 +381,7 @@ class Engine:
                 f"File {fileName} already exists, and conflicts with {nonMd}."
             )
         with open(fileName, "w", encoding="utf-8") as nonMdPageFile:
-            nonMdPageFile.write(nonMd.getPyPageOutput())
+            nonMdPageFile.write(nonMd.output)
 
     @staticmethod
     def generatePyPageNode(pyPageNode: PyPageNode) -> None:
