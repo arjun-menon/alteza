@@ -108,6 +108,10 @@ class Content:
             return self.link(fromPyPage, dstFile, pathOnly)
         if isinstance(destination, FileNode):
             return self.link(fromPyPage, destination, pathOnly)
+        if isinstance(destination, DirNode):
+            if not destination.indexPage:
+                raise AltezaException(f"Directory `{destination}` has no index page.")
+            return self.link(fromPyPage, destination.indexPage, pathOnly)
         raise AltezaException(f"Unknown link destination type: `{type(destination)}`.")
 
     def invokePyPage(self, pyPageNode: PyPageNode, env: dict[str, Any]) -> None:
@@ -232,7 +236,9 @@ class Content:
             if indexPage is not None and isinstance(indexPage, PyPageNode):
                 self.invokePyPage(indexPage, env)
 
-            # TODO: Enrich dirNode with `env`/info from index?
+            # Enrich dirNode with title from index. TODO: Enrich dirNode with additional `env`/info from index?
+            if indexPage and "title" in indexPage.env:
+                setattr(dirNode, "title", indexPage.title)
 
         initial_env = self.seed | self.getBasicHelpers()
 
