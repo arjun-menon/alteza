@@ -6,7 +6,7 @@ Welcome to Section L
 {{
 for file in dir.files:
     write('<li><a href="%s">%s</a> <code>%s</code> </li>' % 
-        (linkObj(file), file.getTitle(),  ' -> ' + file.fullPath))
+        (linkObj(file), file.title,  ' -> ' + file.fullPath))
 }}
 </ol>
 

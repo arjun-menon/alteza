@@ -131,7 +131,8 @@ class FileNode(FsNode):
             return self.getParentDir().getRectifiedName()
         return self.realName
 
-    def getTitle(self) -> str:
+    @property
+    def title(self) -> str:
         if "title" in self.env:
             return self.env["title"]
         return self.realName

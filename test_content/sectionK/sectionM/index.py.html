@@ -20,7 +20,7 @@ title = title_for_this_dir
     {% for file in dir.getPages() %}
     <li>
         <a href="{{ linkObj(file) }}">
-            {{file.getTitle()}}
+            {{file.title}}
         </a>
     </li>
     {% endfor %}
