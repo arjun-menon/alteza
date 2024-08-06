@@ -211,7 +211,7 @@ class DirNode(FsNode):
             f for f in self.files if (isinstance(f, PyPageNode) and not f.isIndex())
         )
 
-    @property
+    @functools.cached_property
     def indexPage(self) -> Optional["PageNode"]:
         indexFilter = filter(lambda f: f.isIndex(), self.files)
         indexFile: Optional[FileNode] = next(indexFilter, None)
@@ -222,9 +222,8 @@ class DirNode(FsNode):
 
     @property
     def title(self) -> Optional[str]:
-        indexPage = self.indexPage
-        if indexPage and "title" in indexPage.env:
-            return indexPage.title
+        if self.indexPage and "title" in self.indexPage.env:
+            return self.indexPage.title
         return None
 
     @staticmethod
