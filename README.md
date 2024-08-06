@@ -126,7 +126,7 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
 <th>Page</th>
 <th>Template</th>
 <th>Config</th>
-<th>Index & <code>after</code></th>
+<th>Index</th>
 </tr>
 <tr>
 <td><code>link</code></td>
