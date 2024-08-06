@@ -228,7 +228,7 @@ class Content:
                     self.invokePyPage(pyPageNode, env)
 
             # We must process the index file last.
-            indexPage: Optional[PageNode] = dirNode.getIndexPage()
+            indexPage: Optional[PageNode] = dirNode.indexPage
             if indexPage is not None and isinstance(indexPage, PyPageNode):
                 self.invokePyPage(indexPage, env)
 

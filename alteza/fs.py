@@ -211,7 +211,8 @@ class DirNode(FsNode):
             f for f in self.files if (isinstance(f, PyPageNode) and not f.isIndex())
         )
 
-    def getIndexPage(self) -> Optional["PageNode"]:
+    @property
+    def indexPage(self) -> Optional["PageNode"]:
         indexFilter = filter(lambda f: f.isIndex(), self.files)
         indexFile: Optional[FileNode] = next(indexFilter, None)
         if indexFile:
