@@ -33,7 +33,8 @@ Flexible Static Site Generator
 ---
 
 * Top 2:
-  * Support auto-refresh, using an approach similar to: https://github.com/baalimago/wd-41/blob/main/internal/wsinject/delta_streamer.ws.go
+  * A `--dev` flag with supports auto-refresh, using an approach similar to: https://github.com/baalimago/wd-41/blob/main/internal/wsinject/delta_streamer.ws.go
+  * Also, the `--dev` flag serve the site. E.g. see: https://stackoverflow.com/questions/33028624/run-python-httpserver-in-background-and-continue-script-execution
   * Add a trailing `/` slash for Markdown page dirs since: (a) if a Markdown page is turned into a dir/collection of smaller essays, this would allow that change to happen naturally/seamlessly, and (b) since many web servers including the one used by GH pages add a trailing `/` slash to directories using a 301 Redirect anyways.
   * Caching in the GitHub action. See:
     * https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows
