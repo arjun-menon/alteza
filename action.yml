@@ -38,7 +38,7 @@ runs:
         # release that is limited to documentation and `action.yml`.
         #
         # pip install -q git+https://github.com/arjun-menon/alteza.git@master
-        pip install -q alteza==0.8.7
+        pip install -q alteza==0.8.8
 
     - name: Generate
       shell: bash
