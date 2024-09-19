@@ -9,6 +9,13 @@ colored==2.2.4
 docstring-parser==0.15
     # via typed-argument-parser
 markdown==3.6
+    # via
+    #   alteza (setup.py)
+    #   mdx-breakless-lists
+    #   mdx-truly-sane-lists
+mdx-breakless-lists==1.0.1
+    # via alteza (setup.py)
+mdx-truly-sane-lists==1.3
     # via alteza (setup.py)
 mypy-extensions==1.0.0
     # via typing-inspect

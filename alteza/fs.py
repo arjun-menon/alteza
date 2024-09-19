@@ -350,7 +350,9 @@ class Md(PyPageNode):
                 "admonition",
                 "codehilite",
                 "meta",
-                "sane_lists",
+                "mdx_breakless_lists",
+                # "sane_lists",
+                "mdx_truly_sane_lists",
                 "smarty",  # not sure
                 "toc",
             ]

@@ -17,6 +17,8 @@ setup(
         # Standard dependencies:
         "pypage >= 2.1.0",
         "markdown >= 3.6",
+        "mdx-breakless-lists >= 1.0.1",
+        "mdx_truly_sane_lists >= 1.3",
         "pygments >= 2.16.1",
         "pyyaml >= 6.0.1",
         "colored >= 2.2.4",
