@@ -479,6 +479,9 @@ class Engine:
             self.makeSite()
         except (AltezaException, PypageError) as e:
             logging.exception(e)
+            print("\nSite build failed due to Alteza or Pypape error.")
+        except Exception as e:
+            logging.exception(e)
             print("\nSite build failed.")
 
     @staticmethod
