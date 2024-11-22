@@ -35,7 +35,7 @@ from .fs import (
 
 class Args(Tap):  # pyre-ignore[13]
     content: str  # Directory to read the input content from.
-    output: str  # Directory to send the output to. WARNING: This will be deleted.
+    output: str  # Directory to write the generated site to.
     clear_output_dir: bool = False  # Delete the output directory, if it already exists.
     copy_assets: bool = False  # Copy static assets instead of symlinking to them.
     seed: str = "{}"  # Seed JSON data to add to the initial root env.

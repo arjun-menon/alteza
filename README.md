@@ -283,6 +283,7 @@ Available everywhere.
 Available everywhere.
 </td>
 </tr>
+
 <tr>
 <td><code>sh</code></td>
 <td>This exposes the entire <code>sh</code> library. The current working directory (CWD) would be wherever the file being executed is located (regardless of whether the file is a regular page or index page or <code>__config__.py</code> or template). If the file is a template, the CWD would be that of the page being processed.
@@ -292,6 +293,13 @@ See `sh`'s documentation here: https://sh.readthedocs.io/en/latest/
 Available everywhere.
 </td>
 </tr>
+
+<tr>
+<td><code>skip</code></td>
+<td>This environment variable, if specified, is a list of names of files or directories to be skipped. (It must be of type <code>List[str]</code>, if defined.)
+</td>
+</tr>
+
 </table>
 
 ## GitHub Action, Installation & Command-Line Usage
@@ -354,17 +362,31 @@ If you're working on Alteza itself, then run the `alteza` module itself, from th
 ### Command-line Arguments
 The `-h` argument above will print the list of available arguments:
 ```
-usage: __main__.py --content CONTENT --output OUTPUT [--clear_output_dir] [--copy_assets] [--seed SEED] [-h]
+usage: __main__.py --content CONTENT --output OUTPUT [--clear_output_dir] [--copy_assets] [--seed SEED] [--watch]
+                   [--ignore [IGNORE ...]] [-h]
 
 options:
-  --content CONTENT   (str, required) Directory to read the input content from.
-  --output OUTPUT     (str, required) Directory to send the output to. WARNING: This will be deleted.
-  --clear_output_dir  (bool, default=False) Delete the output directory, if it already exists.
-  --copy_assets       (bool, default=False) Copy static assets instead of symlinking to them.
-  --seed SEED         (str, default={}) Seed JSON data to add to the initial root env.
-  -h, --help          show this help message and exit
+  --content CONTENT     (str, required) Directory to read the input content from.
+  --output OUTPUT       (str, required) Directory to write the generated site to.
+  --clear_output_dir    (bool, default=False) Delete the output directory, if it already exists.
+  --copy_assets         (bool, default=False) Copy static assets instead of symlinking to them.
+  --seed SEED           (str, default={}) Seed JSON data to add to the initial root env.
+  --watch               (bool, default=False) Watch for content changes, and rebuild.
+  --ignore [IGNORE ...]
+                        (List[str], default=[]) Paths to completely ignore.
+  -h, --help            show this help message and exit
 ```
-As might be obvious above, you set the `content` to your content directory. The output directory will be deleted entirely, before being written to.
+As might be obvious above, you set the `--content` field  to your content directory.
+
+The output directory for the generated site is specified with `--output`. You can have Alteza automaticlly delete it entirely before being written to (including in `--watch` mode) by setting the `--clear_output_dir` flag.
+
+Normally, Alteza performs a single build and exits. With the `--watch` flag, Alteza monitors the file system for changes, and rebuilds the site automatically. 
+
+The `--ignore` flag is a list of _paths_ to files or directories to ignore. This is useful for ignoring directories like `.gitignore`, or other non-pertinent files and directories.
+
+Normal Alteza behavior for static assets is to create symlinks from your generate site to static files in your content directory. You can turn off this behavior with `--copy_assets`.
+
+The `--seed` flag is a JSON string representing seed data for PyPage processing. This seed is injected into every PyPage document. The seed _is not global_, and so cannot be modified between files; it is copied into each PyPage execution environment.
 
 To test against `test_content` (and generate output to `test_output`), run it like this:
 ```sh
