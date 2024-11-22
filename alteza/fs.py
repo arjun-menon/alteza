@@ -376,7 +376,7 @@ class Md(PyPageNode):
 
 class NonMd(PyPageNode):
     def __init__(
-        # pylint: disable=too-many-positional-arguments
+        # pylint: disable=too-many-arguments, too-many-positional-arguments
         self,
         realName: str,
         rectifiedFileName: str,
