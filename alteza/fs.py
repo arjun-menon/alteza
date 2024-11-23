@@ -296,6 +296,10 @@ class PageNode(FileNode):
                 return None
         return None
 
+    def __getattr__(self, attr: str) -> None:
+        """Allows for checking whether page.some_property exists more easily (without `hasattr`)."""
+        return None
+
 
 class PyPageNode(PageNode):
     def __init__(self, parent: Optional[DirNode], dirPath: str, fileName: str) -> None:

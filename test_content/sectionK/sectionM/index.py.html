@@ -23,7 +23,7 @@ title = title_for_this_dir
             {{file.title}}
         </a>
         {{
-        if hasattr(file, 'x1y'):
+        if file.x1y:
             write('&nbsp; &nbsp;' + file.x1y)
         }}
     </li>
