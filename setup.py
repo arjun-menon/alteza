@@ -1,11 +1,6 @@
 from setuptools import setup
 
-version = "0.9.0"
-
-name = "alteza"
-
-repo_url = "https://github.com/arjun-menon/%s" % name
-download_url = "%s/archive/v%s.tar.gz" % (repo_url, version)
+from alteza.version import version, name, repo_url, download_url, author, author_email
 
 setup(
     name=name,
@@ -30,8 +25,8 @@ setup(
     long_description_content_type="text/markdown",
     url=repo_url,
     download_url=download_url,
-    author="Arjun G. Menon",
-    author_email="contact@arjungmenon.com",
+    author=author,
+    author_email=author_email,
     keywords=["static site generator", "static sites", "ssg"],
     license="AGPL-3.0-or-later",
     # Ref:https://docs.python.org/3.11/distutils/examples.html
