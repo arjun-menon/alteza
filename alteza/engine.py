@@ -31,6 +31,7 @@ from .fs import (
     PageNode,
     PyPageNode,
 )
+from .version import version as alteza_version
 
 
 class Args(Tap):  # pyre-ignore[13]
@@ -474,7 +475,10 @@ class Engine:
 
         elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
         # pylint: disable=consider-using-f-string
-        print("\nSite generation complete. Time elapsed: %.2f ms" % elapsedMilliseconds)
+        print(
+            "\nSite generation complete (Alteza %s). Time elapsed: %.2f ms"
+            % (alteza_version, elapsedMilliseconds)
+        )
 
     def makeSiteWithExceptionHandling(self) -> None:
         try:
