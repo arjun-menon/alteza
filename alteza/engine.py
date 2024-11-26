@@ -146,7 +146,9 @@ class Content:
 
         # Perform initial Markdown processing:
         if isinstance(pyPageNode, Md):
+            PyPageNode.temporal_link = link
             mdResult = Md.processMarkdown(pyPageOutput)
+            PyPageNode.temporal_link = None
             env.update(mdResult.metadata)
             pyPageOutput = mdResult.html
 

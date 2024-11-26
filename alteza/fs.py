@@ -22,6 +22,7 @@ from typing import (
 import markdown
 import yaml
 from colored import Style, Fore  # type: ignore
+from markdown.extensions.wikilinks import WikiLinkExtension
 
 colored_logs = True
 
@@ -302,6 +303,8 @@ class PageNode(FileNode):
 
 
 class PyPageNode(PageNode):
+    temporal_link: Optional[Callable[[str], str]] = None
+
     def __init__(self, parent: Optional[DirNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
         self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
@@ -318,7 +321,39 @@ class PyPageNode(PageNode):
         self._pyPageOutput = htmlOutput
 
 
+def buildWikiUrl(label: str, base: str, end: str) -> str:
+    # pylint: disable=unused-argument
+    if PyPageNode.temporal_link is None:
+        raise AltezaException("PyPageNode.temporal_link is not set.")
+    # pylint: disable=not-callable
+    return PyPageNode.temporal_link(label)
+
+
 class Md(PyPageNode):
+    md = markdown.Markdown(
+        # See: https://python-markdown.github.io/extensions/
+        extensions=[
+            # Extra extensions:
+            "abbr",
+            "attr_list",
+            "def_list",
+            "fenced_code",
+            "footnotes",
+            "md_in_html",
+            "tables",
+            # Standard extensions:
+            "admonition",
+            "codehilite",
+            "meta",
+            "mdx_breakless_lists",
+            # "sane_lists",
+            "mdx_truly_sane_lists",
+            "smarty",  # not sure
+            "toc",
+            WikiLinkExtension(html_class="", build_url=buildWikiUrl),
+        ]
+    )
+
     def __init__(self, parent: Optional[DirNode], dirPath: str, fileName: str) -> None:
         super().__init__(parent, dirPath, fileName)
 
@@ -339,32 +374,10 @@ class Md(PyPageNode):
 
     @staticmethod
     def processMarkdown(text: str) -> Result:
-        md = markdown.Markdown(
-            # See: https://python-markdown.github.io/extensions/
-            extensions=[
-                # Extra extensions:
-                "abbr",
-                "attr_list",
-                "def_list",
-                "fenced_code",
-                "footnotes",
-                "md_in_html",
-                "tables",
-                # Standard extensions:
-                "admonition",
-                "codehilite",
-                "meta",
-                "mdx_breakless_lists",
-                # "sane_lists",
-                "mdx_truly_sane_lists",
-                "smarty",  # not sure
-                "toc",
-            ]
-        )
-        html: str = md.convert(text)
+        html: str = Md.md.convert(text)
         yamlFrontMatter: str = ""
 
-        for name, lines in md.Meta.items():  # type: ignore # pylint: disable=no-member
+        for name, lines in Md.md.Meta.items():  # type: ignore # pylint: disable=no-member
             yamlFrontMatter += f"{name} : {lines[0]} \n"
             for line in lines[1:]:
                 yamlFrontMatter += " " * (len(name) + 3) + line + "\n"
