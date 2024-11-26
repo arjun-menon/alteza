@@ -474,8 +474,8 @@ class Engine:
         self.generate(content)
 
         elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
-        # pylint: disable=consider-using-f-string
         print(
+            # pylint: disable=consider-using-f-string
             "\nSite generation complete (Alteza %s). Time elapsed: %.2f ms"
             % (alteza_version, elapsedMilliseconds)
         )

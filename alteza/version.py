@@ -1,9 +1,10 @@
-version = "0.9.0"
+version: str = "0.9.0"
 
-name = "alteza"
+name: str = "alteza"
 
-repo_url = "https://github.com/arjun-menon/%s" % name
-download_url = "%s/archive/v%s.tar.gz" % (repo_url, version)
+# pylint: disable=consider-using-f-string
+repo_url: str = "https://github.com/arjun-menon/%s" % name
+download_url: str = "%s/archive/v%s.tar.gz" % (repo_url, version)
 
-author = "Arjun G. Menon"
-author_email = "contact@arjungmenon.com"
+author: str = "Arjun G. Menon"
+author_email: str = "contact@arjungmenon.com"
