@@ -111,6 +111,10 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
 
        2. Reachability of files is determined using this function, and unreachable files will be treated as non-public (and thus not exist in the generated site).
 
+       3. This function can be called both with a string identifying a file name, or with a reference to the file object itself. `link` will check the type of the argument passed to it, and appropriately handle each type.
+
+       4. This `link` function can also be called with string arguments using wiki-style linksm in Markdown files. For example, a `[[Happy Cat]]` in a Markdown file is the equivalent of writing `[Happy Cat]({{link('Happy Cat')}})`. 
+
     4. A file name's extension must be omitted while using `link` (including the `.py*` for any file with `.py` before its extension).
        * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`.
        * Directories containing index files should just be referred to by the directory name. For example, the index page `about-me/hobbies/index.md` (or `about-me/hobbies/index.py.html`) should just be linked to with a `link('hobbies')`.
