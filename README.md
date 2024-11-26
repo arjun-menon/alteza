@@ -113,7 +113,7 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
 
        3. This function can be called both with a string identifying a file name, or with a reference to the file object itself. `link` will check the type of the argument passed to it, and appropriately handle each type.
 
-       4. This `link` function can also be called with string arguments using wiki-style linksm in Markdown files. For example, a `[[Happy Cat]]` in a Markdown file is the equivalent of writing `[Happy Cat]({{link('Happy Cat')}})`. 
+       4. This `link` function can also be called with string arguments using wiki-style links in Markdown files. For example, a `[[Happy Cat]]` in a Markdown file is the equivalent of writing `[Happy Cat]({{link('Happy Cat')}})`, or of writing `<a href="{{link('Happy Cat')}}">Happy Cat</a>`.
 
     4. A file name's extension must be omitted while using `link` (including the `.py*` for any file with `.py` before its extension).
        * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`.
