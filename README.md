@@ -137,7 +137,7 @@ The `link` function takes **a name** or an object, and returns _a **relative** l
 
 The `link` function has the side effect of making the linked-to page publicly accessible, if the page that is creating the link is reachable from another publicly-accessible page. The root `/` index page is always public.
 
-_Note:_ for Markdown pages, an extra `../` is added at the beginning of the returned path to accomodate the fact that Markdown pages get turned into directories with the page rendered into an `index.html` inside the directory.
+_Note:_ for Markdown pages, an extra `../` is added at the beginning of the returned path to accommodate the fact that Markdown pages get turned into directories with the page rendered into an `index.html` inside the directory.
 
 Availability:
 <table>
@@ -382,7 +382,7 @@ options:
 ```
 As might be obvious above, you set the `--content` field  to your content directory.
 
-The output directory for the generated site is specified with `--output`. You can have Alteza automaticlly delete it entirely before being written to (including in `--watch` mode) by setting the `--clear_output_dir` flag.
+The output directory for the generated site is specified with `--output`. You can have Alteza automatically delete it entirely before being written to (including in `--watch` mode) by setting the `--clear_output_dir` flag.
 
 Normally, Alteza performs a single build and exits. With the `--watch` flag, Alteza monitors the file system for changes, and rebuilds the site automatically. 
 
