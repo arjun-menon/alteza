@@ -8,7 +8,6 @@ Flexible Static Site Generator
     * Proper YAML field capture.
     * Maybe inject post-processing fields (gathered with `getModuleVars`) into this object with `setattr`.
   * Document all built-in functions, and config fields (like the `skip` config var), etc.
-  * Obsidian style Wiki Links.
   * Update the `YYYY-MM-DD-` handler to allow `YYYY-MM-DD ` as well.
   * A `nameEncode` configurable function, with a `defaultNameEncode`.
     * Convert something like "Purpose of Life" to `purpose-of-life`.
@@ -19,11 +18,13 @@ Flexible Static Site Generator
   * An `after` function defined in __config__.py that gets run after all children are processed.
   * Installing pip requirements.txt for the site being built.
   * Maybe: Expose `content` for user post-processing functions.
+  * Avoid rebuilding unchanged directories while re-building with --watch, unless any ascendant __config__.py has changed.
 
 **_Completed_**:
 - [x] Rebuild automatically with a fs watching library.
 - [x] Implement a `skip` config var.
 - [x] Document most built-in functions.
+- [x] Obsidian style Wiki Links.
 
 ---
 
