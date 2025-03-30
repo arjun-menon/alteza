@@ -403,8 +403,9 @@ Feel free to send me PRs for this project.
 
 ### Code Style
 
-I'm using `black`. To re-format the code, just run: `black alteza`.
-Fwiw, I've configured my IDE (_PyCharm_) to always auto-format with `black`.
+I'm using `ruff`. To re-format the code, just run: `ruff format`.
+Fwiw, I've configured my IDE (_PyCharm_) to always auto-format with `ruff`.
+Note: ruff has been configured to use single quotes, tab characters, and a 120-character line length.
 
 ### Type Checking
 
