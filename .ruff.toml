@@ -1,0 +1,8 @@
+target-version = "py312"
+
+line-length = 120
+
+[format]
+indent-style = "tab"
+quote-style = "single"
+line-ending = "lf"
