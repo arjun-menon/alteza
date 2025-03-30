@@ -1,1 +1,1 @@
-title_for_this_dir = "Section M..."
+title_for_this_dir = 'Section M...'

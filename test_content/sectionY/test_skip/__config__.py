@@ -1,1 +1,1 @@
-skip = ["fast_rocket", "flowery_garden"]
+skip = ['fast_rocket', 'flowery_garden']

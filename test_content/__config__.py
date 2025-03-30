@@ -1,8 +1,8 @@
 three = 3
 
 # See: https://pygments.org/styles/
-pygments_style = "sas"
+pygments_style = 'sas'
 
-mood = "joy"
+mood = 'joy'
 
-layout = "ordinary_page"
+layout = 'ordinary_page'
