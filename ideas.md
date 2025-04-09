@@ -19,6 +19,7 @@ Flexible Static Site Generator
   * Installing pip requirements.txt for the site being built.
   * Maybe: Expose `content` for user post-processing functions.
   * Avoid rebuilding unchanged directories while re-building with --watch, unless any ascendant __config__.py has changed.
+  * A `warn` function to log warnings, to be printed by Alteza.
 
 **_Completed_**:
 - [x] Rebuild automatically with a fs watching library.
