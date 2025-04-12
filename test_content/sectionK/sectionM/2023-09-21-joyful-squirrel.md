@@ -16,7 +16,9 @@ A few dats:
   This page was created (or renamed) on {{getCreateDate("%B %-d, %Y")}}.
   * We got this from git history.
       * But we got the idea for this on {{getIdeaDate("%B %-d, %Y")}}.
+          * And it's great we can track both dates.
   * This page was last modified on {{getLastModified()}}.
     - We got this from git history as well.
+        - But spawning a git process could be slow.
 
-Back [home](..).
+Back to the [parent](..) level.
