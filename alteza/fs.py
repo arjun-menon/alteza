@@ -251,6 +251,13 @@ class PageNode(FileNode):
 				return self.ideaDate
 		return self.gitFirstAuthDate
 
+	def getCreateDate(self, f: str = default_date_format) -> str:
+		createDate = self.gitFirstAuthDate
+		return createDate.strftime(f) if createDate else ''
+
+	def getCreateDateObj(self) -> Optional[date]:
+		return self.gitFirstAuthDate
+
 	@functools.cached_property
 	def lastModifiedObj(self) -> datetime:
 		"""Get last modified date from: (a) git history, or (b) system modified time."""
@@ -335,7 +342,8 @@ class Md(PyPageNode):
 			'smarty',  # not sure
 			'toc',
 			WikiLinkExtension(html_class='', build_url=buildWikiUrl),
-		]
+		],
+		extension_configs={'mdx_truly_sane_lists': {'nested_indent': 4}},
 	)
 
 	def __init__(self, parent: Optional[DirNode], dirPath: str, fileName: str) -> None:
