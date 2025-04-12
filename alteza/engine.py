@@ -122,9 +122,9 @@ class Content:
 		# Enrich with current file:
 		env |= {'file': pyPageNode}
 
-		toProcessFurther: str
+		rawPyPageFileText: str
 		if isinstance(pyPageNode, (Md, NonMd)):
-			toProcessFurther = Fs.readfile(pyPageNode.absoluteFilePath)
+			rawPyPageFileText = Fs.readfile(pyPageNode.absoluteFilePath)
 		else:
 			raise AltezaException(f'{pyPageNode} Unsupported type of PyPageNode.')
 
@@ -145,7 +145,7 @@ class Content:
 		env |= {'getCreateDate': pyPageNode.getCreateDate}
 
 		# Invoke pypage
-		pyPageOutput = pypage(toProcessFurther, env)
+		pyPageOutput = pypage(rawPyPageFileText, env)
 
 		# Perform initial Markdown processing:
 		if isinstance(pyPageNode, Md):
