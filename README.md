@@ -236,7 +236,7 @@ Availability (same as `title`):
 </td>
 </tr>
 <tr>
-<td>Last Modified Date & Time</td>
+<td>Last Modified & Git Creation Date & Time</td>
 <td>
 
 _This is only available on `PageNode` objects._
@@ -248,6 +248,8 @@ The last modified date & time for a given file is taken from:
   b. The last modified date & time as provided by the file system. 
 
 There's a `getLastModifiedObj()` function which returns a Python `datetime` object. There's also a `getLastModified(f: str = default_datetime_format)` functon which returns a `str` with the date & time formatted.
+
+There are similar `getCreateDate` and `getCreateDateObj` functions which tell you when the file was created in git history. _Note_ however: This date gets updated when a file is moved or renamed.
 
 The `default_datetime_format` is `%Y %b %-d  at %-H:%M %p`.
 
@@ -366,7 +368,7 @@ If you're working on Alteza itself, then run the `alteza` module itself, from th
 ### Command-line Arguments
 The `-h` argument above will print the list of available arguments:
 ```
-usage: __main__.py --content CONTENT --output OUTPUT [--clear_output_dir] [--copy_assets] [--seed SEED] [--watch]
+usage: alteza --content CONTENT --output OUTPUT [--clear_output_dir] [--copy_assets] [--seed SEED] [--watch]
                    [--ignore [IGNORE ...]] [-h]
 
 options:
