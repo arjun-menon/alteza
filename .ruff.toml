@@ -1,8 +1,9 @@
-target-version = "py312"
+target-version = "py313"
 
 line-length = 120
 
 [format]
+preview = true
 indent-style = "tab"
 quote-style = "single"
 line-ending = "lf"
