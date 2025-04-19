@@ -19,7 +19,7 @@ else
     tmux send-keys -t 0 'cd test_output; python3 -m http.server 1234' C-m
 
     # Send a command to the second pane
-    tmux send-keys -t 1 'source venv/bin/activate.fish' C-m
+    tmux send-keys -t 1 'source .venv/bin/activate.fish' C-m
 
     tmux swap-pane -s 0 -t 1
 
