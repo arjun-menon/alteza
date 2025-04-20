@@ -243,10 +243,6 @@ class DirNode(FsNode):
 		return self._displayDir(self)
 
 
-class AltezaException(Exception):
-	"""Alteza Exception"""
-
-
 class PageNode(FileNode):
 	default_date_format: str = '%Y %b %-d'
 	default_datetime_format: str = default_date_format + ' at %-H:%M %p'
@@ -556,3 +552,7 @@ class Fs:
 		nameRegistry = NameRegistry(rootDir, skipForRegistry)
 
 		return FsCrawlResult(rootDir, nameRegistry)
+
+
+class AltezaException(Exception):
+	"""Alteza Exception"""
