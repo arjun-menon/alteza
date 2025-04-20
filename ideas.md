@@ -4,10 +4,6 @@ Flexible Static Site Generator
 
 #### Ideas...
 * Top 1:
-  * Proper object exposed for each PyPage file.
-    * Proper YAML field capture.
-    * Maybe inject post-processing fields (gathered with `getModuleVars`) into this object with `setattr`.
-  * Document all built-in functions, and config fields (like the `skip` config var), etc.
   * Update the `YYYY-MM-DD-` handler to allow `YYYY-MM-DD ` as well.
   * A `nameEncode` configurable function, with a `defaultNameEncode`.
     * Convert something like "Purpose of Life" to `purpose-of-life`.
@@ -26,6 +22,8 @@ Flexible Static Site Generator
 - [x] Implement a `skip` config var.
 - [x] Document most built-in functions.
 - [x] Obsidian style Wiki Links.
+- [x] A `page` object exposed for each PyPage file. YAML fields and post-processing fields (gathered with `getModuleVars`) captured and injected into this object with `setattr`.
+- [x] Document all built-in functions, and config fields (like the `skip` config var), etc.
 
 ---
 
