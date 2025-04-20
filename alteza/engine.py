@@ -101,7 +101,7 @@ class Content:
 	def linkFlex(
 		self,
 		fromPyPage: PyPageNode,
-		destination: Union[str, FileNode],
+		destination: Union[str, FsNode],
 		pathOnly: bool = False,
 	) -> str:
 		if isinstance(destination, str):
@@ -128,7 +128,7 @@ class Content:
 		else:
 			raise AltezaException(f'{pyPageNode} Unsupported type of PyPageNode.')
 
-		def link(destination: Union[str, FileNode]) -> str:
+		def link(destination: Union[str, FsNode]) -> str:
 			return self.linkFlex(pyPageNode, destination)
 
 		def path(name: str) -> str:
