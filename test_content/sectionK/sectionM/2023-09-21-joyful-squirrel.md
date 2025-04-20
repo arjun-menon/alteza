@@ -1,4 +1,4 @@
-title: {{ title + " about a Squirrel" }}
+title: {{ "About a " + "squirrel" }}
 x1y: :-)
 ---
 
@@ -8,7 +8,7 @@ Here's a joyful squirrel.
 
 Want to learn about a [magic turtle]({{link("magic-turtle")}})?
 
-What about a [[curious-cat]]? <small>(Or the [[baby-squirrel]]?)</small>
+What about a [[curious-cat]]? <small>(Or a [[baby-squirrel]] or a [[baby-chipmunk]]?)</small>
 
 This is [what a "megabyte" is]({{link("just_a_test")}}).
 

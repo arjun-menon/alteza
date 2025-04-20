@@ -128,8 +128,8 @@ class Content:
 		else:
 			raise AltezaException(f'{pyPageNode} Unsupported type of PyPageNode.')
 
-		def link(destination: Union[str, FsNode]) -> str:
-			return self.linkFlex(pyPageNode, destination)
+		def link(destination: Union[str, FsNode], pathOnly: bool = False) -> str:
+			return self.linkFlex(pyPageNode, destination, pathOnly)
 
 		PyPageNode.temporal_link = link
 
@@ -198,6 +198,12 @@ class Content:
 				os.path.join(dirNode.fullPath, Fs.configFileName),
 			)
 			exec(Fs.readfile(Fs.configFileName), configEnv)
+
+			if 'title' in configEnv:
+				if dirNode.configTitle is not None:
+					raise AltezaException('Do not set both `title` and `dir.title` in `__config__.py`.')
+				dirNode.title = configEnv['title']
+				del configEnv['title']
 		return configEnv
 
 	@staticmethod

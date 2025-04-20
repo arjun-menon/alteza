@@ -203,7 +203,9 @@ This object has a fields like `dir.pages`, which is a list of all the pages (a l
   2. `dir.files`: List of `FileNode` objects of files in this directory.
   3. `dir.pages`: List of `PageNode` objects of Markdown files, non-Markdown PyPage files, and HTML files.
   4. `dir.indexPage`: A `PageNode` object of the index page, i.e. a `index.md` or a `index.html` file. If there is no index page, this is `None`.
-  5. `dir.title`: A string `title` object of the index page, only if the index page specifies a title. If there is no index page or no title specified by it, this is `None`.
+  5. `dir.title`: A string `title` object of the index page, if the index page specifies a title, or if `dir.configTitle` is set (more on that below). If there is no index page or no title specified by it nor no `dir.configTitle`, then this is `None`.
+
+`dir.configTitle` is used for the title shown in breadcrumbs (e.g. by calling `page.crumbs()`). Since breadcrumbs are rendered before a parent directory index page has been processed, we don't have access to the index page title. Therefore, this value can be set — it can be set in `__config__.py` either by just writing `title = '...'` or `dir.tite = '...'` (both have the same effect; both set `dir.configTitle`).
 
 In templates, the `dir` points to the directory that the file being processed is in.
 
