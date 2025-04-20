@@ -139,8 +139,6 @@ class Content:
 		env |= {'getCreateDateObj': pyPageNode.gitFirstAuthDate}
 		env |= {'getCreateDate': pyPageNode.getCreateDate}
 
-		env |= {'markdown': lambda text: Md.processMarkdown(text).html}
-
 		# Invoke pypage
 		pyPageOutput = pypage(rawPyPageFileText, env)
 
@@ -305,7 +303,7 @@ class Content:
 
 	@staticmethod
 	def getBasicHelpers() -> Dict[str, Any]:
-		return {'readfile': Fs.readfile, 'sh': sh}
+		return {'readfile': Fs.readfile, 'sh': sh, 'markdown': lambda text: Md.processMarkdown(text).html}
 
 	@staticmethod
 	def splitPath(path: str) -> List[str]:
