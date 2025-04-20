@@ -6,3 +6,5 @@ pygments_style = 'sas'
 mood = 'joy'
 
 layout = 'ordinary_page'
+
+dir.title = 'Home'

@@ -5,7 +5,7 @@ title: Just Section K
 The directories here are:
 <ol>
 {% for d in dir.subDirs %}
-{% if d.title %}
+{% if d.hasIndexPage and d.title %}
 <li>
 <a href="{{link(d)}}">{{d.title}}</a>
 </li>

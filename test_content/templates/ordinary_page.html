@@ -1,5 +1,14 @@
 {% capture body %}
 {% if exists('title') %}
+<small>
+    {% for dirNode in page.getParents() %}
+        {% if dirNode.hasIndexPage %}
+            <a href="{{ link(dirNode) }}">{{ dirNode.titleOrName }}</a>
+        {% else %}
+            {{ dirNode.titleOrName }}
+        {% endif %} &#9656;
+    {% endfor %}
+</small>
 <h4>{{ title }}</h4>
 {% endif %}
 {{ content }}{% endcapture %}

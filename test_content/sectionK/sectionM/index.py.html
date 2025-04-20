@@ -12,6 +12,16 @@ title = title_for_this_dir
 
 <body>
 
+<small>
+	{% for dirNode in page.getParents() %}
+		{% if dirNode.hasIndexPage %}
+			<a href="{{ link(dirNode) }}">{{ dirNode.titleOrName }}</a>
+		{% else %}
+			{{ dirNode.titleOrName }}
+		{% endif %} &#9656;
+	{% endfor %}
+</small>
+
 <h4>
     The pages here are:
 </h4>

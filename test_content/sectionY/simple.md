@@ -1,4 +1,4 @@
-Title:   My Document
+Title: My Document
 Summary: A brief description of my document.
 Authors:
 - Arjun Menon

@@ -8,7 +8,7 @@ Here's a joyful squirrel.
 
 Want to learn about a [magic turtle]({{link("magic-turtle")}})?
 
-What about a [[curious-cat]]?
+What about a [[curious-cat]]? <small>(Or the [[baby-squirrel]]?)</small>
 
 This is [what a "megabyte" is]({{link("just_a_test")}}).
 
