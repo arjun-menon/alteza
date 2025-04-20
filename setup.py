@@ -10,7 +10,7 @@ setup(
 	# Ref: https://packaging.python.org/en/latest/discussions/install-requires-vs-requirements/
 	install_requires=[
 		# Standard dependencies:
-		'pypage >= 2.1.0',
+		'pypage >= 2.2.1',
 		'markdown >= 3.6',
 		'mdx-breakless-lists >= 1.0.1',
 		'mdx_truly_sane_lists >= 1.3',
