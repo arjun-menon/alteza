@@ -308,14 +308,14 @@ class PageNode(FileNode):
 
 
 class PyPageNode(PageNode):
-	temporal_link: Optional[Callable[[Union[str, FsNode]], str]] = None
+	temporal_link: Optional[Callable[[Union[str, FsNode], bool], str]] = None
 
 	@staticmethod
-	def link(destination: Union[str, FsNode]) -> str:
+	def link(destination: Union[str, FsNode], pathOnly: bool = False) -> str:
 		if PyPageNode.temporal_link is None:
-			raise AltezaException('PyPageNode.temporal_link is not set.')
+			raise AltezaException('PyPageNode.temporal_link has not been set.')
 		# pylint: disable=not-callable
-		return PyPageNode.temporal_link(destination)
+		return PyPageNode.temporal_link(destination, pathOnly)
 
 	def __init__(self, parent: Optional[DirNode], dirPath: str, fileName: str) -> None:
 		super().__init__(parent, dirPath, fileName)
