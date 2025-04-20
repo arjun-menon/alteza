@@ -146,6 +146,8 @@ class Content:
 		env |= {'getCreateDateObj': pyPageNode.gitFirstAuthDate}
 		env |= {'getCreateDate': pyPageNode.getCreateDate}
 
+		env |= {'markdown': lambda text: Md.processMarkdown(text).html}
+
 		# Invoke pypage
 		pyPageOutput = pypage(rawPyPageFileText, env)
 

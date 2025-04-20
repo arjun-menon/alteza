@@ -129,6 +129,7 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
 <th>Built-in</th>
 <th>Description</th>
 </tr>
+
 <tr>
 <td><code>page</code></td>
 <td>
@@ -152,6 +153,7 @@ Availability:
 
 </td>
 </tr>
+
 <tr>
 <td><code>link</code></td>
 <td>
@@ -322,6 +324,28 @@ Available everywhere.
 See `sh`'s documentation here: https://sh.readthedocs.io/en/latest/
 
 Available everywhere.
+</td>
+</tr>
+
+<tr>
+<td><code>markdown</code></td>
+<td>
+
+This will rarely ever be needed, but the function `markdown(text)` is available in any PyPage file. It simply processes the argument `text` as Markdown, and returns the ouput HTML as the result (with any front matter discarded).
+
+Availability:
+<table>
+<tr>
+<td>Page</td>
+<td>Template</td>
+<td>Config</td>
+<td>Index</td>
+</tr>
+<tr>
+<td align="center">✅</td><td align="center">✅</td><td align="center">❌</td><td align="center">❌</td>
+</tr>
+</table>
+
 </td>
 </tr>
 

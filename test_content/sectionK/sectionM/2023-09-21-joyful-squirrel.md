@@ -1,10 +1,12 @@
-title: {{ "About a " + "squirrel" }}
+title: {{ "Joyful" + "Squirrel" }}
 x1y: :-)
 ---
 
 Here's a joyful squirrel.
 
 <img src="{{link("squirrel")}}">
+
+{{ markdown("""Now, _it looks quite **cheerful**_, doesn't it?""") }}
 
 Want to learn about a [magic turtle]({{link("magic-turtle")}})?
 
