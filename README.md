@@ -119,7 +119,7 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
        * i.e., e.g. one must write `link('magic-turtle')` for the file `magic-turtle.md`, and `link('pygments-styles')` for the file `pygments-styles.py.css`.
        * Directories containing index files should just be referred to by the directory name. For example, the index page `about-me/hobbies/index.md` (or `about-me/hobbies/index.py.html`) should just be linked to with a `link('hobbies')`.
 
-12. #### Expected (and Optional) Special Variables/Functions
+12. #### Expected (and Optional) Special Variables & Functions
 
     Certain fields, with certain names, hold special meaning, and are called/used by Alteza. One such variable is `layout` (and `layoutRaw`), which points to the layout/template to be used to render the page (as explained in earlier points above). It can be overriden by descendant directories or pages.
 
@@ -128,6 +128,27 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
 <tr>
 <th>Built-in</th>
 <th>Description</th>
+</tr>
+<tr>
+<td><code>page</code></td>
+<td>
+
+The `page` object represents a PyPage file.
+
+Availability:
+<table>
+<tr>
+<td>Page</td>
+<td>Template</td>
+<td>Config</td>
+<td>Index</td>
+</tr>
+<tr>
+<td align="center">✅</td><td align="center">✅</td><td align="center">❌</td><td align="center">❌</td>
+</tr>
+</table>
+
+</td>
 </tr>
 <tr>
 <td><code>link</code></td>
@@ -236,7 +257,7 @@ Availability (same as `title`):
 </td>
 </tr>
 <tr>
-<td>Last Modified & Git Creation Date & Time</td>
+<td>Last Modified & Git Creation Date + Time</td>
 <td>
 
 _This is only available on `PageNode` objects._
@@ -249,11 +270,11 @@ The last modified date & time for a given file is taken from:
 
 There's a `getLastModifiedObj()` function which returns a Python `datetime` object. There's also a `getLastModified(f: str = default_datetime_format)` functon which returns a `str` with the date & time formatted.
 
-There are similar `getCreateDate` and `getCreateDateObj` functions which tell you when the file was created in git history. _Note_ however: This date gets updated when a file is moved or renamed.
+There are similar `getCreateDateObj()` and `getCreateDate(f: str = default_datetime_format)` functions which tell you when the file was created in git history. (_Note_ however: This date gets updated when a file is moved or renamed.) If the file is not in a git repo, then `getCreateDateObj` will return `None` and `getCreateDate` will return an empty string. 
 
 The `default_datetime_format` is `%Y %b %-d  at %-H:%M %p`.
 
-_Note:_ This function calls spawns a `git` process, so is a tiny bit slow.
+_Note:_ These function calls spawn a `git` process, so they can be a tiny bit slow.
 
 Available everywhere.
 
