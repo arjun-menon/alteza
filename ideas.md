@@ -29,6 +29,7 @@ Flexible Static Site Generator
 
 * Top 2:
   * A `--dev` flag with supports auto-refresh, using an approach similar to: https://github.com/baalimago/wd-41/blob/main/internal/wsinject/delta_streamer.ws.go
+  * A `dev_mode` bool env var that is set, when Alteza is run in `--dev` mode.
   * A `--zip` flag that create a zip file of the outputted website, with a special `_raw` directory in there containing the raw source code of the website as well (or maybe that should be a separate option, or sub-option). 
   * Also, the `--dev` flag serve the site. E.g. see: https://stackoverflow.com/questions/33028624/run-python-httpserver-in-background-and-continue-script-execution
   * Add a trailing `/` slash for Markdown page dirs since: (a) if a Markdown page is turned into a dir/collection of smaller essays, this would allow that change to happen naturally/seamlessly, and (b) since many web servers including the one used by GH pages add a trailing `/` slash to directories using a 301 Redirect anyways.
