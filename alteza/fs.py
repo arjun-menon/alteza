@@ -26,6 +26,10 @@ from colored import Fore, Style  # type: ignore
 from markdown.extensions.wikilinks import WikiLinkExtension
 
 
+class AltezaException(Exception):
+	"""Alteza Exception"""
+
+
 class FsNode:
 	def __init__(self, parent: Optional['DirNode'], dirPath: str, fileName: Optional[str]) -> None:
 		self.parent = parent
@@ -548,7 +552,3 @@ class Fs:
 		nameRegistry = NameRegistry(rootDir, skipForRegistry)
 
 		return FsCrawlResult(rootDir, nameRegistry)
-
-
-class AltezaException(Exception):
-	"""Alteza Exception"""
