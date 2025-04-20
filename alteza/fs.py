@@ -165,6 +165,7 @@ class DirNode(FsNode):
 		_, subDirNames, fileNames = next(os.walk(dirPath))
 		dirPath = '' if dirPath == os.curdir else dirPath
 		super().__init__(parent, dirPath, None)
+		self.configTitle: Optional[str] = None
 
 		self.files: List[FileNode] = [
 			FileNode.construct(self, dirPath, fileName)
@@ -211,11 +212,23 @@ class DirNode(FsNode):
 			return indexFile
 		return None
 
+	@functools.cached_property
+	def hasIndexPage(self) -> bool:
+		return self.indexPage is not None
+
 	@property
 	def title(self) -> Optional[str]:
 		if self.indexPage and 'title' in self.indexPage.env:
 			return self.indexPage.title
-		return None
+		return self.configTitle
+
+	@title.setter
+	def title(self, configTitle: str) -> None:
+		self.configTitle = configTitle
+
+	@property
+	def titleOrName(self) -> str:
+		return self.title if self.title else self.getRectifiedName()
 
 	@staticmethod
 	def _displayDir(dirNode: 'DirNode', indent: int = 0) -> str:
@@ -230,7 +243,7 @@ class DirNode(FsNode):
 
 
 class AltezaException(Exception):
-	"""Alteza Exceptions"""
+	"""Alteza Exception"""
 
 
 class PageNode(FileNode):
@@ -299,6 +312,17 @@ class PyPageNode(PageNode):
 	def __init__(self, parent: Optional[DirNode], dirPath: str, fileName: str) -> None:
 		super().__init__(parent, dirPath, fileName)
 		self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
+
+	def getParents(self) -> List[DirNode]:
+		parents: List[DirNode] = []
+		parent: Optional[DirNode] = self.getParentDir()
+		while parent is not None:
+			parents.append(parent)
+			parent = parent.parent
+		parents = list(reversed(parents))
+		if self.isIndex():
+			parents = parents[:-1]
+		return parents
 
 	@property
 	def output(self) -> str:
