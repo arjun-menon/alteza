@@ -25,10 +25,10 @@ from .content import Args, Content, enterDir
 from .version import version as alteza_version
 
 
-class Engine:
-	# Engine.generate(...) is called to write the output of a processed Content object.
-	# Engine.makeSite() is called to perform a full site generation.
-	# Engine.run() is used to invoke Alteza overall.
+class Driver:
+	# Driver.generate(...) is called to write the output of a processed Content object.
+	# Driver.makeSite() is called to perform a full site generation.
+	# Driver.run() is used to invoke Alteza overall.
 	def __init__(self, args: Args) -> None:
 		self.args: Args = args
 		# Just copying & renaming a few args:
@@ -51,9 +51,9 @@ class Engine:
 		if not md.isIndex():
 			os.mkdir(md.realName)
 			with enterDir(md.realName):
-				Engine.generateMdContents(md)
+				Driver.generateMdContents(md)
 		else:
-			Engine.generateMdContents(md)
+			Driver.generateMdContents(md)
 
 	@staticmethod
 	def generateNonMd(nonMd: NonMd) -> None:
@@ -66,10 +66,10 @@ class Engine:
 	@staticmethod
 	def generatePyPageNode(pyPageNode: PyPageNode) -> None:
 		if isinstance(pyPageNode, Md):
-			Engine.generateMd(pyPageNode)
+			Driver.generateMd(pyPageNode)
 
 		elif isinstance(pyPageNode, NonMd):
-			Engine.generateNonMd(pyPageNode)
+			Driver.generateNonMd(pyPageNode)
 
 		else:
 			raise AltezaException(f'{pyPageNode} pyPage attribute is invalid.')
@@ -89,7 +89,7 @@ class Engine:
 
 			for fileNode in filter(lambda node: node.shouldPublish, curDir.files):
 				if isinstance(fileNode, PyPageNode):
-					Engine.generatePyPageNode(fileNode)
+					Driver.generatePyPageNode(fileNode)
 				else:
 					self.generateStaticAsset(fileNode)
 
@@ -195,7 +195,7 @@ class Engine:
 		def watching() -> None:
 			print('\nWatching for changes... press Ctrl+C to exit.')
 
-		eventHandler = Engine.WatchdogEventHandler(self.contentDir)
+		eventHandler = Driver.WatchdogEventHandler(self.contentDir)
 		observer = WatchdogObserver()
 		observer.schedule(eventHandler, self.contentDir, recursive=True)
 		observer.start()

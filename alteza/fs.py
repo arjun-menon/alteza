@@ -37,7 +37,7 @@ class FsNode:
 			else os.path.join(dirPath, fileName)
 		)
 		self.shouldPublish: bool = False
-		# These fields are populated later by engine:
+		# These fields are populated later during processing:
 		self.linksTo: List['FsNode'] = []
 		self.env: dict[str, Any] = {}
 
