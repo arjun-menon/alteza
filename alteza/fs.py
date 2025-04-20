@@ -25,8 +25,6 @@ import yaml
 from colored import Fore, Style  # type: ignore
 from markdown.extensions.wikilinks import WikiLinkExtension
 
-colored_logs = True
-
 
 class FsNode:
 	def __init__(self, parent: Optional['DirNode'], dirPath: str, fileName: Optional[str]) -> None:
@@ -47,9 +45,8 @@ class FsNode:
 		return self.colorize(self.fullPath)
 
 	def colorize(self, r: str) -> str:
-		if colored_logs:
-			if self.shouldPublish:
-				r = f'{Style.bold}{Fore.spring_green_2b}{r}{Style.reset}'
+		if self.shouldPublish:
+			r = f'{Style.bold}{Fore.spring_green_2b}{r}{Style.reset}'
 		return r
 
 	def setNodeAsPublic(self) -> None:
@@ -135,11 +132,10 @@ class FileNode(FsNode):
 		return isinstance(self, PyPageNode)
 
 	def colorize(self, r: str) -> str:
-		if colored_logs:
-			if self.isPyPage() is not None and self.shouldPublish:
-				r = f'{Fore.spring_green_1}{r}{Style.reset}'
-			elif isinstance(self, Md):
-				r = f'{Fore.purple_4b}{r}{Style.reset}'
+		if self.isPyPage() is not None and self.shouldPublish:
+			r = f'{Fore.spring_green_1}{r}{Style.reset}'
+		elif isinstance(self, Md):
+			r = f'{Fore.purple_4b}{r}{Style.reset}'
 		return r
 
 	def __repr__(self) -> str:
