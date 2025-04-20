@@ -135,6 +135,8 @@ must run Alteza with trusted code, or in an isolated container. For example, in 
 
 The `page` object represents a PyPage file. It is an instance of `PyPageNode` (which inherits from `PageNode`, which in turn inherits from `FileNode`, which inherits from `FsNode`). Refer to the UML diagram at the end of this documentation for the methods provided by these classes (the method names should hint their functionality). Or take a look at the code in [`fs.py`](https://github.com/arjun-menon/alteza/blob/master/alteza/fs.py) to know what these classes provide.
 
+The `page.crumbs()` function in particular can return an HTML string representing navigation breadcrumbs.
+
 Availability:
 <table>
 <tr>

@@ -131,6 +131,8 @@ class Content:
 		def link(destination: Union[str, FsNode]) -> str:
 			return self.linkFlex(pyPageNode, destination)
 
+		PyPageNode.temporal_link = link
+
 		def path(name: str) -> str:
 			return self.linkFlex(pyPageNode, name, True)
 
@@ -149,9 +151,7 @@ class Content:
 
 		# Perform initial Markdown processing:
 		if isinstance(pyPageNode, Md):
-			PyPageNode.temporal_link = link
 			mdResult = Md.processMarkdown(pyPageOutput)
-			PyPageNode.temporal_link = None
 			env.update(mdResult.metadata)
 			pyPageOutput = mdResult.html
 
@@ -178,6 +178,8 @@ class Content:
 		for k, v in self.getModuleVars(env).items():
 			if not hasattr(pyPageNode, k):
 				setattr(pyPageNode, k, v)
+
+		PyPageNode.temporal_link = None
 
 	def runConfigIfAny(self, dirNode: DirNode, env: dict[str, Any]) -> Dict[str, Any]:
 		# Run a __config__.py file, if one exists.

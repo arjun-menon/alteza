@@ -10,6 +10,7 @@ from typing import (
 	Callable,
 	DefaultDict,
 	Dict,
+	Union,
 	Iterator,
 	List,
 	NamedTuple,
@@ -307,7 +308,14 @@ class PageNode(FileNode):
 
 
 class PyPageNode(PageNode):
-	temporal_link: Optional[Callable[[str], str]] = None
+	temporal_link: Optional[Callable[[Union[str, FsNode]], str]] = None
+
+	@staticmethod
+	def link(destination: Union[str, FsNode]) -> str:
+		if PyPageNode.temporal_link is None:
+			raise AltezaException('PyPageNode.temporal_link is not set.')
+		# pylint: disable=not-callable
+		return PyPageNode.temporal_link(destination)
 
 	def __init__(self, parent: Optional[DirNode], dirPath: str, fileName: str) -> None:
 		super().__init__(parent, dirPath, fileName)
@@ -324,6 +332,27 @@ class PyPageNode(PageNode):
 			parents = parents[:-1]
 		return parents
 
+	def crumbs(self, sep: str = '&#9656;') -> str:
+		parents = self.getParents()
+		if len(parents) == 0:
+			return ''
+
+		crumbs_html = '<nav class="crumbs">'
+		crumbs_html += f'<span class="crumb-sep"> {sep} </span>'.join(
+			(
+				'<span class="crumb">'
+				+ (
+					f'<a class="crumb-link" href="{PyPageNode.link(parent)}">{parent.titleOrName}</a>'
+					if parent.hasIndexPage
+					else f'<span class="crumb-nolink">{parent.titleOrName}</span>'
+				)
+				+ '</span>'
+			)
+			for parent in parents
+		)
+		crumbs_html += '</nav>'
+		return crumbs_html
+
 	@property
 	def output(self) -> str:
 		if self._pyPageOutput is None:
@@ -338,10 +367,7 @@ class PyPageNode(PageNode):
 
 def buildWikiUrl(label: str, base: str, end: str) -> str:
 	# pylint: disable=unused-argument
-	if PyPageNode.temporal_link is None:
-		raise AltezaException('PyPageNode.temporal_link is not set.')
-	# pylint: disable=not-callable
-	return PyPageNode.temporal_link(label)
+	return PyPageNode.link(label)
 
 
 class Md(PyPageNode):
