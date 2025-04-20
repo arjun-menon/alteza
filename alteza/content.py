@@ -136,7 +136,7 @@ class Content:
 		env |= {'getLastModified': pyPageNode.getLastModified}
 		env |= {'getIdeaDateObj': pyPageNode.getIdeaDateObj}
 		env |= {'getIdeaDate': pyPageNode.getIdeaDate}
-		env |= {'getCreateDateObj': pyPageNode.gitFirstAuthDate}
+		env |= {'getCreateDateObj': pyPageNode.getCreateDateObj}
 		env |= {'getCreateDate': pyPageNode.getCreateDate}
 
 		# Invoke pypage

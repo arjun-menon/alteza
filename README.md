@@ -280,7 +280,7 @@ There are similar `getCreateDateObj()` and `getCreateDate(f: str = default_datet
 
 The `default_datetime_format` is `%Y %b %-d  at %-H:%M %p`.
 
-_Note:_ These function calls spawn a `git` process, so they can be a tiny bit slow.
+_Note:_ These function calls spawn a `git` process, so they can be a bit slow.
 
 Available everywhere.
 
