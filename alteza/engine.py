@@ -119,8 +119,8 @@ class Content:
 		print(f'{Fore.gold_1}Processing:{Style.reset}', pyPageNode.fullPath)
 		env = env.copy()
 
-		# Enrich with current file:
-		env |= {'file': pyPageNode}
+		# Enrich with the current file:
+		env |= {'page': pyPageNode}
 
 		rawPyPageFileText: str
 		if isinstance(pyPageNode, (Md, NonMd)):
