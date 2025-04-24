@@ -13,7 +13,7 @@ title = title_for_this_dir
 <body>
 
 <small>
-	{% for dirNode in page.getParents() %}
+	{% for dirNode in page.parents %}
 		{% if dirNode.hasIndexPage %}
 			<a href="{{ link(dirNode) }}">{{ dirNode.titleOrName }}</a>
 		{% else %}

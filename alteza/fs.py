@@ -320,7 +320,8 @@ class PyPageNode(PageNode):
 		super().__init__(parent, dirPath, fileName)
 		self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
-	def getParents(self) -> deque[DirNode]:
+	@functools.cached_property
+	def parents(self) -> deque[DirNode]:
 		parents: deque[DirNode] = deque()
 		parent: Optional[DirNode] = self.parentDir
 		while parent is not None:
@@ -331,7 +332,7 @@ class PyPageNode(PageNode):
 		return parents
 
 	def crumbs(self, sep: str = '&#9656;') -> str:
-		parents = self.getParents()
+		parents = self.parents
 		if len(parents) == 0:
 			return ''
 
