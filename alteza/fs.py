@@ -119,14 +119,14 @@ class FileNode(FsNode):
 		self.realName: str = self.baseName  # to be overwritten selectively
 		self.preSlugRealName: Optional[str] = None
 
-	# TODO: @functools.cached_property
+	@functools.cached_property
 	def isIndex(self) -> bool:
 		# Index pages are `index.md` or `index[.py].html` files.
 		return self.realName == 'index' and (self.extension in ('.md', '.html'))
 
 	# TODO: @functools.cached_property
 	def getLinkName(self) -> str:
-		if self.isIndex():
+		if self.isIndex:
 			return self.getParentDir().getRectifiedName()
 		return self.realName
 
@@ -203,14 +203,14 @@ class DirNode(FsNode):
 
 	@property
 	def pages(self) -> Sequence['PageNode']:
-		return [f for f in self.files if (isinstance(f, PageNode) and not f.isIndex())]
+		return [f for f in self.files if (isinstance(f, PageNode) and not f.isIndex)]
 
 	def getPyPagesOtherThanIndex(self) -> Iterator['PyPageNode']:
-		return (f for f in self.files if (isinstance(f, PyPageNode) and not f.isIndex()))
+		return (f for f in self.files if (isinstance(f, PyPageNode) and not f.isIndex))
 
 	@functools.cached_property
 	def indexPage(self) -> Optional['PageNode']:
-		indexFilter = filter(lambda f: f.isIndex(), self.files)
+		indexFilter = filter(lambda f: f.isIndex, self.files)
 		indexFile: Optional[FileNode] = next(indexFilter, None)
 		if indexFile:
 			assert isinstance(indexFile, PageNode)
@@ -328,7 +328,7 @@ class PyPageNode(PageNode):
 			parents.append(parent)
 			parent = parent.parent
 		parents = list(reversed(parents))
-		if self.isIndex():
+		if self.isIndex:
 			parents = parents[:-1]
 		return parents
 

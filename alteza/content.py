@@ -75,7 +75,7 @@ class Content:
 				relativePath.append('..')
 		for p in remainingPath:
 			relativePath.append(p)
-		if isinstance(srcFile, Md) and not srcFile.isIndex() and not pathOnly:
+		if isinstance(srcFile, Md) and not srcFile.isIndex and not pathOnly:
 			relativePath = ['..'] + relativePath
 
 		relativePathStr = os.path.join('', *relativePath)
@@ -83,7 +83,7 @@ class Content:
 
 	@staticmethod
 	def getFileUrlName(dstFile: FileNode) -> str:
-		if dstFile.isIndex():
+		if dstFile.isIndex:
 			return ''
 		if isinstance(dstFile, Md):
 			return dstFile.realName

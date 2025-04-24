@@ -48,7 +48,7 @@ class Driver:
 
 	@staticmethod
 	def generateMd(md: Md) -> None:
-		if not md.isIndex():
+		if not md.isIndex:
 			os.mkdir(md.realName)
 			with enterDir(md.realName):
 				Driver.generateMdContents(md)
