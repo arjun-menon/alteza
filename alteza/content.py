@@ -114,6 +114,7 @@ class Content:
 
 		# Enrich with the current file:
 		env |= {'page': pyPageNode}
+		env |= pyPageNode.env
 
 		rawPyPageFileText: str
 		if isinstance(pyPageNode, (Md, NonMd)):
@@ -167,7 +168,7 @@ class Content:
 		pyPageNode.output = pyPageOutput
 
 		# Enrich with `env`.
-		pyPageNode.env = env
+		pyPageNode.env |= env
 		for k, v in self.getModuleVars(env).items():
 			if not hasattr(pyPageNode, k):
 				setattr(pyPageNode, k, v)

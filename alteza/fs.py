@@ -1,6 +1,7 @@
 import functools
 import os
 import re
+import unicodedata
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -116,11 +117,14 @@ class FileNode(FsNode):
 		self.extension: str = extension
 		self.baseName: str = baseName
 		self.realName: str = self.baseName  # to be overwritten selectively
+		self.preSlugRealName: Optional[str] = None
 
+	# TODO: @functools.cached_property
 	def isIndex(self) -> bool:
 		# Index pages are `index.md` or `index[.py].html` files.
 		return self.realName == 'index' and (self.extension in ('.md', '.html'))
 
+	# TODO: @functools.cached_property
 	def getLinkName(self) -> str:
 		if self.isIndex():
 			return self.getParentDir().getRectifiedName()
@@ -401,10 +405,16 @@ class Md(PyPageNode):
 		if len(self.baseName) > dateFragmentLength:
 			dateFragment_ = self.baseName[:dateFragmentLength]
 			remainingBasename = self.baseName[dateFragmentLength:]
-			if re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}-$', dateFragment_):
+			if re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}[- ]$', dateFragment_):
 				dateFragment = dateFragment_[:-1]
 				self.ideaDate = date.fromisoformat(dateFragment)
 				self.realName: str = remainingBasename
+
+		slugName = Md.slugify(self.realName)
+		if slugName != self.realName:
+			self.preSlugRealName: Optional[str] = self.realName
+			self.env['title'] = self.realName
+			self.realName = slugName
 
 	class Result(NamedTuple):
 		metadata: Dict[str, str]
@@ -427,6 +437,19 @@ class Md(PyPageNode):
 			raise AltezaException('Expected yaml.safe_load to return a dict or None.')
 
 		return Md.Result(metadata=metadata, html=html)
+
+	@staticmethod
+	def slugify(name: str) -> str:
+		name = (
+			unicodedata.normalize('NFKD', name)  # Normalize unicode characters
+			.encode('ascii', 'ignore')
+			.decode('ascii')
+		)
+		name = name.lower()
+		name = re.sub(r'[^\w\s-]', '', name)  # Replace any non-word characters with a dash
+		name = re.sub(r'[-\s]+', '-', name)  # Replace whitespace and repeated dashes with a single dash
+		name = name.strip('-')  # Strip leading and trailing dashes
+		return name
 
 
 class NonMd(PyPageNode):
@@ -452,6 +475,9 @@ class NameRegistry:
 			for fileNode in node.files:
 				if not skipForRegistry(fileNode.fileName):
 					allFilesMulti[fileNode.getLinkName()].add(fileNode)
+					if isinstance(fileNode, Md):
+						if fileNode.preSlugRealName is not None:
+							allFilesMulti[fileNode.preSlugRealName].add(fileNode)
 			for d in node.subDirs:
 				walk(d)
 

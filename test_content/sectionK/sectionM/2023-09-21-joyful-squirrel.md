@@ -26,4 +26,8 @@ A few data points:
     - We got this from git history as well.
         - But note that spawning a git process could be slow.
 
+Slug tests:
+* This is [[slug-test-1]].
+    * This is also the same [[Slug Test 1]].
+
 Back to the [parent](..) level.
