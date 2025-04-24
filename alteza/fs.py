@@ -340,9 +340,9 @@ class PyPageNode(PageNode):
 			(
 				'<span class="crumb">'
 				+ (
-					f'<a class="crumb-link" href="{PyPageNode.link(parent)}">{parent.titleOrName}</a>'
+					f'<a class="crumb crumb-link" href="{PyPageNode.link(parent)}">{parent.titleOrName}</a>'
 					if parent.hasIndexPage
-					else f'<span class="crumb-nolink">{parent.titleOrName}</span>'
+					else f'<span class="crumb crumb-nolink">{parent.titleOrName}</span>'
 				)
 				+ '</span>'
 			)
