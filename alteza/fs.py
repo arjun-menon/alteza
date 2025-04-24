@@ -2,13 +2,14 @@ import functools
 import os
 import re
 import unicodedata
-from collections import defaultdict
+from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import date, datetime
 from subprocess import STDOUT, CalledProcessError, check_output
 from typing import (
 	Any,
 	Callable,
+	Iterable,
 	DefaultDict,
 	Dict,
 	Union,
@@ -119,6 +120,10 @@ class FileNode(FsNode):
 		self.realName: str = self.baseName  # to be overwritten selectively
 		self.preSlugRealName: Optional[str] = None
 
+		# Note: The parent of a FileNode is always a DirNode (and never None).
+		assert isinstance(self.parent, DirNode)
+		self.parentDir: DirNode = self.parent
+
 	@functools.cached_property
 	def isIndex(self) -> bool:
 		# Index pages are `index.md` or `index[.py].html` files.
@@ -127,7 +132,7 @@ class FileNode(FsNode):
 	@functools.cached_property
 	def linkName(self) -> str:
 		if self.isIndex:
-			return self.getParentDir().rectifiedName
+			return self.parentDir.rectifiedName
 		return self.realName
 
 	@property
@@ -151,13 +156,6 @@ class FileNode(FsNode):
 		r = self.colorize(r)
 		r = super().colorize(r)
 		return r
-
-	# TODO: change to property
-	def getParentDir(self) -> 'DirNode':
-		# Note: The parent of a FileNode is always a DirNode (and never None).
-		assert isinstance(self.parent, DirNode)
-		parentDir: DirNode = self.parent
-		return parentDir
 
 
 class DirNode(FsNode):
@@ -323,15 +321,14 @@ class PyPageNode(PageNode):
 		super().__init__(parent, dirPath, fileName)
 		self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
-	def getParents(self) -> List[DirNode]:
-		parents: List[DirNode] = []
-		parent: Optional[DirNode] = self.getParentDir()
+	def getParents(self) -> Iterable[DirNode]:
+		parents: deque[DirNode] = deque()
+		parent: Optional[DirNode] = self.parentDir
 		while parent is not None:
-			parents.append(parent)
+			parents.appendleft(parent)
 			parent = parent.parent
-		parents = list(reversed(parents))
 		if self.isIndex:
-			parents = parents[:-1]
+			parents.pop()
 		return parents
 
 	def crumbs(self, sep: str = '&#9656;') -> str:
