@@ -1,4 +1,4 @@
-version: str = '0.9.5'
+version: str = '0.9.6'
 
 name: str = 'alteza'
 
