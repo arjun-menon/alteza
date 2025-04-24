@@ -9,7 +9,6 @@ from subprocess import STDOUT, CalledProcessError, check_output
 from typing import (
 	Any,
 	Callable,
-	Iterable,
 	DefaultDict,
 	Dict,
 	Union,
@@ -321,7 +320,7 @@ class PyPageNode(PageNode):
 		super().__init__(parent, dirPath, fileName)
 		self._pyPageOutput: Optional[str] = None  # to be generated (by pypage)
 
-	def getParents(self) -> Iterable[DirNode]:
+	def getParents(self) -> deque[DirNode]:
 		parents: deque[DirNode] = deque()
 		parent: Optional[DirNode] = self.parentDir
 		while parent is not None:
