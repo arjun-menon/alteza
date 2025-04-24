@@ -52,8 +52,7 @@ class Content:
 			srcFile.linksTo.append(dstFile)  # This is used to determine reachability.
 			if dstFile not in self.seenTemplateLinks:
 				print(
-					' ' * (4 if self.inTemplate else 2)
-					+ f'{Fore.grey_42}Linking to:{Style.reset} {dstFile.getLinkName()}',
+					' ' * (4 if self.inTemplate else 2) + f'{Fore.grey_42}Linking to:{Style.reset} {dstFile.linkName}',
 				)
 				if self.inTemplate:
 					self.seenTemplateLinks.add(dstFile)
@@ -235,7 +234,7 @@ class Content:
 			# all subdirectories have been processed so that they have access to
 			# information about the subdirectories.
 			for pyPageNode in dirNode.getPyPagesOtherThanIndex():
-				if pyPageNode.getLinkName() not in skipNames:
+				if pyPageNode.linkName not in skipNames:
 					self.invokePyPage(pyPageNode, env)
 
 			# We must process the index file last.

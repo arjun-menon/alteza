@@ -124,10 +124,10 @@ class FileNode(FsNode):
 		# Index pages are `index.md` or `index[.py].html` files.
 		return self.realName == 'index' and (self.extension in ('.md', '.html'))
 
-	# TODO: @functools.cached_property
-	def getLinkName(self) -> str:
+	@functools.cached_property
+	def linkName(self) -> str:
 		if self.isIndex:
-			return self.getParentDir().getRectifiedName()
+			return self.getParentDir().rectifiedName
 		return self.realName
 
 	@property
@@ -152,6 +152,7 @@ class FileNode(FsNode):
 		r = super().colorize(r)
 		return r
 
+	# TODO: change to property
 	def getParentDir(self) -> 'DirNode':
 		# Note: The parent of a FileNode is always a DirNode (and never None).
 		assert isinstance(self.parent, DirNode)
@@ -183,7 +184,8 @@ class DirNode(FsNode):
 			if not shouldIgnore(subDirName, self.fullPath, True)
 		]
 
-	def getRectifiedName(self) -> str:
+	@functools.cached_property
+	def rectifiedName(self) -> str:
 		# Note: if `dirName` is an empty string (""), that means we're at the root (/).
 		return self.dirName if len(self.dirName) > 0 else '/'
 
@@ -233,7 +235,7 @@ class DirNode(FsNode):
 
 	@property
 	def titleOrName(self) -> str:
-		return self.title if self.title else self.getRectifiedName()
+		return self.title if self.title else self.rectifiedName
 
 	@staticmethod
 	def _displayDir(dirNode: 'DirNode', indent: int = 0) -> str:
@@ -474,7 +476,7 @@ class NameRegistry:
 		def walk(node: DirNode) -> None:
 			for fileNode in node.files:
 				if not skipForRegistry(fileNode.fileName):
-					allFilesMulti[fileNode.getLinkName()].add(fileNode)
+					allFilesMulti[fileNode.linkName].add(fileNode)
 					if isinstance(fileNode, Md):
 						if fileNode.preSlugRealName is not None:
 							allFilesMulti[fileNode.preSlugRealName].add(fileNode)
