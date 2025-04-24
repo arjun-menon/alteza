@@ -331,13 +331,16 @@ class PyPageNode(PageNode):
 			parents.pop()
 		return parents
 
-	def crumbs(self, sep: str = '&#9656;') -> str:
+	def crumbs(self, sep: str = '&#9656;', end_with: bool = False, nav: bool = True) -> str:
 		parents = self.parents
 		if len(parents) == 0:
 			return ''
 
-		crumbs_html = '<nav class="crumbs">'
-		crumbs_html += f'<span class="crumb-sep"> {sep} </span>'.join(
+		crumbs_html = ''
+		if nav:
+			crumbs_html = '<nav class="crumbs">'
+		crumb_sep = f'<span class="crumb-sep"> {sep} </span>'
+		crumbs_html += crumb_sep.join(
 			(
 				'<span class="crumb">'
 				+ (
@@ -349,7 +352,10 @@ class PyPageNode(PageNode):
 			)
 			for parent in parents
 		)
-		crumbs_html += '</nav>'
+		if end_with:
+			crumbs_html += crumb_sep
+		if nav:
+			crumbs_html += '</nav>'
 		return crumbs_html
 
 	@property
