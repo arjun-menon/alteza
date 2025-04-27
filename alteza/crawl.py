@@ -26,7 +26,10 @@ class NameRegistry:
 		for name, fileNodes in allFilesMulti.items():
 			assert len(fileNodes) >= 1
 			if len(fileNodes) > 1:
-				self.errorOut(name, fileNodes)
+				raise AltezaException(
+					f"Error: The name '{name}' has multiple matches:\n"
+					+ '  \n'.join(f' {fileNode.fullPath}' for fileNode in fileNodes)
+				)
 			self.allFiles[name] = fileNodes.pop()
 
 	def lookup(self, name: str) -> FileNode:
@@ -35,13 +38,6 @@ class NameRegistry:
 			raise AltezaException(f'Link error: {name}')
 
 		return self.allFiles[name]
-
-	@staticmethod
-	def errorOut(name: str, fileNodes: Set[FileNode]) -> None:
-		raise AltezaException(
-			f"Error: The name '{name}' has multiple matches:\n"
-			+ '  \n'.join(f' {fileNode.fullPath}' for fileNode in fileNodes)
-		)
 
 	def __repr__(self) -> str:
 		return (
