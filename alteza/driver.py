@@ -20,7 +20,7 @@ from .fs import (
 	Style,
 	PyPageNode,
 )
-from .crawl import Fs
+from .crawl import Fs, isHidden, crawl
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
 
@@ -119,7 +119,7 @@ class Driver:
 	def processContent(self) -> Content:
 		with enterDir(self.contentDir):
 			print('Analyzing content directory...')
-			fsCrawlResult = Fs.crawl()
+			fsCrawlResult = crawl()
 			print(fsCrawlResult.nameRegistry)
 			content = Content(self.args, fsCrawlResult)
 			print('Processing...\n')
@@ -180,7 +180,7 @@ class Driver:
 					return
 			if '__pycache__' in event.src_path or '__pycache__' in event.dest_path:
 				return
-			if Fs.isHidden(os.path.basename(os.path.normpath(event.src_path))):
+			if isHidden(os.path.basename(os.path.normpath(event.src_path))):
 				return
 			if isinstance(event, DirModifiedEvent) and event.src_path == self.contentDirAbsPath:
 				return

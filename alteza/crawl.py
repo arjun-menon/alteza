@@ -52,68 +52,63 @@ class NameRegistry:
 
 
 @dataclass
-class FsCrawlResult:
+class CrawlResult:
 	rootDir: DirNode
 	nameRegistry: NameRegistry
+
+
+def isHidden(name: str) -> bool:
+	return name.startswith('.')
+
+
+def shouldIgnoreStandard(name: str) -> bool:
+	if isHidden(name):
+		return True
+	if name in {'__pycache__'}:
+		return True
+	_, fileExt = os.path.splitext(name)
+	if fileExt == '.pyc':
+		return True
+	if name != Fs.configFileName and fileExt == '.py':
+		return True
+	return False
+
+
+def defaultShouldIgnore(name: str, parentPath: str, isDir: bool) -> bool:
+	# pylint: disable=unused-argument
+	if shouldIgnoreStandard(name):
+		return True
+
+	fullPath = os.path.abspath(os.path.join(parentPath, name))
+	for ignoreAbsPath in Fs.ignoreAbsPaths:
+		if ignoreAbsPath in fullPath:
+			return True
+
+	return False
+
+
+def defaultSkipForRegistry(name: str) -> bool:
+	if name == Fs.configFileName:
+		return True
+	return False
+
+
+def crawl(
+	# Signature -- shouldIgnore(name: str, parentPath: str, isDir: bool) -> bool
+	shouldIgnore: Callable[[str, str, bool], bool] = defaultShouldIgnore,
+	skipForRegistry: Callable[[str], bool] = defaultSkipForRegistry,
+) -> CrawlResult:
+	"""
+	Crawl the current directory. Construct & return an FsNode tree and NameRegistry.
+	"""
+	dirPath: str = os.curdir
+
+	rootDir: DirNode = DirNode(None, dirPath, shouldIgnore)
+	nameRegistry = NameRegistry(rootDir, skipForRegistry)
+
+	return CrawlResult(rootDir, nameRegistry)
 
 
 class Fs:
 	configFileName: str = '__config__.py'
 	ignoreAbsPaths: List[str] = []
-
-	@staticmethod
-	def readfile(file_path: str) -> str:
-		with open(file_path, 'r', encoding='utf-8') as someFile:
-			return someFile.read()
-
-	@staticmethod
-	def isHidden(name: str) -> bool:
-		return name.startswith('.')
-
-	@staticmethod
-	def shouldIgnoreStandard(name: str) -> bool:
-		if Fs.isHidden(name):
-			return True
-		if name in {'__pycache__'}:
-			return True
-		_, fileExt = os.path.splitext(name)
-		if fileExt == '.pyc':
-			return True
-		if name != Fs.configFileName and fileExt == '.py':
-			return True
-		return False
-
-	@staticmethod
-	def defaultShouldIgnore(name: str, parentPath: str, isDir: bool) -> bool:
-		# pylint: disable=unused-argument
-		if Fs.shouldIgnoreStandard(name):
-			return True
-
-		fullPath = os.path.abspath(os.path.join(parentPath, name))
-		for ignoreAbsPath in Fs.ignoreAbsPaths:
-			if ignoreAbsPath in fullPath:
-				return True
-
-		return False
-
-	@staticmethod
-	def defaultSkipForRegistry(name: str) -> bool:
-		if name == Fs.configFileName:
-			return True
-		return False
-
-	@staticmethod
-	def crawl(
-		# Signature -- shouldIgnore(name: str, parentPath: str, isDir: bool) -> bool
-		shouldIgnore: Callable[[str, str, bool], bool] = defaultShouldIgnore,
-		skipForRegistry: Callable[[str], bool] = defaultSkipForRegistry,
-	) -> FsCrawlResult:
-		"""
-		Crawl the current directory. Construct & return an FsNode tree and NameRegistry.
-		"""
-		dirPath: str = os.curdir
-
-		rootDir: DirNode = DirNode(None, dirPath, shouldIgnore)
-		nameRegistry = NameRegistry(rootDir, skipForRegistry)
-
-		return FsCrawlResult(rootDir, nameRegistry)

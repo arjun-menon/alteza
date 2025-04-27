@@ -22,7 +22,7 @@ from .fs import (
 	Fore,
 	Style,
 )
-from .crawl import NameRegistry, FsCrawlResult, Fs
+from .crawl import NameRegistry, CrawlResult, Fs
 
 
 class Args(Tap):  # pyre-ignore[13]
@@ -36,7 +36,7 @@ class Args(Tap):  # pyre-ignore[13]
 
 
 class Content:
-	def __init__(self, args: Args, fs: FsCrawlResult) -> None:
+	def __init__(self, args: Args, fs: CrawlResult) -> None:
 		self.inTemplate: bool = False
 		self.templateCache: Dict[str, str] = {}
 		self.seenTemplateLinks: Set[FileNode] = set()
@@ -90,7 +90,7 @@ class Content:
 
 		rawPyPageFileText: str
 		if isinstance(pyPageNode, (Md, NonMd)):
-			rawPyPageFileText = Fs.readfile(pyPageNode.absoluteFilePath)
+			rawPyPageFileText = readfile(pyPageNode.absoluteFilePath)
 		else:
 			raise AltezaException(f'{pyPageNode} Unsupported type of PyPageNode.')
 
@@ -167,7 +167,7 @@ class Content:
 				f'{Fore.dark_orange}Running:{Style.reset}',
 				os.path.join(dirNode.fullPath, Fs.configFileName),
 			)
-			exec(Fs.readfile(Fs.configFileName), configEnv)
+			exec(readfile(Fs.configFileName), configEnv)
 
 			if 'title' in configEnv:
 				if dirNode.configTitle is not None:
@@ -280,7 +280,7 @@ class Content:
 
 	@staticmethod
 	def getBasicHelpers() -> Dict[str, Any]:
-		return {'readfile': Fs.readfile, 'sh': sh, 'markdown': lambda text: Md.processMarkdown(text).html}
+		return {'readfile': readfile, 'sh': sh, 'markdown': lambda text: Md.processMarkdown(text).html}
 
 	def getTemplateHtml(self, env: dict[str, Any]) -> str:
 		if 'layoutRaw' in env:
@@ -297,10 +297,15 @@ class Content:
 			if templateName in self.templateCache:
 				return self.templateCache[templateName]
 			templateFile = self.nameRegistry.lookup(templateName)
-			templateRaw = Fs.readfile(templateFile.absoluteFilePath)
+			templateRaw = readfile(templateFile.absoluteFilePath)
 			self.templateCache[templateName] = templateRaw
 			return templateRaw
 		raise AltezaException('You must define a `layout` or `layoutRaw` in some ancestral `__config__.py` file.')
+
+
+def readfile(file_path: str) -> str:
+	with open(file_path, 'r', encoding='utf-8') as someFile:
+		return someFile.read()
 
 
 @contextlib.contextmanager
