@@ -22,7 +22,7 @@ from .fs import (
 	Fore,
 	Style,
 )
-from .crawl import NameRegistry, CrawlResult, Fs
+from .crawl import NameRegistry, CrawlResult, CrawlConfig
 
 
 class Args(Tap):  # pyre-ignore[13]
@@ -152,7 +152,7 @@ class Content:
 	def runConfigIfAny(self, dirNode: DirNode, env: dict[str, Any]) -> Dict[str, Any]:
 		# Run a __config__.py file, if one exists.
 		configEnv = env.copy()
-		configFileL = [f for f in dirNode.files if f.fileName == Fs.configFileName]
+		configFileL = [f for f in dirNode.files if f.fileName == CrawlConfig.configFileName]
 		if configFileL:
 			configFile: FileNode = configFileL[0]
 
@@ -165,9 +165,9 @@ class Content:
 
 			print(
 				f'{Fore.dark_orange}Running:{Style.reset}',
-				os.path.join(dirNode.fullPath, Fs.configFileName),
+				os.path.join(dirNode.fullPath, CrawlConfig.configFileName),
 			)
-			exec(readfile(Fs.configFileName), configEnv)
+			exec(readfile(CrawlConfig.configFileName), configEnv)
 
 			if 'title' in configEnv:
 				if dirNode.configTitle is not None:

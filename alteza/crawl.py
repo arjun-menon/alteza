@@ -69,7 +69,7 @@ def shouldIgnoreStandard(name: str) -> bool:
 	_, fileExt = os.path.splitext(name)
 	if fileExt == '.pyc':
 		return True
-	if name != Fs.configFileName and fileExt == '.py':
+	if name != CrawlConfig.configFileName and fileExt == '.py':
 		return True
 	return False
 
@@ -80,7 +80,7 @@ def defaultShouldIgnore(name: str, parentPath: str, isDir: bool) -> bool:
 		return True
 
 	fullPath = os.path.abspath(os.path.join(parentPath, name))
-	for ignoreAbsPath in Fs.ignoreAbsPaths:
+	for ignoreAbsPath in CrawlConfig.ignoreAbsPaths:
 		if ignoreAbsPath in fullPath:
 			return True
 
@@ -88,7 +88,7 @@ def defaultShouldIgnore(name: str, parentPath: str, isDir: bool) -> bool:
 
 
 def defaultSkipForRegistry(name: str) -> bool:
-	if name == Fs.configFileName:
+	if name == CrawlConfig.configFileName:
 		return True
 	return False
 
@@ -109,6 +109,6 @@ def crawl(
 	return CrawlResult(rootDir, nameRegistry)
 
 
-class Fs:
+class CrawlConfig:
 	configFileName: str = '__config__.py'
 	ignoreAbsPaths: List[str] = []

@@ -20,7 +20,7 @@ from .fs import (
 	Style,
 	PyPageNode,
 )
-from .crawl import Fs, isHidden, crawl
+from .crawl import CrawlConfig, isHidden, crawl
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
 
@@ -162,10 +162,10 @@ class Driver:
 
 	@staticmethod
 	def setIgnoreAbsPaths(args: Args) -> None:
-		Fs.ignoreAbsPaths = []
+		CrawlConfig.ignoreAbsPaths = []
 		for somePath in args.ignore:
 			if os.path.exists(somePath):
-				Fs.ignoreAbsPaths.append(os.path.abspath(somePath))
+				CrawlConfig.ignoreAbsPaths.append(os.path.abspath(somePath))
 			else:
 				raise AltezaException(f'Path to ignore `{somePath}` does not exist.')
 
@@ -175,7 +175,7 @@ class Driver:
 			self.timeOfMostRecentEvent: Optional[int] = None
 
 		def on_any_event(self, event: FileSystemEvent) -> None:
-			for ignoreAbsPath in Fs.ignoreAbsPaths:
+			for ignoreAbsPath in CrawlConfig.ignoreAbsPaths:
 				if ignoreAbsPath in event.src_path or ignoreAbsPath in event.dest_path:
 					return
 			if '__pycache__' in event.src_path or '__pycache__' in event.dest_path:
