@@ -402,7 +402,7 @@ jobs:
     steps:
       - name: Generate Alteza Website
         id: generate
-        uses: arjun-menon/alteza@v0.9.7
+        uses: arjun-menon/alteza@v0.9.8
         with:
           path: .
 ```
