@@ -37,6 +37,7 @@ class Driver:
 		self.outputDir: str = args.output
 		# Other instance variables:
 		self.shouldExit: bool = False
+		CrawlConfig.configFileName = Args.config
 		self.setIgnoreAbsPaths(args)
 
 	@staticmethod

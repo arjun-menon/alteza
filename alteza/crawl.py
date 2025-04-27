@@ -105,7 +105,7 @@ def crawl(
 	return CrawlResult(rootDir, nameRegistry)
 
 
-class CrawlConfig:
+class CrawlConfig:  # pyre-ignore[13]
 	# pylint: disable=too-few-public-methods
-	configFileName: str = '__config__.py'
-	ignoreAbsPaths: List[str] = []
+	configFileName: str
+	ignoreAbsPaths: List[str]

@@ -33,6 +33,7 @@ class Args(Tap):  # pyre-ignore[13]
 	seed: str = '{}'  # Seed JSON data to add to the initial root env.
 	watch: bool = False  # Watch for content changes, and rebuild.
 	ignore: List[str] = []  # Paths to completely ignore.
+	config: str = '__config__.py'
 
 
 class Content:
@@ -150,7 +151,7 @@ class Content:
 		PyPageNode.temporal_link = None
 
 	def runConfigIfAny(self, dirNode: DirNode, env: dict[str, Any]) -> Dict[str, Any]:
-		# Run a __config__.py file, if one exists.
+		# Run the config Python file (usually `__config__.py`) if one exists.
 		configEnv = env.copy()
 		configFileL = [f for f in dirNode.files if f.fileName == CrawlConfig.configFileName]
 		if configFileL:
@@ -171,7 +172,7 @@ class Content:
 
 			if 'title' in configEnv:
 				if dirNode.configTitle is not None:
-					raise AltezaException('Do not set both `title` and `dir.title` in `__config__.py`.')
+					raise AltezaException(f'Do not set both `title` and `dir.title` in `{CrawlConfig.configFileName}`.')
 				dirNode.title = configEnv['title']
 				del configEnv['title']
 		return configEnv
@@ -300,7 +301,9 @@ class Content:
 			templateRaw = readfile(templateFile.absoluteFilePath)
 			self.templateCache[templateName] = templateRaw
 			return templateRaw
-		raise AltezaException('You must define a `layout` or `layoutRaw` in some ancestral `__config__.py` file.')
+		raise AltezaException(
+			f'You must define a `layout` or `layoutRaw` in some ancestral `{CrawlConfig.configFileName}` file.'
+		)
 
 
 def readfile(file_path: str) -> str:
