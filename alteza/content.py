@@ -77,7 +77,7 @@ class Content:
 			return self.link(fromPyPage, destination.indexPage, pathOnly)
 		raise AltezaException(f'Unknown link destination type: `{type(destination)}`.')
 
-	def warn(self, fileNode: FileNode, desc: str):
+	def warn(self, fileNode: FileNode, desc: str) -> None:
 		self.warnings[fileNode] = desc
 
 	def invokePyPage(self, pyPageNode: PyPageNode, env: dict[str, Any]) -> None:
