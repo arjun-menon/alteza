@@ -185,6 +185,7 @@ class Content:
 			def path(name: str) -> str:
 				return self.link(configFile, self.nameRegistry.lookup(name), True)
 
+			configEnv |= {'file': lambda name: self.nameRegistry.lookup(name)}
 			configEnv |= {'path': path}
 
 			print(
