@@ -45,6 +45,7 @@ class Content:
 		self.rootDir: DirNode = fs.rootDir
 		self.nameRegistry: NameRegistry = fs.nameRegistry
 		self.seed: Dict[str, Any] = json.loads(args.seed)
+		self.warnings: Dict[FileNode, str] = {}
 		self.fixSysPath()
 
 	def link(self, srcFile: FileNode, dstFile: FileNode, pathOnly: bool = False) -> str:
@@ -76,6 +77,9 @@ class Content:
 			return self.link(fromPyPage, destination.indexPage, pathOnly)
 		raise AltezaException(f'Unknown link destination type: `{type(destination)}`.')
 
+	def warn(self, fileNode: FileNode, desc: str):
+		self.warnings[fileNode] = desc
+
 	def invokePyPage(self, pyPageNode: PyPageNode, env: dict[str, Any]) -> None:
 		print(f'{Fore.gold_1}Processing:{Style.reset}', pyPageNode.fullPath)
 		FileNode.current_pypage_node_being_processed = pyPageNode
@@ -83,6 +87,7 @@ class Content:
 
 		# Enrich with the current file:
 		env |= {'page': pyPageNode}
+		env |= {'warn': lambda desc: self.warn(pyPageNode, desc)}
 		env |= pyPageNode.env
 
 		rawPyPageFileText: str
@@ -157,6 +162,7 @@ class Content:
 				return self.link(configFile, self.nameRegistry.lookup(name), True)
 
 			configEnv |= {'file': self.nameRegistry.lookup}
+			configEnv |= {'warn': lambda desc: self.warn(configFile, desc)}
 			configEnv |= {'path': path}
 
 			print(

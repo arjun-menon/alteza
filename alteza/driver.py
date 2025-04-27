@@ -142,6 +142,9 @@ class Driver:
 		self.generate(content)
 
 		elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
+		if len(content.warnings) > 0:
+			print('\nWarnings:')
+			print('\n  '.join(f'{Fore.light_red}{fN.fullPath}{Style.reset}: {d}' for fN, d in content.warnings.items()))
 		print(
 			# pylint: disable=consider-using-f-string
 			'\nSite generation complete (Alteza %s). Time elapsed: %.2f ms' % (alteza_version, elapsedMilliseconds)

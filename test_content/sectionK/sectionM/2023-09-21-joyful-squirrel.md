@@ -28,6 +28,10 @@ A few data points:
 
 The [[lizard]]'s last modified date is {{file('lizard').getLastModified()}}.
 
+{{
+warn('Hi!')
+}}
+
 Slug tests:
 * This is [[slug-test-1]].
     * This is also the same [[Slug Test 1]].
