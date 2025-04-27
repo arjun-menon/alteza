@@ -131,7 +131,7 @@ class FileNode(FsNode):
 	@functools.cached_property
 	def linkName(self) -> str:
 		if self.isIndex:
-			return self.parentDir.rectifiedName
+			return self.parentDir.dirName
 		return self.realName
 
 	@property
@@ -181,10 +181,8 @@ class DirNode(FsNode):
 			if not shouldIgnore(subDirName, self.fullPath, True)
 		]
 
-	@functools.cached_property
-	def rectifiedName(self) -> str:
 		# Note: if `dirName` is an empty string (""), that means we're at the root (/).
-		return self.dirName if len(self.dirName) > 0 else '/'
+		self.dirName: str = self.dirName if len(self.dirName) > 0 else '/'
 
 	@functools.cached_property
 	def isInGitRepo(self) -> bool:
@@ -232,7 +230,7 @@ class DirNode(FsNode):
 
 	@property
 	def titleOrName(self) -> str:
-		return self.title if self.title else self.rectifiedName
+		return self.title if self.title else self.dirName
 
 	@staticmethod
 	def _displayDir(dirNode: 'DirNode', indent: int = 0) -> str:
