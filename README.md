@@ -179,6 +179,7 @@ Availability:
 
 </td>
 </tr>
+
 <tr>
 <td><code>path</code>, <code>file</code></td>
 <td>
@@ -195,6 +196,16 @@ Available everywhere.
 
 </td>
 </tr>
+
+<tr>
+<td><code>warn</code></td>
+<td>
+
+Log a warning which will be printed at the end of site build. (Available everywhere.)
+
+</td>
+</tr>
+
 <tr>
 <td><code>dir</code></td>
 <td>
