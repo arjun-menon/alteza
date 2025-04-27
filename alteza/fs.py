@@ -76,6 +76,7 @@ class FsNode:
 
 
 class FileNode(FsNode):
+	# pylint: disable=too-many-instance-attributes
 	@staticmethod
 	def construct(parent: Optional['DirNode'], dirPath: str, fileName: str) -> 'FileNode':
 		"""Constructs an object of type FileNode or one of its subclasses.

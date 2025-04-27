@@ -180,7 +180,7 @@ Availability:
 </td>
 </tr>
 <tr>
-<td><code>path</code></td>
+<td><code>path</code>, <code>file</code></td>
 <td>
 
 The `path` function is similar to the `path` function above, except that:
@@ -188,6 +188,8 @@ The `path` function is similar to the `path` function above, except that:
 * it also does not add an extra `../` at the beginning of the returned path for Markdown pages.
 
 This function is good for use inside templates, to reference parent/ancestor templates for injection. For example, writing something like `{{ inject(path('skeleton')) }}`.
+
+The `file` function is similar to the `path` function, but it returns the actual `FileNode` object of that file. This is useful if you want to do things like look up some attribute (e.g., the last modified date) of some specific file.
 
 Available everywhere.
 
