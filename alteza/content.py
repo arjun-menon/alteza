@@ -129,6 +129,7 @@ class Content:
 		def path(name: str) -> str:
 			return self.linkFlex(pyPageNode, name, True)
 
+		env |= {'file': lambda name: self.nameRegistry.lookup(name)}
 		env |= {'link': link}
 		env |= {'path': path}
 
