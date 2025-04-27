@@ -18,13 +18,11 @@ from .fs import (
 	PyPageNode,
 	Md,
 	NonMd,
-	NameRegistry,
-	FsCrawlResult,
-	Fs,
 	AltezaException,
 	Fore,
 	Style,
 )
+from .crawl import NameRegistry, FsCrawlResult, Fs
 
 
 class Args(Tap):  # pyre-ignore[13]

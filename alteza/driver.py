@@ -16,11 +16,11 @@ from .fs import (
 	AltezaException,
 	Md,
 	NonMd,
-	Fs,
 	Fore,
 	Style,
 	PyPageNode,
 )
+from .crawl import Fs
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
 
