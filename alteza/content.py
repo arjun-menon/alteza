@@ -57,38 +57,7 @@ class Content:
 				if self.inTemplate:
 					self.seenTemplateLinks.add(dstFile)
 
-		dstFileName = self.getFileUrlName(dstFile)
-
-		srcPath = self.splitPath(srcFile.fullPath)[:-1]
-		dstPath = self.splitPath(dstFile.fullPath)[:-1]
-		commonLevel = 0
-		for i in range(min(len(srcPath), len(dstPath))):
-			if srcPath[i] == dstPath[i]:
-				commonLevel += 1
-		remainingPath = dstPath[commonLevel:] + [dstFileName]
-
-		relativePath: List[str] = []
-		if commonLevel < len(srcPath):
-			stepsDown = len(srcPath) - commonLevel
-			for _ in range(stepsDown):
-				relativePath.append('..')
-		for p in remainingPath:
-			relativePath.append(p)
-		if isinstance(srcFile, Md) and not srcFile.isIndex and not pathOnly:
-			relativePath = ['..'] + relativePath
-
-		relativePathStr = os.path.join('', *relativePath)
-		return relativePathStr
-
-	@staticmethod
-	def getFileUrlName(dstFile: FileNode) -> str:
-		if dstFile.isIndex:
-			return ''
-		if isinstance(dstFile, Md):
-			return dstFile.realName
-		if isinstance(dstFile, NonMd):
-			return dstFile.rectifiedFileName
-		return dstFile.fileName
+		return FileNode.relativePath(srcFile, dstFile, pathOnly)
 
 	def linkFlex(
 		self,
@@ -109,6 +78,7 @@ class Content:
 
 	def invokePyPage(self, pyPageNode: PyPageNode, env: dict[str, Any]) -> None:
 		print(f'{Fore.gold_1}Processing:{Style.reset}', pyPageNode.fullPath)
+		FileNode.current_pypage_node_being_processed = pyPageNode
 		env = env.copy()
 
 		# Enrich with the current file:
@@ -173,6 +143,7 @@ class Content:
 			if not hasattr(pyPageNode, k):
 				setattr(pyPageNode, k, v)
 
+		FileNode.current_pypage_node_being_processed = None
 		PyPageNode.temporal_link = None
 
 	def runConfigIfAny(self, dirNode: DirNode, env: dict[str, Any]) -> Dict[str, Any]:
@@ -306,13 +277,6 @@ class Content:
 	@staticmethod
 	def getBasicHelpers() -> Dict[str, Any]:
 		return {'readfile': Fs.readfile, 'sh': sh, 'markdown': lambda text: Md.processMarkdown(text).html}
-
-	@staticmethod
-	def splitPath(path: str) -> List[str]:
-		head, tail = os.path.split(path)
-		if head == '':
-			return [path]
-		return Content.splitPath(head) + [tail]
 
 	def getTemplateHtml(self, env: dict[str, Any]) -> str:
 		if 'layoutRaw' in env:

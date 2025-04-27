@@ -26,6 +26,8 @@ A few data points:
     - We got this from git history as well.
         - But note that spawning a git process could be slow.
 
+The [[lizard]]'s last modified date is {{file('lizard').getLastModified()}}.
+
 Slug tests:
 * This is [[slug-test-1]].
     * This is also the same [[Slug Test 1]].

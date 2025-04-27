@@ -77,6 +77,8 @@ class FsNode:
 
 class FileNode(FsNode):
 	# pylint: disable=too-many-instance-attributes
+	current_pypage_node_being_processed: Optional['PyPageNode'] = None
+
 	@staticmethod
 	def construct(parent: Optional['DirNode'], dirPath: str, fileName: str) -> 'FileNode':
 		"""Constructs an object of type FileNode or one of its subclasses.
@@ -144,6 +146,50 @@ class FileNode(FsNode):
 
 	def isPyPage(self) -> bool:
 		return isinstance(self, PyPageNode)
+
+	@staticmethod
+	def relativePath(
+		srcFile: 'FileNode', dstFile: 'FileNode', noMdCorrection: bool = False, useUrlName: bool = True
+	) -> str:
+		dstFileName = FileNode.getFileUrlName(dstFile) if useUrlName else dstFile.fileName
+
+		srcPath = FileNode.splitPath(srcFile.fullPath)[:-1]
+		dstPath = FileNode.splitPath(dstFile.fullPath)[:-1]
+		commonLevel = 0
+		for i in range(min(len(srcPath), len(dstPath))):
+			if srcPath[i] == dstPath[i]:
+				commonLevel += 1
+		remainingPath = dstPath[commonLevel:] + [dstFileName]
+
+		relativePath: List[str] = []
+		if commonLevel < len(srcPath):
+			stepsDown = len(srcPath) - commonLevel
+			for _ in range(stepsDown):
+				relativePath.append('..')
+		for p in remainingPath:
+			relativePath.append(p)
+		if isinstance(srcFile, Md) and not srcFile.isIndex and not noMdCorrection:
+			relativePath = ['..'] + relativePath
+
+		relativePathStr = os.path.join('', *relativePath)
+		return relativePathStr
+
+	@staticmethod
+	def getFileUrlName(dstFile: 'FileNode') -> str:
+		if dstFile.isIndex:
+			return ''
+		if isinstance(dstFile, Md):
+			return dstFile.realName
+		if isinstance(dstFile, NonMd):
+			return dstFile.rectifiedFileName
+		return dstFile.fileName
+
+	@staticmethod
+	def splitPath(path: str) -> List[str]:
+		head, tail = os.path.split(path)
+		if head == '':
+			return [path]
+		return FileNode.splitPath(head) + [tail]
 
 	def colorize(self, r: str) -> str:
 		if self.isPyPage() is not None and self.shouldPublish:
@@ -273,8 +319,9 @@ class PageNode(FileNode):
 
 	@functools.cached_property
 	def lastModifiedObj(self) -> datetime:
-		"""Get last modified date from: (a) git history, or (b) system modified time."""
-		path = self.fileName
+		"""Get the last modified date from: (a) git history, or (b) system modified time."""
+		print(f'!!!!! {self.fileName}')
+		path = self.getGitRelPath()
 		if self.isParentGitRepo():
 			lastUpdated = PageNode.getGitFileLastAuthDate(path)
 			if lastUpdated is not None:
@@ -291,7 +338,7 @@ class PageNode(FileNode):
 
 	@functools.cached_property
 	def gitFirstAuthDate(self) -> Optional[date]:
-		path = self.fileName
+		path = self.getGitRelPath()
 		if self.isParentGitRepo():
 			try:
 				git_output = check_output(['git', 'log', '--reverse', '--pretty=format:%aI', path]).decode()
@@ -300,6 +347,11 @@ class PageNode(FileNode):
 			except Exception:
 				return None
 		return None
+
+	def getGitRelPath(self) -> str:
+		if FileNode.current_pypage_node_being_processed:
+			return self.relativePath(FileNode.current_pypage_node_being_processed, self, True, False)
+		return self.fileName
 
 	def __getattr__(self, attr: str) -> None:
 		"""Allows for checking whether page.some_property exists more easily (without `hasattr`)."""
