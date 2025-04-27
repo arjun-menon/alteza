@@ -110,5 +110,6 @@ def crawl(
 
 
 class CrawlConfig:
+	# pylint: disable=too-few-public-methods
 	configFileName: str = '__config__.py'
 	ignoreAbsPaths: List[str] = []
