@@ -1,3 +1,13 @@
 {
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "ruff",
+    "python.pythonPath": "./.venv/bin/python",
+    // "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.ruff": "explicit"
+        // "source.organizeImports.ruff": "explicit"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true
+    }
 }

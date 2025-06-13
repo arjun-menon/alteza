@@ -8,7 +8,14 @@
             "name": "Python: Module",
             "type": "python",
             "request": "launch",
-            "module": "core",
+            "module": "alteza",
+            "args": [
+                "--content", "test_content",
+                "--output", "test_output",
+                "--clear_output_dir",
+                "--watch",
+                "--ignore", "test_content/dirA"
+            ],
             "justMyCode": true
         }
     ]
