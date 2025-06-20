@@ -10,8 +10,11 @@ for f in dir.files:
 }}
 </ol>
 
-Lizard attribute x1: {{ file('lizard').env['x1'] }}
-
-Lizard attribute x2: {{ file('lizard').env['x2'] }}
+Lizard vars:<code>
+* Lizard attribute x1 from env: {{ file('lizard').env['x1'] }}
+* Lizard attribute x1 injected: {{ file('lizard').x1 }}
+* Lizard attribute x2 from env: {{ file('lizard').env['x2'] }}
+* Lizard attribute x2 injected: {{ file('lizard').x2 }}
+</code>
 
 Self-link <a href="{{ link('sectionL') }}">here</a>.
