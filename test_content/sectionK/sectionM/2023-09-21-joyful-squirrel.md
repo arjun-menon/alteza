@@ -29,7 +29,7 @@ A few data points:
 The [[lizard]]'s last modified date is {{file('lizard').getLastModified()}}.
 
 {{
-warn('Hi!')
+warn('Hi! This is a just a test warning that you can safely ignore.')
 }}
 
 Slug tests:
