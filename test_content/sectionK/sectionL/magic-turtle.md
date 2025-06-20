@@ -1,6 +1,7 @@
 ---
 title: A Magic Turtle
 draft: true
+small_title: a magic turtle
 ---
 
 Magic Turtle
