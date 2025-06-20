@@ -114,23 +114,22 @@ class Content:
 		env |= {'getCreateDateObj': pyPageNode.getCreateDateObj}
 		env |= {'getCreateDate': pyPageNode.getCreateDate}
 
-		# Invoke pypage
+		# Invoke pypage on the raw page file text:
 		pyPageOutput = pypage(rawPyPageFileText, env)
 
-		# Perform initial Markdown processing:
+		# Perform Markdown processing:
 		if isinstance(pyPageNode, Md):
 			mdResult = Md.processMarkdown(pyPageOutput)
 			env.update(mdResult.metadata)
 			pyPageOutput = mdResult.html
 
-		# Handle `public` var:
-		if 'public' in env:
-			if env['public'] is True:
-				pyPageNode.makePublic()
-			elif env['public'] is False:
-				pyPageNode.shouldPublish = False
+		# Enrich with `env`:
+		pyPageNode.env |= env
+		for k, v in self.getModuleVars(env).items():
+			if k not in dir(pyPageNode):
+				setattr(pyPageNode, k, v)
 
-		# Perform Markdown template application:
+		# Perform template application (invoke PyPage on the layout template):
 		if isinstance(pyPageNode, Md):
 			templateHtml = self.getTemplateHtml(env)
 			self.inTemplate = True
@@ -141,11 +140,12 @@ class Content:
 		# Set the PyPageNode's output:
 		pyPageNode.output = pyPageOutput
 
-		# Enrich with `env`.
-		pyPageNode.env |= env
-		for k, v in self.getModuleVars(env).items():
-			if not hasattr(pyPageNode, k):
-				setattr(pyPageNode, k, v)
+		# Handle `public` var:
+		if 'public' in env:
+			if env['public'] is True:
+				pyPageNode.makePublic()
+			elif env['public'] is False:
+				pyPageNode.shouldPublish = False
 
 		FileNode.current_pypage_node_being_processed = None
 		PyPageNode.temporal_link = None
