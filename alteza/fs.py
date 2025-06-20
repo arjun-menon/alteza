@@ -122,6 +122,7 @@ class FileNode(FsNode):
 		# Note: The parent of a FileNode is always a DirNode (and never None).
 		assert isinstance(self.parent, DirNode)
 		self.parentDir: DirNode = self.parent
+		self.parentName: str = self.parentDir.dirName
 
 	@functools.cached_property
 	def isIndex(self) -> bool:

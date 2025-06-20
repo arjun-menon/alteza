@@ -123,6 +123,13 @@ class Content:
 			env.update(mdResult.metadata)
 			pyPageOutput = mdResult.html
 
+		# Handle `public` var:
+		if 'public' in env:
+			if env['public'] is True:
+				pyPageNode.makePublic()
+			elif env['public'] is False:
+				pyPageNode.shouldPublish = False
+
 		# Perform Markdown template application:
 		if isinstance(pyPageNode, Md):
 			templateHtml = self.getTemplateHtml(env)
@@ -139,13 +146,6 @@ class Content:
 		for k, v in self.getModuleVars(env).items():
 			if not hasattr(pyPageNode, k):
 				setattr(pyPageNode, k, v)
-
-		# Handle `public` var:
-		if 'public' in env:
-			if env['public'] is True:
-				pyPageNode.makePublic()
-			elif env['public'] is False:
-				pyPageNode.shouldPublish = False
 
 		FileNode.current_pypage_node_being_processed = None
 		PyPageNode.temporal_link = None
