@@ -17,16 +17,16 @@ This is [what a "megabyte" is]({{link("just_a_test")}}).
 <style>li { margin-top: 0.5em; }</style>
 
 A few data points:
-  * This page was created (or renamed) on {{getCreateDate("%B %-d, %Y")}}.
+  * This page was created (or renamed) on {{firstCommitDate("%B %-d, %Y")}}.
       * We got this from git history.
-  * But we got the idea for this on {{getIdeaDate("%B %-d, %Y")}}.
+  * But we got the idea for this on {{ideaDate("%B %-d, %Y")}}.
       * We got this from the file name prefix of this file.
       * And it's great we can track both dates.
-  * This page was last modified on {{getLastModified()}}.
+  * This page was last modified on {{lastModified()}}.
     - We got this from git history as well.
         - But note that spawning a git process could be slow.
 
-The [[lizard]]'s last modified date is {{file('lizard').getLastModified()}}.
+The [[lizard]]'s last modified date is {{file('lizard').lastModified()}}.
 
 {{
 warn('Hi! This is a just a test warning that you can safely ignore.')

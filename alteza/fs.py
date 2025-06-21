@@ -195,40 +195,39 @@ class FileNode(FsNode):
 	default_date_format: str = '%Y %b %-d'
 	default_datetime_format: str = default_date_format + ' at %-H:%M %p'
 
-	def getLastModified(self, f: str = default_datetime_format) -> str:
-		# The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
-		return self.lastModifiedObj.strftime(f)
-
-	def getIdeaDate(self, f: str = default_date_format) -> str:
-		ideaDate = self.getIdeaDateObj()
+	def ideaDate(self, f: str = default_date_format) -> str:
+		ideaDate = self.ideaDateObj()
 		return ideaDate.strftime(f) if ideaDate else ''
 
-	def getIdeaDateObj(self) -> Optional[date]:
+	def ideaDateObj(self) -> Optional[date]:
 		if isinstance(self, Md):
-			if self.ideaDate is not None:
-				return self.ideaDate
-		return self.gitFirstAuthDate
+			if self._ideaDate is not None:
+				return self._ideaDate
+		return self.gitFirstCommitDate
 
-	def getCreateDate(self, f: str = default_date_format) -> str:
-		createDate = self.gitFirstAuthDate
+	def firstCommitDate(self, f: str = default_date_format) -> str:
+		createDate = self.gitFirstCommitDate
 		return createDate.strftime(f) if createDate else ''
 
-	def getCreateDateObj(self) -> Optional[date]:
-		return self.gitFirstAuthDate
+	def firstCommitDateObj(self) -> Optional[date]:
+		return self.gitFirstCommitDate
+
+	def lastModified(self, f: str = default_datetime_format) -> str:
+		# The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
+		return self.lastModifiedObj.strftime(f)
 
 	@functools.cached_property
 	def lastModifiedObj(self) -> datetime:
 		"""Get the last modified date from: (a) git history, or (b) system modified time."""
-		print(f'!!!!! {self.fileName}')
-		path = self.getGitRelPath()
+		path = self.gitRelPath()
 		if self.isParentGitRepo():
-			lastUpdated = PageNode.getGitFileLastAuthDate(path)
+			lastUpdated = PageNode.gitLastCommitDateForPath(path)
 			if lastUpdated is not None:
 				return lastUpdated
 		return datetime.fromtimestamp(os.path.getmtime(path))
 
 	@staticmethod
-	def getGitFileLastAuthDate(path: str) -> Optional[datetime]:
+	def gitLastCommitDateForPath(path: str) -> Optional[datetime]:
 		try:
 			git_output = check_output(['git', 'log', '-n', '1', '--pretty=format:%aI', path]).decode()
 			return datetime.fromisoformat(git_output)
@@ -236,18 +235,23 @@ class FileNode(FsNode):
 			return None
 
 	@functools.cached_property
-	def gitFirstAuthDate(self) -> Optional[date]:
-		path = self.getGitRelPath()
+	def gitFirstCommitDate(self) -> Optional[date]:
+		"""If a git repo, get the date this file was first committed, otherwise return None."""
+		path = self.gitRelPath()
 		if self.isParentGitRepo():
-			try:
-				git_output = check_output(['git', 'log', '--reverse', '--pretty=format:%aI', path]).decode()
-				first_commit_date = git_output.splitlines()[0]
-				return datetime.fromisoformat(first_commit_date).date()
-			except Exception:
-				return None
+			return PageNode.gitFirstCommitDateForPath(path)
 		return None
 
-	def getGitRelPath(self) -> str:
+	@staticmethod
+	def gitFirstCommitDateForPath(path: str) -> Optional[date]:
+		try:
+			git_output = check_output(['git', 'log', '--reverse', '--pretty=format:%aI', path]).decode()
+			first_commit_date = git_output.splitlines()[0]
+			return datetime.fromisoformat(first_commit_date).date()
+		except Exception:
+			return None
+
+	def gitRelPath(self) -> str:
 		if FileNode.current_pypage_node_being_processed:
 			return self.relativePath(FileNode.current_pypage_node_being_processed, self, True, False)
 		return self.fileName
@@ -461,7 +465,7 @@ class Md(PyPageNode):
 	def __init__(self, parent: Optional[DirNode], dirPath: str, fileName: str) -> None:
 		super().__init__(parent, dirPath, fileName)
 
-		self.ideaDate: Optional[date] = None
+		self._ideaDate: Optional[date] = None
 		# Handle file names that start with a date:
 		dateFragmentLength = len('YYYY-MM-DD-')
 		if len(self.baseName) > dateFragmentLength:
@@ -469,7 +473,7 @@ class Md(PyPageNode):
 			remainingBasename = self.baseName[dateFragmentLength:]
 			if re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}[- ]$', dateFragment_):
 				dateFragment = dateFragment_[:-1]
-				self.ideaDate = date.fromisoformat(dateFragment)
+				self._ideaDate = date.fromisoformat(dateFragment)
 				self.realName: str = remainingBasename
 
 		slugName = Md.slugify(self.realName)

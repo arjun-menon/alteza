@@ -15,6 +15,6 @@ And had a happy {{mood + 'ful'}} day.
 
 Want to visit a [joyful squirrel]({{link("joyful-squirrel")}})?
 
-This page was last updated on {{getLastModified()}}.
+This page was last updated on {{lastModified()}}.
 
 Check out his friend, the [lizard]({{link('lizard')}}).

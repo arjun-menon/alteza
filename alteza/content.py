@@ -107,12 +107,12 @@ class Content:
 		env |= {'link': link}
 		env |= {'path': path}
 
-		env |= {'getLastModifiedObj': lambda: pyPageNode.lastModifiedObj}
-		env |= {'getLastModified': pyPageNode.getLastModified}
-		env |= {'getIdeaDateObj': pyPageNode.getIdeaDateObj}
-		env |= {'getIdeaDate': pyPageNode.getIdeaDate}
-		env |= {'getCreateDateObj': pyPageNode.getCreateDateObj}
-		env |= {'getCreateDate': pyPageNode.getCreateDate}
+		env |= {'lastModified': pyPageNode.lastModified}
+		env |= {'lastModifiedObj': lambda: pyPageNode.lastModifiedObj}
+		env |= {'ideaDate': pyPageNode.ideaDate}
+		env |= {'ideaDateObj': pyPageNode.ideaDateObj}
+		env |= {'firstCommitDate': pyPageNode.firstCommitDate}
+		env |= {'firstCommitDateObj': pyPageNode.firstCommitDateObj}
 
 		# Invoke pypage on the raw page file text:
 		pyPageOutput = pypage(rawPyPageFileText, env)

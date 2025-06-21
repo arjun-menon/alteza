@@ -279,7 +279,7 @@ Availability (same as `title`):
 <td>Last Modified & Git Creation Date + Time</td>
 <td>
 
-_This is only available on `PageNode` objects._
+_This is only available on `FileNode` objects._
 
 The last modified date & time for a given file is taken from:
 
@@ -287,9 +287,9 @@ The last modified date & time for a given file is taken from:
 
   b. The last modified date & time as provided by the file system. 
 
-There's a `getLastModifiedObj()` function which returns a Python `datetime` object. There's also a `getLastModified(f: str = default_datetime_format)` functon which returns a `str` with the date & time formatted.
+There's a `lastModifiedObj()` function which returns a Python `datetime` object. There's also a `lastModified(f: str = default_datetime_format)` functon which returns a `str` with the date & time formatted.
 
-There are similar `getCreateDateObj()` and `getCreateDate(f: str = default_datetime_format)` functions which tell you when the file was created in git history. (_Note_ however: This date gets updated when a file is moved or renamed.) If the file is not in a git repo, then `getCreateDateObj` will return `None` and `getCreateDate` will return an empty string. 
+There are similar `firstCommitDateObj()` and `firstCommitDate(f: str = default_datetime_format)` functions which tell you when the file was created in git history. (_Note_ however: This date gets updated when a file is moved or renamed.) If the file is not in a git repo, then `firstCommitDateObj` will return `None` and `firstCommitDate` will return an empty string.
 
 The `default_datetime_format` is `%Y %b %-d  at %-H:%M %p`.
 
@@ -303,7 +303,7 @@ Available everywhere.
 <td>Idea Date</td>
 <td>
 
-_This is only available on `PageNode` objects._
+_This is only available on `FileNode` objects._
 
 The "idea date" for a given file is either:
 
@@ -313,7 +313,9 @@ The "idea date" for a given file is either:
 
   c. If there is neither a date prefix and the file is not in a git repo, there is no idea date for that file (i.e. it's `None` or `""`).
 
-There's a `getIdeaDateObj()` function which returns a Python `date` object (or `None` if there's no idea). There's also a `getIdeaDate(f: str = default_date_format)` functon which returns a `str` with the date & time formatted or `""` if there's no idea date.
+There's an `ideaDateObj()` function which returns a Python `date` object, if an idea date has been specified. If there is no idea date, it return the date of the _first `git` commit_ that introduced this file (note: this changes if the file is renamed or moved), or `None` if the file is not in a git repo.
+
+There's also an `ideaDate(f: str = default_date_format)` functon which returns a `str` with the date return by `ideaDateObj()` formatted, or emptry string `""` if it returned `None`.
 
 The `default_date_format` is `%Y %b %-d`.
 
