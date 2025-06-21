@@ -188,6 +188,74 @@ class FileNode(FsNode):
 			return [path]
 		return FileNode.splitPath(head) + [tail]
 
+	#
+	# Git & Date related methods
+	#
+
+	default_date_format: str = '%Y %b %-d'
+	default_datetime_format: str = default_date_format + ' at %-H:%M %p'
+
+	def getLastModified(self, f: str = default_datetime_format) -> str:
+		# The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
+		return self.lastModifiedObj.strftime(f)
+
+	def getIdeaDate(self, f: str = default_date_format) -> str:
+		ideaDate = self.getIdeaDateObj()
+		return ideaDate.strftime(f) if ideaDate else ''
+
+	def getIdeaDateObj(self) -> Optional[date]:
+		if isinstance(self, Md):
+			if self.ideaDate is not None:
+				return self.ideaDate
+		return self.gitFirstAuthDate
+
+	def getCreateDate(self, f: str = default_date_format) -> str:
+		createDate = self.gitFirstAuthDate
+		return createDate.strftime(f) if createDate else ''
+
+	def getCreateDateObj(self) -> Optional[date]:
+		return self.gitFirstAuthDate
+
+	@functools.cached_property
+	def lastModifiedObj(self) -> datetime:
+		"""Get the last modified date from: (a) git history, or (b) system modified time."""
+		print(f'!!!!! {self.fileName}')
+		path = self.getGitRelPath()
+		if self.isParentGitRepo():
+			lastUpdated = PageNode.getGitFileLastAuthDate(path)
+			if lastUpdated is not None:
+				return lastUpdated
+		return datetime.fromtimestamp(os.path.getmtime(path))
+
+	@staticmethod
+	def getGitFileLastAuthDate(path: str) -> Optional[datetime]:
+		try:
+			git_output = check_output(['git', 'log', '-n', '1', '--pretty=format:%aI', path]).decode()
+			return datetime.fromisoformat(git_output)
+		except Exception:
+			return None
+
+	@functools.cached_property
+	def gitFirstAuthDate(self) -> Optional[date]:
+		path = self.getGitRelPath()
+		if self.isParentGitRepo():
+			try:
+				git_output = check_output(['git', 'log', '--reverse', '--pretty=format:%aI', path]).decode()
+				first_commit_date = git_output.splitlines()[0]
+				return datetime.fromisoformat(first_commit_date).date()
+			except Exception:
+				return None
+		return None
+
+	def getGitRelPath(self) -> str:
+		if FileNode.current_pypage_node_being_processed:
+			return self.relativePath(FileNode.current_pypage_node_being_processed, self, True, False)
+		return self.fileName
+
+	#
+	# Visualization
+	#
+
 	def colorize(self, r: str) -> str:
 		if self.isPyPage() is not None and self.shouldPublish:
 			r = f'{Fore.spring_green_1}{r}{Style.reset}'
@@ -290,66 +358,6 @@ class DirNode(FsNode):
 
 
 class PageNode(FileNode):
-	default_date_format: str = '%Y %b %-d'
-	default_datetime_format: str = default_date_format + ' at %-H:%M %p'
-
-	def getLastModified(self, f: str = default_datetime_format) -> str:
-		# The formatting below might only work on Linux. https://stackoverflow.com/a/29980406/908430
-		return self.lastModifiedObj.strftime(f)
-
-	def getIdeaDate(self, f: str = default_date_format) -> str:
-		ideaDate = self.getIdeaDateObj()
-		return ideaDate.strftime(f) if ideaDate else ''
-
-	def getIdeaDateObj(self) -> Optional[date]:
-		if isinstance(self, Md):
-			if self.ideaDate is not None:
-				return self.ideaDate
-		return self.gitFirstAuthDate
-
-	def getCreateDate(self, f: str = default_date_format) -> str:
-		createDate = self.gitFirstAuthDate
-		return createDate.strftime(f) if createDate else ''
-
-	def getCreateDateObj(self) -> Optional[date]:
-		return self.gitFirstAuthDate
-
-	@functools.cached_property
-	def lastModifiedObj(self) -> datetime:
-		"""Get the last modified date from: (a) git history, or (b) system modified time."""
-		print(f'!!!!! {self.fileName}')
-		path = self.getGitRelPath()
-		if self.isParentGitRepo():
-			lastUpdated = PageNode.getGitFileLastAuthDate(path)
-			if lastUpdated is not None:
-				return lastUpdated
-		return datetime.fromtimestamp(os.path.getmtime(path))
-
-	@staticmethod
-	def getGitFileLastAuthDate(path: str) -> Optional[datetime]:
-		try:
-			git_output = check_output(['git', 'log', '-n', '1', '--pretty=format:%aI', path]).decode()
-			return datetime.fromisoformat(git_output)
-		except Exception:
-			return None
-
-	@functools.cached_property
-	def gitFirstAuthDate(self) -> Optional[date]:
-		path = self.getGitRelPath()
-		if self.isParentGitRepo():
-			try:
-				git_output = check_output(['git', 'log', '--reverse', '--pretty=format:%aI', path]).decode()
-				first_commit_date = git_output.splitlines()[0]
-				return datetime.fromisoformat(first_commit_date).date()
-			except Exception:
-				return None
-		return None
-
-	def getGitRelPath(self) -> str:
-		if FileNode.current_pypage_node_being_processed:
-			return self.relativePath(FileNode.current_pypage_node_being_processed, self, True, False)
-		return self.fileName
-
 	def __getattr__(self, attr: str) -> None:
 		"""Allows for checking whether page.some_property exists more easily (without `hasattr`)."""
 		return None
