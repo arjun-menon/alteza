@@ -135,7 +135,7 @@ class Driver:
 			}
 			FsNode.allFilesCommitDates = fsCrawlResult.nameRegistry.allFilesCommitDates
 			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
-			print(f' took {elapsedMilliseconds:.2f} ms.\n')
+			print(f' got the dates of {len(allFilesCommitDates)} files. Took {elapsedMilliseconds:.2f} ms.\n')
 
 			# Process content
 			startTimeNs = time.time_ns()
@@ -169,7 +169,7 @@ class Driver:
 			self.generate(content)
 			ProgressBar.close()
 			genElapsedMilliseconds = (time.time_ns() - genStartTimeNs) / 10**6
-			print(f'Generation complete in {genElapsedMilliseconds:.2f} ms.')
+			print(f'Generation complete. Took {genElapsedMilliseconds:.2f} ms.')
 
 			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
 			if len(content.warnings) > 0:
