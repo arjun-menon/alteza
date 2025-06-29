@@ -11,7 +11,8 @@ from watchdog.events import FileSystemEventHandler, FileSystemEvent, DirModified
 from watchdog.observers import Observer as WatchdogObserver
 from colored import Fore, Style  # type: ignore
 
-from .fs import AltezaException, FileNode, DirNode, PyPageNode, Md, NonMd
+from .util import AltezaException, getFilesCommitDates
+from .fs import FileNode, DirNode, PyPageNode, Md, NonMd
 from .crawl import CrawlConfig, isHidden, crawl, ProgressBar
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
@@ -113,9 +114,26 @@ class Driver:
 
 	def processContent(self) -> Content:
 		with enterDir(self.contentDir):
-			print('Analyzing content directory...')
+			startTimeNs = time.time_ns()
+			print('Analyzing content directory...', end='')
 			fsCrawlResult = crawl()
+			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
+			print(f' took {elapsedMilliseconds:.2f} ms.')
 			print(fsCrawlResult.nameRegistry)
+
+			startTimeNs = time.time_ns()
+			print('Analyzing git history...', end='')
+			filesToAnalyze = list(
+				map(
+					lambda fileNode: os.path.join(self.contentDir, fileNode.fullPath),
+					fsCrawlResult.nameRegistry.allFiles.values(),
+				)
+			)
+			fsCrawlResult.nameRegistry.allFilesCommitDates = getFilesCommitDates(filesToAnalyze)
+			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
+			print(f' took {elapsedMilliseconds:.2f} ms.\n')
+
+			startTimeNs = time.time_ns()
 			n = fsCrawlResult.nameRegistry.pageCount
 			ProgressBar.start(n, 'Processing')
 			content = Content(self.args, fsCrawlResult)
@@ -123,7 +141,8 @@ class Driver:
 			current_progress_n: int = ProgressBar.pbar.n  # type: ignore
 			ProgressBar.update(n - current_progress_n)
 			ProgressBar.close()
-			print('\nSuccessfully completed processing.\n')
+			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
+			print(f'\nSuccessfully completed processing. Took {elapsedMilliseconds:.2f} ms.\n')
 
 		print('File Tree:')
 		print(fsCrawlResult.rootDir.displayDir())
@@ -139,10 +158,12 @@ class Driver:
 
 			content = self.processContent()
 
-			n = content.publicNodeCounts.total()
-			ProgressBar.start(n, 'Generating')
+			genStartTimeNs = time.time_ns()
+			ProgressBar.start(content.publicNodeCounts.total(), 'Generating')
 			self.generate(content)
 			ProgressBar.close()
+			genElapsedMilliseconds = (time.time_ns() - genStartTimeNs) / 10**6
+			print(f'Generation complete in {genElapsedMilliseconds:.2f} ms.')
 
 			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
 			if len(content.warnings) > 0:
@@ -154,7 +175,7 @@ class Driver:
 				)
 			print(
 				# pylint: disable=consider-using-f-string
-				'\nSite generation complete (Alteza %s). Time elapsed: %.2f ms' % (alteza_version, elapsedMilliseconds)
+				'\nSite build complete (Alteza %s). Time elapsed: %.2f ms' % (alteza_version, elapsedMilliseconds)
 			)
 		except (AltezaException, PypageError, PypageSyntaxError) as e:
 			logging.exception(e)

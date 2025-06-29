@@ -9,14 +9,14 @@ class AltezaException(Exception):
 
 
 # pylint: disable=too-many-branches, no-member
-def getFilesCommitDates(repoPath: str, filePaths: List[str]) -> Dict[str, Tuple[datetime, datetime]]:
+def getFilesCommitDates(filePaths: List[str], repoPath: str = '.') -> Dict[str, Tuple[datetime, datetime]]:
 	"""
 	Get the first commit date (file introduction) and last commit date (last modified)
 	for a list of files, handling renames correctly.
 
 	Args:
 	    filePaths: List of file paths relative to the repository root
-	    repoPath: Path to the git repository
+	    repoPath: Path to the git repository, defaults to current directory
 
 	Returns:
 	    Dictionary mapping each file path to a tuple of (first_commit_date, last_commit_date)
