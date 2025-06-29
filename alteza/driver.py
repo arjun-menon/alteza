@@ -197,7 +197,7 @@ class Driver:
 		timeIntervalNs = 2 * 10**8
 		timeIntervalSecs = 0.2
 
-		def watching() -> None:
+		def logWatching() -> None:
 			print('\nWatching for changes... press Ctrl+C to exit.')
 
 		eventHandler = Driver.WatchdogEventHandler(self.contentDir)
@@ -205,7 +205,7 @@ class Driver:
 		observer.schedule(eventHandler, self.contentDir, recursive=True)
 		observer.start()
 		try:
-			watching()
+			logWatching()
 
 			def signalHandler(sig: int, frame: Optional[types.FrameType]) -> None:
 				# pylint: disable=unused-argument
@@ -221,12 +221,8 @@ class Driver:
 					if timeSinceMostRecentEvent > timeIntervalNs:
 						eventHandler.timeOfMostRecentEvent = None
 						print('\nRebuilding...\n')
-						try:
-							self.makeSite()
-						except AltezaException as e:
-							logging.exception(e)
-							print('\nSite build failed.')
-						watching()
+						self.makeSite()
+						logWatching()
 		finally:
 			observer.stop()
 			observer.join()

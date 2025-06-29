@@ -3,7 +3,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Callable, DefaultDict, Set, Dict, List
 from colored import Fore, Style  # type: ignore
-from alteza.fs import DirNode, FileNode, Md, AltezaException
+from .fs import DirNode, FileNode, Md, AltezaException
 
 
 class NameRegistry:
