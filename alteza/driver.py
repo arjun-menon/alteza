@@ -12,7 +12,7 @@ from watchdog.observers import Observer as WatchdogObserver
 from colored import Fore, Style  # type: ignore
 
 from .util import AltezaException, getFilesCommitDates
-from .fs import FileNode, DirNode, PyPageNode, Md, NonMd
+from .fs import FsNode, FileNode, DirNode, PyPageNode, Md, NonMd
 from .crawl import CrawlConfig, isHidden, crawl, ProgressBar
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
@@ -121,18 +121,23 @@ class Driver:
 			print(f' took {elapsedMilliseconds:.2f} ms.')
 			print(fsCrawlResult.nameRegistry)
 
+			# Analyze git history
 			startTimeNs = time.time_ns()
 			print('Analyzing git history...', end='')
-			filesToAnalyze = list(
-				map(
-					lambda fileNode: os.path.join(self.contentDir, fileNode.fullPath),
-					fsCrawlResult.nameRegistry.allFiles.values(),
-				)
-			)
-			fsCrawlResult.nameRegistry.allFilesCommitDates = getFilesCommitDates(filesToAnalyze)
+			allFilesPathsToNodes: dict[str, FileNode] = {
+				os.path.join(self.contentDir, fileNode.fullPath): fileNode
+				for fileNode in fsCrawlResult.nameRegistry.allFiles.values()
+			}
+			allFilesPaths: list[str] = list(allFilesPathsToNodes.keys())
+			allFilesCommitDates = getFilesCommitDates(allFilesPaths)
+			fsCrawlResult.nameRegistry.allFilesCommitDates = {
+				allFilesPathsToNodes[k]: v for k, v in allFilesCommitDates.items()
+			}
+			FsNode.allFilesCommitDates = fsCrawlResult.nameRegistry.allFilesCommitDates
 			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
 			print(f' took {elapsedMilliseconds:.2f} ms.\n')
 
+			# Process content
 			startTimeNs = time.time_ns()
 			n = fsCrawlResult.nameRegistry.pageCount
 			ProgressBar.start(n, 'Processing')
@@ -158,6 +163,7 @@ class Driver:
 
 			content = self.processContent()
 
+			# Generate site
 			genStartTimeNs = time.time_ns()
 			ProgressBar.start(content.publicNodeCounts.total(), 'Generating')
 			self.generate(content)

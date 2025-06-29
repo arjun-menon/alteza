@@ -38,6 +38,7 @@ class PublicNodeCounts:
 
 class FsNode:
 	publicNodeCounts: Optional[PublicNodeCounts] = None  # Set by the Content class.
+	allFilesCommitDates: Dict['FileNode', Tuple[datetime, datetime]] = {}  # Same as NameRegistry.allFilesCommitDates
 
 	def __init__(self, parent: Optional['DirNode'], dirPath: str, fileName: Optional[str]) -> None:
 		self.parent = parent
@@ -236,6 +237,8 @@ class FileNode(FsNode):
 	@functools.cached_property
 	def lastModifiedObj(self) -> datetime:
 		"""Get the last modified date from: (a) git history, or (b) system modified time."""
+		if self in FsNode.allFilesCommitDates:
+			return FsNode.allFilesCommitDates[self][1]
 		path = self.gitRelPath()
 		if self.isParentGitRepo():
 			lastUpdated = PageNode.gitLastCommitDateForPath(path)
@@ -254,6 +257,8 @@ class FileNode(FsNode):
 	@functools.cached_property
 	def gitFirstCommitDate(self) -> Optional[date]:
 		"""If a git repo, get the date this file was first committed, otherwise return None."""
+		if self in FsNode.allFilesCommitDates:
+			return FsNode.allFilesCommitDates[self][0]
 		path = self.gitRelPath()
 		if self.isParentGitRepo():
 			return PageNode.gitFirstCommitDateForPath(path)

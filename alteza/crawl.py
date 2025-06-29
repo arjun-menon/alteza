@@ -66,7 +66,7 @@ class NameRegistry:
 				)
 			self.allFiles[name] = fileNodes.pop()
 
-		self.allFilesCommitDates: Dict[str, Tuple[datetime, datetime]] = {}
+		self.allFilesCommitDates: Dict[FileNode, Tuple[datetime, datetime]] = {}
 
 	def lookup(self, name: str) -> FileNode:
 		if name not in self.allFiles:
