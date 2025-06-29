@@ -293,8 +293,6 @@ There are similar `firstCommitDateObj()` and `firstCommitDate(f: str = default_d
 
 The `default_datetime_format` is `%Y %b %-d  at %-H:%M %p`.
 
-_Note:_ These function calls spawn a `git` process, so they can be a bit slow.
-
 Available everywhere.
 
 </td>
@@ -319,7 +317,7 @@ There's also an `ideaDate(f: str = default_date_format)` functon which returns a
 
 The `default_date_format` is `%Y %b %-d`.
 
-_Note:_ This function calls spawns a `git` process, if it's not a Markdown file or if there is no date prefix in the Markdown file's name.
+_Note:_ This function checks `git` history, if the file is not a Markdown file or if there is no date prefix in the Markdown file's name.
 
 Available everywhere.
 
