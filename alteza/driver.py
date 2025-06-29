@@ -129,6 +129,7 @@ class Driver:
 				for fileNode in fsCrawlResult.nameRegistry.allFiles.values()
 			}
 			allFilesPaths: list[str] = list(allFilesPathsToNodes.keys())
+			print('[debug] allFilesPaths:', allFilesPaths)
 			allFilesCommitDates = getFilesCommitDates(allFilesPaths)
 			fsCrawlResult.nameRegistry.allFilesCommitDates = {
 				allFilesPathsToNodes[k]: v for k, v in allFilesCommitDates.items()

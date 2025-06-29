@@ -62,10 +62,12 @@ def getFilesCommitDates(filePaths: List[str], repoPath: str = '.') -> Dict[str, 
 
 			# Handle different types of changes
 			if delta.status == pygit2.GIT_DELTA_ADDED and new_file:  # type: ignore
+				print(f'[debug] {new_file} was added')
 				# File was added
 				if new_file in filePaths:
 					files_to_update.add(new_file)
 			elif delta.status == pygit2.GIT_DELTA_MODIFIED and new_file:  # type: ignore
+				print(f'[debug] {new_file} was modified')
 				# File was modified
 				if new_file in filePaths:
 					files_to_update.add(new_file)
