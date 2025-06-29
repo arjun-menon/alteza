@@ -113,15 +113,14 @@ class Driver:
 		os.mkdir(self.outputDir)
 
 	def analyzeGitHistory(self, nameRegistry: NameRegistry) -> None:
-		inGitRepo = os.path.exists('.git')
+		inGitRepo = os.path.exists('.git')  # Improve this to find the nearest ascendant git repo.
 		if not inGitRepo:
 			print(f'Warning: {Fore.light_red}Not in a git repository{Style.reset}.\n')
 
 		def getGitRelPath(fileNode: FileNode) -> str:
 			if self.contentDir == '.':
 				return fileNode.fullPath
-			else:
-				return os.path.join(self.contentDir, fileNode.fullPath)
+			return os.path.join(self.contentDir, fileNode.fullPath)
 
 		startTimeNs = time.time_ns()
 		print('Analyzing git history...', end='')
@@ -129,7 +128,6 @@ class Driver:
 			getGitRelPath(fileNode): fileNode for fileNode in nameRegistry.allFiles.values()
 		}
 		allFilesPaths: list[str] = list(allFilesPathsToNodes.keys())
-		print('[debug] allFilesPaths:', allFilesPaths)
 		allFilesCommitDates = getFilesCommitDates(allFilesPaths)
 		nameRegistry.allFilesCommitDates = {allFilesPathsToNodes[k]: v for k, v in allFilesCommitDates.items()}
 		FsNode.allFilesCommitDates = nameRegistry.allFilesCommitDates

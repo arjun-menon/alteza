@@ -3,7 +3,6 @@ import os
 import re
 import unicodedata
 from collections import deque
-from dataclasses import dataclass
 from datetime import date, datetime
 from typing import (
 	Any,
@@ -23,16 +22,7 @@ import yaml
 from colored import Fore, Style  # type: ignore
 from markdown.extensions.wikilinks import WikiLinkExtension
 
-from .util import AltezaException
-
-
-@dataclass
-class PublicNodeCounts:
-	fileCount: int = 0
-	dirCount: int = 0
-
-	def total(self) -> int:
-		return self.fileCount + self.dirCount
+from .util import AltezaException, PublicNodeCounts
 
 
 class FsNode:
