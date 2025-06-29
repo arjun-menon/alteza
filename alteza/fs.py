@@ -24,9 +24,7 @@ import yaml
 from colored import Fore, Style  # type: ignore
 from markdown.extensions.wikilinks import WikiLinkExtension
 
-
-class AltezaException(Exception):
-	"""Alteza Exception"""
+from .util import AltezaException
 
 
 @dataclass
