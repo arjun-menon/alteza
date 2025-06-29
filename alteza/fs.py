@@ -5,7 +5,6 @@ import unicodedata
 from collections import deque
 from dataclasses import dataclass
 from datetime import date, datetime
-from subprocess import STDOUT, CalledProcessError, check_output
 from typing import (
 	Any,
 	Callable,
@@ -74,11 +73,6 @@ class FsNode:
 
 	def makePublic(self) -> None:
 		self.runOnFsNodeAndAscendantNodes(self, lambda fsNode: fsNode.setNodeAsPublic())
-
-	def isParentGitRepo(self) -> bool:
-		if self.parent is None:
-			return DirNode.isPwdGitRepo()
-		return self.parent.isInGitRepo
 
 	@staticmethod
 	def runOnFsNodeAndAscendantNodes(startingNode: 'FsNode', fn: Callable[['FsNode'], None]) -> None:
@@ -239,44 +233,14 @@ class FileNode(FsNode):
 		"""Get the last modified date from: (a) git history, or (b) system modified time."""
 		if self in FsNode.allFilesCommitDates:
 			return FsNode.allFilesCommitDates[self][1]
-		path = self.gitRelPath()
-		if self.isParentGitRepo():
-			lastUpdated = PageNode.gitLastCommitDateForPath(path)
-			if lastUpdated is not None:
-				return lastUpdated
-		return datetime.fromtimestamp(os.path.getmtime(path))
-
-	@staticmethod
-	def gitLastCommitDateForPath(path: str) -> Optional[datetime]:
-		try:
-			git_output = check_output(['git', 'log', '-n', '1', '--pretty=format:%aI', path]).decode()
-			return datetime.fromisoformat(git_output)
-		except Exception:
-			return None
+		return datetime.fromtimestamp(os.path.getmtime(self.absoluteFilePath))
 
 	@functools.cached_property
 	def gitFirstCommitDate(self) -> Optional[date]:
 		"""If a git repo, get the date this file was first committed, otherwise return None."""
 		if self in FsNode.allFilesCommitDates:
 			return FsNode.allFilesCommitDates[self][0]
-		path = self.gitRelPath()
-		if self.isParentGitRepo():
-			return PageNode.gitFirstCommitDateForPath(path)
 		return None
-
-	@staticmethod
-	def gitFirstCommitDateForPath(path: str) -> Optional[date]:
-		try:
-			git_output = check_output(['git', 'log', '--reverse', '--pretty=format:%aI', path]).decode()
-			first_commit_date = git_output.splitlines()[0]
-			return datetime.fromisoformat(first_commit_date).date()
-		except Exception:
-			return None
-
-	def gitRelPath(self) -> str:
-		if FileNode.current_pypage_node_being_processed:
-			return self.relativePath(FileNode.current_pypage_node_being_processed, self, True, False)
-		return self.fileName
 
 	#
 	# Visualization
@@ -322,20 +286,6 @@ class DirNode(FsNode):
 
 		# Note: if `dirName` is an empty string (""), that means we're at the root (/).
 		self.dirName: str = self.dirName if len(self.dirName) > 0 else '/'
-
-	@functools.cached_property
-	def isInGitRepo(self) -> bool:
-		# We recheck if it's a git repo for each directory, in case
-		# there's a symlink to a directory outside a git repo.
-		return DirNode.isPwdGitRepo()
-
-	@staticmethod
-	def isPwdGitRepo() -> bool:
-		try:
-			check_output(['git', 'status'], stderr=STDOUT).decode()
-			return True
-		except CalledProcessError:
-			return False
 
 	@property
 	def pages(self) -> Sequence['PageNode']:
