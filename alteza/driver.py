@@ -13,7 +13,7 @@ from colored import Fore, Style  # type: ignore
 
 from .util import AltezaException, getFilesCommitDates
 from .fs import FsNode, FileNode, DirNode, PyPageNode, Md, NonMd
-from .crawl import CrawlConfig, isHidden, crawl, ProgressBar
+from .crawl import CrawlConfig, isHidden, crawl, ProgressBar, NameRegistry
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
 
@@ -112,6 +112,30 @@ class Driver:
 			shutil.rmtree(self.outputDir)
 		os.mkdir(self.outputDir)
 
+	def analyzeGitHistory(self, nameRegistry: NameRegistry) -> None:
+		inGitRepo = os.path.exists('.git')
+		if not inGitRepo:
+			print(f'Warning: {Fore.light_red}Not in a git repository{Style.reset}.\n')
+
+		def getGitRelPath(fileNode: FileNode) -> str:
+			if self.contentDir == '.':
+				return fileNode.fullPath
+			else:
+				return os.path.join(self.contentDir, fileNode.fullPath)
+
+		startTimeNs = time.time_ns()
+		print('Analyzing git history...', end='')
+		allFilesPathsToNodes: dict[str, FileNode] = {
+			getGitRelPath(fileNode): fileNode for fileNode in nameRegistry.allFiles.values()
+		}
+		allFilesPaths: list[str] = list(allFilesPathsToNodes.keys())
+		print('[debug] allFilesPaths:', allFilesPaths)
+		allFilesCommitDates = getFilesCommitDates(allFilesPaths)
+		nameRegistry.allFilesCommitDates = {allFilesPathsToNodes[k]: v for k, v in allFilesCommitDates.items()}
+		FsNode.allFilesCommitDates = nameRegistry.allFilesCommitDates
+		elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
+		print(f' got the dates of {len(allFilesCommitDates)} files. Took {elapsedMilliseconds:.2f} ms.\n')
+
 	def processContent(self) -> Content:
 		with enterDir(self.contentDir):
 			startTimeNs = time.time_ns()
@@ -121,23 +145,10 @@ class Driver:
 			print(f' took {elapsedMilliseconds:.2f} ms.')
 			print(fsCrawlResult.nameRegistry)
 
-			# Analyze git history
-			startTimeNs = time.time_ns()
-			print('Analyzing git history...', end='')
-			allFilesPathsToNodes: dict[str, FileNode] = {
-				os.path.join(self.contentDir, fileNode.fullPath): fileNode
-				for fileNode in fsCrawlResult.nameRegistry.allFiles.values()
-			}
-			allFilesPaths: list[str] = list(allFilesPathsToNodes.keys())
-			print('[debug] allFilesPaths:', allFilesPaths)
-			allFilesCommitDates = getFilesCommitDates(allFilesPaths)
-			fsCrawlResult.nameRegistry.allFilesCommitDates = {
-				allFilesPathsToNodes[k]: v for k, v in allFilesCommitDates.items()
-			}
-			FsNode.allFilesCommitDates = fsCrawlResult.nameRegistry.allFilesCommitDates
-			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
-			print(f' got the dates of {len(allFilesCommitDates)} files. Took {elapsedMilliseconds:.2f} ms.\n')
+		# Analyze git history
+		self.analyzeGitHistory(fsCrawlResult.nameRegistry)
 
+		with enterDir(self.contentDir):
 			# Process content
 			startTimeNs = time.time_ns()
 			n = fsCrawlResult.nameRegistry.pageCount
