@@ -4,6 +4,8 @@
 #
 #    pip-compile
 #
+cffi==1.17.1
+    # via pygit2
 colored==2.2.4
     # via alteza (setup.py)
 docstring-parser==0.15
@@ -21,6 +23,10 @@ mypy-extensions==1.0.0
     # via typing-inspect
 packaging==24.1
     # via typed-argument-parser
+pycparser==2.22
+    # via cffi
+pygit2==1.18.0
+    # via alteza (setup.py)
 pygments==2.17.2
     # via alteza (setup.py)
 pypage==2.2.1

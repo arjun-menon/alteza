@@ -21,6 +21,7 @@ setup(
 		'typed-argument-parser >= 1.10.1',
 		'watchdog >= 4.0.1',
 		'tqdm >= 4.67.1',
+		'pygit2 >= 1.16.2',
 	],
 	long_description=open('README.md').read(),
 	long_description_content_type='text/markdown',
