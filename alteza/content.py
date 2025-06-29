@@ -9,20 +9,9 @@ from typing import List, Dict, Set, Any, Union, Optional, Generator
 from tap import Tap
 import sh  # type: ignore
 from pypage import pypage  # type: ignore
+from colored import Fore, Style  # type: ignore
 
-from .fs import (
-	FsNode,
-	PublicNodeCounts,
-	FileNode,
-	DirNode,
-	PageNode,
-	PyPageNode,
-	Md,
-	NonMd,
-	AltezaException,
-	Fore,
-	Style,
-)
+from .fs import AltezaException, PublicNodeCounts, FsNode, FileNode, DirNode, PageNode, PyPageNode, Md, NonMd
 from .crawl import NameRegistry, CrawlResult, CrawlConfig, ProgressBar
 
 

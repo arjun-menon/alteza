@@ -70,7 +70,6 @@ class FsNode:
 			if isinstance(self, FileNode):
 				publicNodeCounts.fileCount += 1
 			else:
-				assert isinstance(self, DirNode)
 				publicNodeCounts.dirCount += 1
 		self.shouldPublish = True
 

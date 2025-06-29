@@ -9,17 +9,9 @@ from typing import Optional
 from pypage import PypageError, PypageSyntaxError  # type: ignore
 from watchdog.events import FileSystemEventHandler, FileSystemEvent, DirModifiedEvent
 from watchdog.observers import Observer as WatchdogObserver
+from colored import Fore, Style  # type: ignore
 
-from .fs import (
-	FileNode,
-	DirNode,
-	AltezaException,
-	Md,
-	NonMd,
-	Fore,
-	Style,
-	PyPageNode,
-)
+from .fs import AltezaException, FileNode, DirNode, PyPageNode, Md, NonMd
 from .crawl import CrawlConfig, isHidden, crawl, ProgressBar
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
