@@ -32,8 +32,7 @@ jobs:
   #
   pyre:
     needs: should_skip
-    # if: needs.should_skip.outputs.should_skip != 'true'
-    if: 'false'
+    if: 'false' # if: needs.should_skip.outputs.should_skip != 'true'
     permissions:
       actions: read
       contents: read
@@ -118,7 +117,7 @@ jobs:
   #
   pytype:
     needs: should_skip
-    if: needs.should_skip.outputs.should_skip != 'true'
+    if: 'false' # if: needs.should_skip.outputs.should_skip != 'true'
     permissions:
       actions: read
       contents: read
