@@ -442,6 +442,7 @@ options:
   --watch               (bool, default=False) Watch for content changes, and rebuild.
   --ignore [IGNORE ...]
                         (List[str], default=[]) Paths to completely ignore.
+  --config CONFIG       (str, default=__config__.py)
   -h, --help            show this help message and exit
 ```
 As might be obvious above, you set the `--content` field  to your content directory.
@@ -464,6 +465,22 @@ python -m alteza --content test_content --output test_output --clear_output_dir
 ## Development & Testing
 
 Feel free to send me PRs for this project.
+
+### Dependencies
+
+To install dependencies for development, run:
+```sh
+python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements-dev.txt
+```
+
+To use a virtual environment (after creating one with `python3 -m venv venv`):
+```sh
+source venv/bin/activate
+# ... install requirements ...
+# ... do some development ...
+deactive # end the venv
+```
 
 ### Code Style
 
@@ -499,22 +516,6 @@ Of course, when it makes sense, lints should be suppressed next to the relevant 
 Here's the Pylint-generated UML diagram of Alteza's code (that's current as of v0.9.4):
 
 ![](https://raw.githubusercontent.com/arjun-menon/alteza/master/uml-diagram.png)
-
-### Dependencies
-
-To install dependencies for development, run:
-```sh
-python3 -m pip install -r requirements.txt
-python3 -m pip install -r requirements-dev.txt
-```
-
-To use a virtual environment (after creating one with `python3 -m venv venv`):
-```sh
-source venv/bin/activate
-# ... install requirements ...
-# ... do some development ...
-deactive # end the venv
-```
 
 ---
 
