@@ -133,27 +133,28 @@ class Driver:
 		return content
 
 	def makeSite(self) -> None:
-		startTimeNs = time.time_ns()
-
-		self.checkContentDir()
-		self.resetOutputDir()
-
-		content = self.processContent()
-		print('Generating...')
-		self.generate(content)
-
-		elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
-		if len(content.warnings) > 0:
-			print('\nWarnings:')
-			print('\n  '.join(f'{Fore.light_red}{fN.fullPath}{Style.reset}: {d}' for fN, d in content.warnings.items()))
-		print(
-			# pylint: disable=consider-using-f-string
-			'\nSite generation complete (Alteza %s). Time elapsed: %.2f ms' % (alteza_version, elapsedMilliseconds)
-		)
-
-	def makeSiteWithExceptionHandling(self) -> None:
 		try:
-			self.makeSite()
+			startTimeNs = time.time_ns()
+
+			self.checkContentDir()
+			self.resetOutputDir()
+
+			content = self.processContent()
+			print('Generating...')
+			self.generate(content)
+
+			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
+			if len(content.warnings) > 0:
+				print('\nWarnings:')
+				print(
+					'\n  '.join(
+						f'{Fore.light_red}{fN.fullPath}{Style.reset}: {d}' for fN, d in content.warnings.items()
+					)
+				)
+			print(
+				# pylint: disable=consider-using-f-string
+				'\nSite generation complete (Alteza %s). Time elapsed: %.2f ms' % (alteza_version, elapsedMilliseconds)
+			)
 		except (AltezaException, PypageError, PypageSyntaxError) as e:
 			logging.exception(e)
 			print('\nSite build failed due to Alteza or PyPage error.')
@@ -191,7 +192,7 @@ class Driver:
 			self.timeOfMostRecentEvent = max(self.timeOfMostRecentEvent or 0, time.time_ns())
 
 	def runWatchdog(self) -> None:
-		self.makeSiteWithExceptionHandling()
+		self.makeSite()
 
 		timeIntervalNs = 2 * 10**8
 		timeIntervalSecs = 0.2
@@ -221,7 +222,7 @@ class Driver:
 						eventHandler.timeOfMostRecentEvent = None
 						print('\nRebuilding...\n')
 						try:
-							self.makeSiteWithExceptionHandling()
+							self.makeSite()
 						except AltezaException as e:
 							logging.exception(e)
 							print('\nSite build failed.')
