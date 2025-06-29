@@ -1,13 +1,44 @@
 import os
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Callable, DefaultDict, Set, Dict, List
+from typing import Optional, Callable, DefaultDict, Set, Dict, List, Any
 from colored import Fore, Style  # type: ignore
-from .fs import DirNode, FileNode, Md, AltezaException
+from tqdm import tqdm  # type: ignore
+from .fs import DirNode, FileNode, Md, AltezaException, PageNode
+
+
+class ProgressBar:
+	pbar: Optional[tqdm] = None
+
+	@classmethod
+	def start(cls, total: int, desc: str = '') -> None:
+		assert cls.pbar is None
+		cls.pbar = tqdm(total=total, desc=desc)
+
+	@classmethod
+	def update(cls, n: int) -> None:
+		assert cls.pbar is not None
+		cls.pbar.update(n)
+
+	@classmethod
+	def write(cls, *args: Any, sep: str = ' ', end: str = '\n') -> None:
+		# if cls.pbar is None:
+		# 	print(*args, sep=sep, end=end)
+		# 	return
+		message = sep.join(str(arg) for arg in args)
+		assert cls.pbar is not None
+		cls.pbar.write(message, end=end)
+
+	@classmethod
+	def close(cls) -> None:
+		if cls.pbar is not None:
+			cls.pbar.close()
+			cls.pbar = None
 
 
 class NameRegistry:
 	def __init__(self, root: DirNode, skipForRegistry: Callable[[str], bool]) -> None:
+		self.pageCount = 0
 		allFilesMulti: DefaultDict[str, Set[FileNode]] = defaultdict(set)
 
 		def walk(node: DirNode) -> None:
@@ -17,6 +48,8 @@ class NameRegistry:
 					if isinstance(fileNode, Md):
 						if fileNode.preSlugRealName is not None:
 							allFilesMulti[fileNode.preSlugRealName].add(fileNode)
+				if isinstance(fileNode, PageNode):
+					self.pageCount += 1
 			for d in node.subDirs:
 				walk(d)
 
@@ -34,7 +67,7 @@ class NameRegistry:
 
 	def lookup(self, name: str) -> FileNode:
 		if name not in self.allFiles:
-			print(f'Link error: `{name}` was not found in the name registry.')
+			ProgressBar.write(f'Link error: `{name}` was not found in the name registry.')
 			raise AltezaException(f'Link error: {name}')
 
 		return self.allFiles[name]

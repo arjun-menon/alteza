@@ -3,6 +3,7 @@ import os
 import re
 import unicodedata
 from collections import deque
+from dataclasses import dataclass
 from datetime import date, datetime
 from subprocess import STDOUT, CalledProcessError, check_output
 from typing import (
@@ -28,7 +29,18 @@ class AltezaException(Exception):
 	"""Alteza Exception"""
 
 
+@dataclass
+class PublicNodeCounts:
+	fileCount: int = 0
+	dirCount: int = 0
+
+	def total(self) -> int:
+		return self.fileCount + self.dirCount
+
+
 class FsNode:
+	publicNodeCounts: Optional[PublicNodeCounts] = None  # Set by the Content class.
+
 	def __init__(self, parent: Optional['DirNode'], dirPath: str, fileName: Optional[str]) -> None:
 		self.parent = parent
 		self.fileName: Optional[str] = fileName
@@ -52,6 +64,14 @@ class FsNode:
 		return r
 
 	def setNodeAsPublic(self) -> None:
+		assert FsNode.publicNodeCounts is not None
+		publicNodeCounts: PublicNodeCounts = FsNode.publicNodeCounts
+		if not self.shouldPublish:
+			if isinstance(self, FileNode):
+				publicNodeCounts.fileCount += 1
+			else:
+				assert isinstance(self, DirNode)
+				publicNodeCounts.dirCount += 1
 		self.shouldPublish = True
 
 	def makePublic(self) -> None:

@@ -12,6 +12,7 @@ from pypage import pypage  # type: ignore
 
 from .fs import (
 	FsNode,
+	PublicNodeCounts,
 	FileNode,
 	DirNode,
 	PageNode,
@@ -22,7 +23,7 @@ from .fs import (
 	Fore,
 	Style,
 )
-from .crawl import NameRegistry, CrawlResult, CrawlConfig
+from .crawl import NameRegistry, CrawlResult, CrawlConfig, ProgressBar
 
 
 class Args(Tap):  # pyre-ignore[13]
@@ -36,8 +37,10 @@ class Args(Tap):  # pyre-ignore[13]
 	config: str = '__config__.py'
 
 
-class Content:
+class Content:  # pylint: disable=too-many-instance-attributes
 	def __init__(self, args: Args, fs: CrawlResult) -> None:
+		self.publicNodeCounts: PublicNodeCounts = PublicNodeCounts()
+		FsNode.publicNodeCounts = self.publicNodeCounts
 		self.inTemplate: bool = False
 		self.templateCache: Dict[str, str] = {}
 		self.seenTemplateLinks: Set[FileNode] = set()
@@ -51,7 +54,7 @@ class Content:
 		if not pathOnly:
 			srcFile.linksTo.append(dstFile)  # This is used to determine reachability.
 			if dstFile not in self.seenTemplateLinks:
-				print(
+				ProgressBar.write(
 					' ' * (4 if self.inTemplate else 2) + f'{Fore.grey_42}Linking to:{Style.reset} {dstFile.linkName}',
 				)
 				if self.inTemplate:
@@ -80,7 +83,7 @@ class Content:
 		self.warnings[fileNode] = desc
 
 	def invokePyPage(self, pyPageNode: PyPageNode, env: dict[str, Any]) -> None:
-		print(f'{Fore.gold_1}Processing:{Style.reset}', pyPageNode.fullPath)
+		ProgressBar.write(f'{Fore.gold_1}Processing:{Style.reset}', pyPageNode.fullPath)
 		FileNode.current_pypage_node_being_processed = pyPageNode
 		env = env.copy()
 
@@ -144,8 +147,6 @@ class Content:
 		if 'public' in env:
 			if env['public'] is True:
 				pyPageNode.makePublic()
-			elif env['public'] is False:
-				pyPageNode.shouldPublish = False
 
 		FileNode.current_pypage_node_being_processed = None
 		PyPageNode.temporal_link = None
@@ -164,7 +165,7 @@ class Content:
 			configEnv |= {'warn': lambda desc: self.warn(configFile, desc)}
 			configEnv |= {'path': path}
 
-			print(
+			ProgressBar.write(
 				f'{Fore.dark_orange}Running:{Style.reset}',
 				os.path.join(dirNode.fullPath, CrawlConfig.configFileName),
 			)
@@ -214,11 +215,13 @@ class Content:
 			for pyPageNode in dirNode.getPyPagesOtherThanIndex():
 				if pyPageNode.linkName not in skipNames:
 					self.invokePyPage(pyPageNode, env)
+				ProgressBar.update(1)
 
 			# We must process the index file last.
 			indexPage: Optional[PageNode] = dirNode.indexPage
 			if indexPage is not None and isinstance(indexPage, PyPageNode):
 				self.invokePyPage(indexPage, env)
+				ProgressBar.update(1)
 
 			# TODO: Enrich dirNode with additional `env`/info from index?
 
@@ -246,10 +249,12 @@ class Content:
 
 		gatherPublicNodes(self.rootDir)
 
-		print('\nInitial pre-reachability public files:')
+		ProgressBar.write('\nInitial pre-reachability public files:')
 		for node in filter(lambda pNode: isinstance(pNode, FileNode), publicNodes):
-			print('/' + node.fullPath)
+			ProgressBar.write('/' + node.fullPath)
+		ProgressBar.write()
 
+		ProgressBar.write('Marking all reachable nodes as public...')
 		seen: Set['FsNode'] = set()
 
 		def makeReachableNodesPublic(fsNode: FsNode) -> None:
@@ -265,6 +270,8 @@ class Content:
 
 		for node in publicNodes:
 			makeReachableNodesPublic(node)
+
+		ProgressBar.write(f'{self.publicNodeCounts.total()} reachable public nodes.\n')
 
 	@staticmethod
 	def fixSysPath() -> None:
@@ -288,11 +295,11 @@ class Content:
 			templateRaw = env['layoutRaw']
 			if not isinstance(templateRaw, str):
 				raise AltezaException('The `layoutRaw` must be a string.')
-			print(f'  {Fore.purple_3}Applying raw template...{Style.reset}')
+			ProgressBar.write(f'  {Fore.purple_3}Applying raw template...{Style.reset}')
 			return templateRaw
 		if 'layout' in env:
 			templateName = env['layout']
-			print(
+			ProgressBar.write(
 				f'  {Fore.purple_3}Applying template: {Fore.blue_violet}{templateName}{Fore.purple_3}...{Style.reset}'
 			)
 			if templateName in self.templateCache:

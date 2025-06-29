@@ -20,7 +20,7 @@ from .fs import (
 	Style,
 	PyPageNode,
 )
-from .crawl import CrawlConfig, isHidden, crawl
+from .crawl import CrawlConfig, isHidden, crawl, ProgressBar
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
 
@@ -83,6 +83,7 @@ class Driver:
 
 	def generate(self, content: Content) -> None:
 		def walk(curDir: DirNode) -> None:
+			ProgressBar.update(1)
 			for subDir in filter(lambda node: node.shouldPublish, curDir.subDirs):
 				os.mkdir(subDir.dirName)
 				with enterDir(subDir.dirName):
@@ -93,6 +94,7 @@ class Driver:
 					Driver.generatePyPageNode(fileNode)
 				else:
 					self.generateStaticAsset(fileNode)
+				ProgressBar.update(1)
 
 		with enterDir(self.outputDir):
 			walk(content.rootDir)
@@ -122,9 +124,13 @@ class Driver:
 			print('Analyzing content directory...')
 			fsCrawlResult = crawl()
 			print(fsCrawlResult.nameRegistry)
+			n = fsCrawlResult.nameRegistry.pageCount
+			ProgressBar.start(n, 'Processing')
 			content = Content(self.args, fsCrawlResult)
-			print('Processing...\n')
 			content.process()
+			current_progress_n: int = ProgressBar.pbar.n  # type: ignore
+			ProgressBar.update(n - current_progress_n)
+			ProgressBar.close()
 			print('\nSuccessfully completed processing.\n')
 
 		print('File Tree:')
@@ -140,8 +146,11 @@ class Driver:
 			self.resetOutputDir()
 
 			content = self.processContent()
-			print('Generating...')
+
+			n = content.publicNodeCounts.total()
+			ProgressBar.start(n, 'Generating')
 			self.generate(content)
+			ProgressBar.close()
 
 			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
 			if len(content.warnings) > 0:
@@ -161,6 +170,8 @@ class Driver:
 		except Exception as e:
 			logging.exception(e)
 			print('\nSite build failed.')
+		finally:
+			ProgressBar.close()
 
 	@staticmethod
 	def setIgnoreAbsPaths(args: Args) -> None:

@@ -20,6 +20,7 @@ setup(
 		'sh >= 2.0.7',
 		'typed-argument-parser >= 1.10.1',
 		'watchdog >= 4.0.1',
+		'tqdm >= 4.67.1',
 	],
 	long_description=open('README.md').read(),
 	long_description_content_type='text/markdown',
