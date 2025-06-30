@@ -13,7 +13,7 @@ from colored import Fore, Style  # type: ignore
 
 from .util import AltezaException, getFilesCommitDates
 from .fs import FsNode, FileNode, DirNode, PyPageNode, Md, NonMd
-from .crawl import CrawlConfig, isHidden, crawl, ProgressBar, NameRegistry
+from .crawl import CrawlConfig, isHidden, crawl, ProgressBar, NameRegistry, pr
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
 
@@ -108,7 +108,7 @@ class Driver:
 					f'Specified output directory {self.outputDir} already exists.\n'
 					'Please use --clear_output_dir to delete it prior to site generation.'
 				)
-			print(f'Deleting directory {Fore.dark_red_2}%s{Style.reset} and all of its content...\n' % self.outputDir)
+			pr(f'Deleting directory {Fore.dark_red_2}%s{Style.reset} and all of its content...\n' % self.outputDir)
 			shutil.rmtree(self.outputDir)
 		os.mkdir(self.outputDir)
 
@@ -167,13 +167,12 @@ class Driver:
 			startTimeNs = time.time_ns()
 
 			self.checkContentDir()
-			self.resetOutputDir()
-
 			content = self.processContent()
 
 			# Generate site
 			genStartTimeNs = time.time_ns()
 			ProgressBar.start(content.publicNodeCounts.total(), 'Generating')
+			self.resetOutputDir()
 			self.generate(content)
 			ProgressBar.close()
 			genElapsedMilliseconds = (time.time_ns() - genStartTimeNs) / 10**6
