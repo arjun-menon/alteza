@@ -13,6 +13,7 @@ from colored import Fore, Style  # type: ignore
 
 from .fs import AltezaException, PublicNodeCounts, FsNode, FileNode, DirNode, PageNode, PyPageNode, Md, NonMd
 from .crawl import NameRegistry, CrawlResult, CrawlConfig, ProgressBar, pr
+from .util import StopWatch, MultiRunTimes
 
 
 class Args(Tap):  # pyre-ignore[13]
@@ -36,6 +37,8 @@ class Content:  # pylint: disable=too-many-instance-attributes
 		self.rootDir: DirNode = fs.rootDir
 		self.nameRegistry: NameRegistry = fs.nameRegistry
 		self.seed: Dict[str, Any] = json.loads(args.seed)
+		self.timePyPage: MultiRunTimes = MultiRunTimes()
+		self.timeMarkdown: MultiRunTimes = MultiRunTimes()
 		self.warnings: Dict[FileNode, str] = {}
 		self.fixSysPath()
 
@@ -107,11 +110,15 @@ class Content:  # pylint: disable=too-many-instance-attributes
 		env |= {'firstCommitDateObj': pyPageNode.firstCommitDateObj}
 
 		# Invoke pypage on the raw page file text:
-		pyPageOutput = pypage(rawPyPageFileText, env)
+		with StopWatch() as sw:
+			pyPageOutput = pypage(rawPyPageFileText, env)
+		self.timePyPage.add(sw)
 
 		# Perform Markdown processing:
 		if isinstance(pyPageNode, Md):
-			mdResult = Md.processMarkdown(pyPageOutput)
+			with StopWatch() as sw:
+				mdResult = Md.processMarkdown(pyPageOutput)
+			self.timeMarkdown.add(sw)
 			env.update(mdResult.metadata)
 			pyPageOutput = mdResult.html
 
@@ -126,7 +133,9 @@ class Content:  # pylint: disable=too-many-instance-attributes
 			templateHtml = self.getTemplateHtml(env)
 			self.inTemplate = True
 			# Re-process against `templateHtml` with PyPage:
-			pyPageOutput = pypage(templateHtml, env | {'content': pyPageOutput})
+			with StopWatch() as sw:
+				pyPageOutput = pypage(templateHtml, env | {'content': pyPageOutput})
+			self.timePyPage.add(sw)
 			self.inTemplate = False
 
 		# Set the PyPageNode's output:

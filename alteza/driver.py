@@ -155,7 +155,18 @@ class Driver:
 			content.process()
 			ProgressBar.finish(progress_total)
 			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
-			print(f'\nSuccessfully completed processing. Took {elapsedMilliseconds:.2f} ms.\n')
+			print(f'\nSuccessfully completed processing. Took {elapsedMilliseconds:.2f} ms. Of which:')
+			print(
+				f'  PyPage processing took {content.timePyPage.total() / 10**6:.2f} ms'
+				f' in total for {content.timePyPage.count()} calls,'
+				f' with each call averaging {content.timePyPage.average() / 10**6:.2f} ms.'
+			)
+			print(
+				f'  Markdown processing took {content.timeMarkdown.total() / 10**6:.2f} ms'
+				f' in total for {content.timeMarkdown.count()} calls,'
+				f' with each call averaging {content.timeMarkdown.average() / 10**6:.2f} ms.'
+			)
+			print()
 
 		print('File Tree:')
 		print(fsCrawlResult.rootDir.displayDir())

@@ -1,6 +1,7 @@
+import time
 from datetime import datetime
-from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from dataclasses import dataclass, field
+from typing import Dict, List, Tuple, Any
 
 import pygit2  # type: ignore
 
@@ -16,6 +17,38 @@ class PublicNodeCounts:
 
 	def total(self) -> int:
 		return self.fileCount + self.dirCount
+
+
+class StopWatch:
+	def __init__(self) -> None:
+		self.startNs: int = 0
+		self.endNs: int = 0
+		self.t: int = 0
+
+	def __enter__(self) -> 'StopWatch':
+		self.startNs = time.perf_counter_ns()
+		return self
+
+	def __exit__(self, *args: Any) -> None:
+		self.endNs = time.perf_counter_ns()
+		self.t = self.endNs - self.startNs
+
+
+@dataclass
+class MultiRunTimes:
+	times: List[int] = field(default_factory=list)
+
+	def add(self, sw: StopWatch) -> None:
+		self.times.append(sw.t)
+
+	def total(self) -> int:
+		return sum(self.times)
+
+	def count(self) -> int:
+		return len(self.times)
+
+	def average(self) -> float:
+		return sum(self.times) / self.count()
 
 
 # pylint: disable=too-many-branches, no-member
