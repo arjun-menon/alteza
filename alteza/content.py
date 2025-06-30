@@ -204,13 +204,13 @@ class Content:  # pylint: disable=too-many-instance-attributes
 			for pyPageNode in dirNode.getPyPagesOtherThanIndex():
 				if pyPageNode.linkName not in skipNames:
 					self.invokePyPage(pyPageNode, env)
-				ProgressBar.update(1)
+				ProgressBar.increment()
 
 			# We must process the index file last.
 			indexPage: Optional[PageNode] = dirNode.indexPage
 			if indexPage is not None and isinstance(indexPage, PyPageNode):
 				self.invokePyPage(indexPage, env)
-				ProgressBar.update(1)
+				ProgressBar.increment()
 
 			# TODO: Enrich dirNode with additional `env`/info from index?
 

@@ -76,7 +76,7 @@ class Driver:
 
 	def generate(self, content: Content) -> None:
 		def walk(curDir: DirNode) -> None:
-			ProgressBar.update(1)
+			ProgressBar.increment()
 			for subDir in filter(lambda node: node.shouldPublish, curDir.subDirs):
 				os.mkdir(subDir.dirName)
 				with enterDir(subDir.dirName):
@@ -87,7 +87,7 @@ class Driver:
 					Driver.generatePyPageNode(fileNode)
 				else:
 					self.generateStaticAsset(fileNode)
-				ProgressBar.update(1)
+				ProgressBar.increment()
 
 		with enterDir(self.outputDir):
 			walk(content.rootDir)
@@ -146,16 +146,14 @@ class Driver:
 		# Analyze git history
 		self.analyzeGitHistory(fsCrawlResult.nameRegistry)
 
+		# Process content
 		with enterDir(self.contentDir):
-			# Process content
 			startTimeNs = time.time_ns()
-			n = fsCrawlResult.nameRegistry.pageCount
-			ProgressBar.start(n, 'Processing')
+			progress_total = fsCrawlResult.nameRegistry.pageCount
+			ProgressBar.start(progress_total, 'Processing')
 			content = Content(self.args, fsCrawlResult)
 			content.process()
-			current_progress_n: int = ProgressBar.pbar.n  # type: ignore
-			ProgressBar.update(n - current_progress_n)
-			ProgressBar.close()
+			ProgressBar.finish(progress_total)
 			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
 			print(f'\nSuccessfully completed processing. Took {elapsedMilliseconds:.2f} ms.\n')
 
@@ -274,5 +272,4 @@ class Driver:
 		if self.args.watch:
 			self.runWatchdog()
 			return 0
-		else:
-			return self.makeSite()
+		return self.makeSite()

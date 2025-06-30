@@ -21,9 +21,16 @@ class ProgressBar:
 		cls.pbar = tqdm(total=total, desc=desc)
 
 	@classmethod
-	def update(cls, n: int) -> None:
+	def increment(cls) -> None:
 		if cls.pbar is not None:
-			cls.pbar.update(n)
+			cls.pbar.update(1)
+
+	@classmethod
+	def finish(cls, total: int) -> None:
+		if cls.pbar is not None:
+			current_progress_n: int = ProgressBar.pbar.n  # type: ignore
+			cls.pbar.update(total - current_progress_n)
+			ProgressBar.close()
 
 	@classmethod
 	def write(cls, *args: Any, sep: str = ' ', end: str = '\n') -> None:
