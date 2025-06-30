@@ -36,7 +36,7 @@ class ProgressBar:
 	def write(cls, *args: Any, sep: str = ' ', end: str = '\n') -> None:
 		if cls.pbar is None:
 			print(*args, sep=sep, end=end)
-			raise AltezaException('Use print() for the line above instead.')  # return
+			return
 		message = sep.join(str(arg) for arg in args)
 		assert cls.pbar is not None
 		cls.pbar.write(message, end=end)
