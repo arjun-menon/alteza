@@ -223,6 +223,15 @@ class Content:  # pylint: disable=too-many-instance-attributes
 
 			# TODO: Enrich dirNode with additional `env`/info from index?
 
+			# Sorting:
+			# =========
+			# Sort all by specified key string
+			# Sort all by specified key function
+			# Sort dirs by specified key string
+			# Sort dirs by specified key function
+			# Sort files by specified key string
+			# Sort files by specified key function
+
 		initial_env = self.seed | self.getBasicHelpers()
 
 		walk(self.rootDir, initial_env)
