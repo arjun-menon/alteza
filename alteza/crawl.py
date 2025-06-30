@@ -2,8 +2,7 @@ import os
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Optional, Callable, DefaultDict, Set, Dict, List, Tuple, Any
+from typing import Optional, Callable, DefaultDict, Set, Dict, List, Any
 from colored import Fore, Style  # type: ignore
 from tqdm import tqdm  # type: ignore
 from .fs import DirNode, FileNode, Md, AltezaException, PageNode
@@ -79,8 +78,6 @@ class NameRegistry:
 					+ '  \n'.join(f' {fileNode.fullPath}' for fileNode in fileNodes)
 				)
 			self.allFiles[name] = fileNodes.pop()
-
-		self.allFilesCommitDates: Dict[FileNode, Tuple[datetime, datetime]] = {}
 
 	def lookup(self, name: str) -> FileNode:
 		if name not in self.allFiles:

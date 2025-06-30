@@ -27,7 +27,6 @@ from .util import AltezaException, PublicNodeCounts
 
 class FsNode:
 	publicNodeCounts: Optional[PublicNodeCounts] = None  # Set by the Content class.
-	allFilesCommitDates: Dict['FileNode', Tuple[datetime, datetime]] = {}  # Same as NameRegistry.allFilesCommitDates
 
 	def __init__(self, parent: Optional['DirNode'], dirPath: str, fileName: Optional[str]) -> None:
 		self.parent = parent
@@ -126,6 +125,10 @@ class FileNode(FsNode):
 		self.parentDir: DirNode = self.parent
 		self.parentName: str = self.parentDir.dirName
 
+		# Populated by Driver.analyzeGitHistory:
+		self.gitFirstCommitDate: Optional[datetime] = None
+		self.gitLastCommitDate: Optional[datetime] = None
+
 	@functools.cached_property
 	def isIndex(self) -> bool:
 		# Index pages are `index.md` or `index[.py].html` files.
@@ -221,16 +224,9 @@ class FileNode(FsNode):
 	@functools.cached_property
 	def lastModifiedObj(self) -> datetime:
 		"""Get the last modified date from: (a) git history, or (b) system modified time."""
-		if self in FsNode.allFilesCommitDates:
-			return FsNode.allFilesCommitDates[self][1]
+		if self.gitLastCommitDate is not None:
+			return self.gitLastCommitDate
 		return datetime.fromtimestamp(os.path.getmtime(self.absoluteFilePath))
-
-	@functools.cached_property
-	def gitFirstCommitDate(self) -> Optional[date]:
-		"""If a git repo, get the date this file was first committed, otherwise return None."""
-		if self in FsNode.allFilesCommitDates:
-			return FsNode.allFilesCommitDates[self][0]
-		return None
 
 	#
 	# Visualization

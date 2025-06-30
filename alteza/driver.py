@@ -4,7 +4,8 @@ import signal
 import time
 import types
 import traceback
-from typing import Optional
+from datetime import datetime
+from typing import Optional, Dict, Tuple
 
 from pypage import PypageError, PypageSyntaxError  # type: ignore
 from watchdog.events import FileSystemEventHandler, FileSystemEvent, DirModifiedEvent
@@ -12,7 +13,7 @@ from watchdog.observers import Observer as WatchdogObserver
 from colored import Fore, Style  # type: ignore
 
 from .util import AltezaException, getFilesCommitDates
-from .fs import FsNode, FileNode, DirNode, PyPageNode, Md, NonMd
+from .fs import FileNode, DirNode, PyPageNode, Md, NonMd
 from .crawl import CrawlConfig, isHidden, crawl, ProgressBar, NameRegistry, pr
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
@@ -124,15 +125,17 @@ class Driver:
 
 		startTimeNs = time.time_ns()
 		pr('Analyzing git history...', end='')
-		allFilesPathsToNodes: dict[str, FileNode] = {
+		filesPathsToFileNodes: dict[str, FileNode] = {
 			getGitRelPath(fileNode): fileNode for fileNode in nameRegistry.allFiles.values()
 		}
-		allFilesPaths: list[str] = list(allFilesPathsToNodes.keys())
-		allFilesCommitDates = getFilesCommitDates(allFilesPaths)
-		nameRegistry.allFilesCommitDates = {allFilesPathsToNodes[k]: v for k, v in allFilesCommitDates.items()}
-		FsNode.allFilesCommitDates = nameRegistry.allFilesCommitDates
+		fileCommitDates: Dict[str, Tuple[datetime, datetime]] = getFilesCommitDates(list(filesPathsToFileNodes.keys()))
+		for filePath, (firstCommitDate, lastCommitDate) in fileCommitDates.items():
+			fileNode = filesPathsToFileNodes[filePath]
+			fileNode.gitFirstCommitDate = firstCommitDate
+			fileNode.gitLastCommitDate = lastCommitDate
+
 		elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
-		pr(f' got the dates of {len(allFilesCommitDates)} files. Took {elapsedMilliseconds:.2f} ms.\n')
+		pr(f' got the dates of {len(fileCommitDates)} files. Took {elapsedMilliseconds:.2f} ms.\n')
 
 	def processContent(self) -> Content:
 		with enterDir(self.contentDir):
