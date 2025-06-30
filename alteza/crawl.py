@@ -48,6 +48,9 @@ class ProgressBar:
 			cls.pbar = None
 
 
+pr: Callable[..., None] = ProgressBar.write
+
+
 class NameRegistry:
 	def __init__(self, root: DirNode, skipForRegistry: Callable[[str], bool]) -> None:
 		self.pageCount = 0
@@ -81,7 +84,7 @@ class NameRegistry:
 
 	def lookup(self, name: str) -> FileNode:
 		if name not in self.allFiles:
-			ProgressBar.write(f'Link error: `{name}` was not found in the name registry.')
+			pr(f'Link error: `{name}` was not found in the name registry.')
 			raise AltezaException(f'Link error: {name}')
 
 		return self.allFiles[name]

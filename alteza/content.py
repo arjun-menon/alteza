@@ -12,7 +12,7 @@ from pypage import pypage  # type: ignore
 from colored import Fore, Style  # type: ignore
 
 from .fs import AltezaException, PublicNodeCounts, FsNode, FileNode, DirNode, PageNode, PyPageNode, Md, NonMd
-from .crawl import NameRegistry, CrawlResult, CrawlConfig, ProgressBar
+from .crawl import NameRegistry, CrawlResult, CrawlConfig, ProgressBar, pr
 
 
 class Args(Tap):  # pyre-ignore[13]
@@ -43,7 +43,7 @@ class Content:  # pylint: disable=too-many-instance-attributes
 		if not pathOnly:
 			srcFile.linksTo.append(dstFile)  # This is used to determine reachability.
 			if dstFile not in self.seenTemplateLinks:
-				ProgressBar.write(
+				pr(
 					' ' * (4 if self.inTemplate else 2) + f'{Fore.grey_42}Linking to:{Style.reset} {dstFile.linkName}',
 				)
 				if self.inTemplate:
@@ -72,7 +72,7 @@ class Content:  # pylint: disable=too-many-instance-attributes
 		self.warnings[fileNode] = desc
 
 	def invokePyPage(self, pyPageNode: PyPageNode, env: dict[str, Any]) -> None:
-		ProgressBar.write(f'{Fore.gold_1}Processing:{Style.reset}', pyPageNode.fullPath)
+		pr(f'{Fore.gold_1}Processing:{Style.reset}', pyPageNode.fullPath)
 		FileNode.current_pypage_node_being_processed = pyPageNode
 		env = env.copy()
 
@@ -154,7 +154,7 @@ class Content:  # pylint: disable=too-many-instance-attributes
 			configEnv |= {'warn': lambda desc: self.warn(configFile, desc)}
 			configEnv |= {'path': path}
 
-			ProgressBar.write(
+			pr(
 				f'{Fore.dark_orange}Running:{Style.reset}',
 				os.path.join(dirNode.fullPath, CrawlConfig.configFileName),
 			)
@@ -238,12 +238,12 @@ class Content:  # pylint: disable=too-many-instance-attributes
 
 		gatherPublicNodes(self.rootDir)
 
-		ProgressBar.write('\nInitial pre-reachability public files:')
+		pr('\nInitial pre-reachability public files:')
 		for node in filter(lambda pNode: isinstance(pNode, FileNode), publicNodes):
-			ProgressBar.write('/' + node.fullPath)
-		ProgressBar.write()
+			pr('/' + node.fullPath)
+		pr()
 
-		ProgressBar.write('Marking all reachable nodes as public...')
+		pr('Marking all reachable nodes as public...')
 		seen: Set['FsNode'] = set()
 
 		def makeReachableNodesPublic(fsNode: FsNode) -> None:
@@ -260,7 +260,7 @@ class Content:  # pylint: disable=too-many-instance-attributes
 		for node in publicNodes:
 			makeReachableNodesPublic(node)
 
-		ProgressBar.write(f'{self.publicNodeCounts.total()} reachable public nodes.\n')
+		pr(f'{self.publicNodeCounts.total()} reachable public nodes.\n')
 
 	@staticmethod
 	def fixSysPath() -> None:
@@ -284,13 +284,11 @@ class Content:  # pylint: disable=too-many-instance-attributes
 			templateRaw = env['layoutRaw']
 			if not isinstance(templateRaw, str):
 				raise AltezaException('The `layoutRaw` must be a string.')
-			ProgressBar.write(f'  {Fore.purple_3}Applying raw template...{Style.reset}')
+			pr(f'  {Fore.purple_3}Applying raw template...{Style.reset}')
 			return templateRaw
 		if 'layout' in env:
 			templateName = env['layout']
-			ProgressBar.write(
-				f'  {Fore.purple_3}Applying template: {Fore.blue_violet}{templateName}{Fore.purple_3}...{Style.reset}'
-			)
+			pr(f'  {Fore.purple_3}Applying template: {Fore.blue_violet}{templateName}{Fore.purple_3}...{Style.reset}')
 			if templateName in self.templateCache:
 				return self.templateCache[templateName]
 			templateFile = self.nameRegistry.lookup(templateName)
