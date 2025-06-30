@@ -1,4 +1,3 @@
-import logging
 import os
 import shutil
 import signal
@@ -17,8 +16,6 @@ from .fs import FsNode, FileNode, DirNode, PyPageNode, Md, NonMd
 from .crawl import CrawlConfig, isHidden, crawl, ProgressBar, NameRegistry
 from .content import Args, Content, enterDir
 from .version import version as alteza_version
-
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s', force=True)
 
 
 class Driver:
@@ -199,13 +196,11 @@ class Driver:
 			return 0
 		except (AltezaException, PypageError, PypageSyntaxError) as e:
 			print(f'\nSite build failed due to Alteza or PyPage error: {e}')
-			print(f'Full traceback:\n{traceback.format_exc()}')
-			logging.exception(e)
+			print(f'\n{traceback.format_exc()}')
 			return 1
 		except Exception as e:
 			print(f'\nSite build failed with unexpected error: {e}')
-			print(f'Full traceback:\n{traceback.format_exc()}')
-			logging.exception(e)
+			print(f'\n{traceback.format_exc()}')
 			return 1
 		finally:
 			ProgressBar.close()
