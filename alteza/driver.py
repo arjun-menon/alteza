@@ -115,7 +115,7 @@ class Driver:
 	def analyzeGitHistory(self, nameRegistry: NameRegistry) -> None:
 		inGitRepo = os.path.exists('.git')  # Improve this to find the nearest ascendant git repo.
 		if not inGitRepo:
-			print(f'Warning: {Fore.light_red}Not in a git repository{Style.reset}.\n')
+			pr(f'Warning: {Fore.light_red}Not in a git repository{Style.reset}.\n')
 
 		def getGitRelPath(fileNode: FileNode) -> str:
 			if self.contentDir == '.':
@@ -123,7 +123,7 @@ class Driver:
 			return os.path.join(self.contentDir, fileNode.fullPath)
 
 		startTimeNs = time.time_ns()
-		print('Analyzing git history...', end='')
+		pr('Analyzing git history...', end='')
 		allFilesPathsToNodes: dict[str, FileNode] = {
 			getGitRelPath(fileNode): fileNode for fileNode in nameRegistry.allFiles.values()
 		}
@@ -132,16 +132,16 @@ class Driver:
 		nameRegistry.allFilesCommitDates = {allFilesPathsToNodes[k]: v for k, v in allFilesCommitDates.items()}
 		FsNode.allFilesCommitDates = nameRegistry.allFilesCommitDates
 		elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
-		print(f' got the dates of {len(allFilesCommitDates)} files. Took {elapsedMilliseconds:.2f} ms.\n')
+		pr(f' got the dates of {len(allFilesCommitDates)} files. Took {elapsedMilliseconds:.2f} ms.\n')
 
 	def processContent(self) -> Content:
 		with enterDir(self.contentDir):
 			startTimeNs = time.time_ns()
-			print('Analyzing content directory...', end='')
+			pr('Analyzing content directory...', end='')
 			fsCrawlResult = crawl()
 			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
-			print(f' took {elapsedMilliseconds:.2f} ms.')
-			print(fsCrawlResult.nameRegistry)
+			pr(f' took {elapsedMilliseconds:.2f} ms.')
+			pr(fsCrawlResult.nameRegistry)
 
 		# Analyze git history
 		self.analyzeGitHistory(fsCrawlResult.nameRegistry)
@@ -155,21 +155,21 @@ class Driver:
 			content.process()
 			ProgressBar.finish(progress_total)
 			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
-			print(f'\nSuccessfully completed processing. Took {elapsedMilliseconds:.2f} ms. Of which:')
-			print(
+			pr(f'\nSuccessfully completed processing. Took {elapsedMilliseconds:.2f} ms. Of which:')
+			pr(
 				f'  PyPage processing took {content.timePyPage.total() / 10**6:.2f} ms'
 				f' in total for {content.timePyPage.count()} calls,'
 				f' with each call averaging {content.timePyPage.average() / 10**6:.2f} ms.'
 			)
-			print(
+			pr(
 				f'  Markdown processing took {content.timeMarkdown.total() / 10**6:.2f} ms'
 				f' in total for {content.timeMarkdown.count()} calls,'
 				f' with each call averaging {content.timeMarkdown.average() / 10**6:.2f} ms.'
 			)
-			print()
+			pr()
 
-		print('File Tree:')
-		print(fsCrawlResult.rootDir.displayDir())
+		pr('File Tree:')
+		pr(fsCrawlResult.rootDir.displayDir())
 
 		return content
 
@@ -187,28 +187,28 @@ class Driver:
 			self.generate(content)
 			ProgressBar.close()
 			genElapsedMilliseconds = (time.time_ns() - genStartTimeNs) / 10**6
-			print(f'Generation complete. Took {genElapsedMilliseconds:.2f} ms.')
+			pr(f'Generation complete. Took {genElapsedMilliseconds:.2f} ms.')
 
 			elapsedMilliseconds = (time.time_ns() - startTimeNs) / 10**6
 			if len(content.warnings) > 0:
-				print('\nWarnings:')
-				print(
+				pr('\nWarnings:')
+				pr(
 					'\n  '.join(
 						f'{Fore.light_red}{fN.fullPath}{Style.reset}: {d}' for fN, d in content.warnings.items()
 					)
 				)
-			print(
+			pr(
 				# pylint: disable=consider-using-f-string
 				'\nSite build complete (Alteza %s). Time elapsed: %.2f ms' % (alteza_version, elapsedMilliseconds)
 			)
 			return 0
 		except (AltezaException, PypageError, PypageSyntaxError) as e:
-			print(f'\nSite build failed due to Alteza or PyPage error: {e}')
-			print(f'\n{traceback.format_exc()}')
+			pr(f'\nSite build failed due to Alteza or PyPage error: {e}')
+			pr(f'\n{traceback.format_exc()}')
 			return 1
 		except Exception as e:
-			print(f'\nSite build failed with unexpected error: {e}')
-			print(f'\n{traceback.format_exc()}')
+			pr(f'\nSite build failed with unexpected error: {e}')
+			pr(f'\n{traceback.format_exc()}')
 			return 1
 		finally:
 			ProgressBar.close()
@@ -238,7 +238,7 @@ class Driver:
 			if isinstance(event, DirModifiedEvent) and event.src_path == self.contentDirAbsPath:
 				return
 
-			print('Detected a change in:', event.src_path or event.dest_path)
+			pr('Detected a change in:', event.src_path or event.dest_path)
 
 			self.timeOfMostRecentEvent = max(self.timeOfMostRecentEvent or 0, time.time_ns())
 
@@ -249,7 +249,7 @@ class Driver:
 		timeIntervalSecs = 0.2
 
 		def logWatching() -> None:
-			print('\nWatching for changes... press Ctrl+C to exit.')
+			pr('\nWatching for changes... press Ctrl+C to exit.')
 
 		eventHandler = Driver.WatchdogEventHandler(self.contentDir)
 		observer = WatchdogObserver()
@@ -260,7 +260,7 @@ class Driver:
 
 			def signalHandler(sig: int, frame: Optional[types.FrameType]) -> None:
 				# pylint: disable=unused-argument
-				print('\nExiting...')
+				pr('\nExiting...')
 				self.shouldExit = True
 
 			signal.signal(signal.SIGINT, signalHandler)
@@ -271,7 +271,7 @@ class Driver:
 					timeSinceMostRecentEvent = time.time_ns() - (eventHandler.timeOfMostRecentEvent or 0)
 					if timeSinceMostRecentEvent > timeIntervalNs:
 						eventHandler.timeOfMostRecentEvent = None
-						print('\nRebuilding...\n')
+						pr('\nRebuilding...\n')
 						self.makeSite()
 						logWatching()
 		finally:
