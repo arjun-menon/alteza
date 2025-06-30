@@ -164,7 +164,7 @@ class Driver:
 
 		return content
 
-	def makeSite(self) -> None:
+	def makeSite(self) -> int:
 		try:
 			startTimeNs = time.time_ns()
 
@@ -193,12 +193,15 @@ class Driver:
 				# pylint: disable=consider-using-f-string
 				'\nSite build complete (Alteza %s). Time elapsed: %.2f ms' % (alteza_version, elapsedMilliseconds)
 			)
+			return 0
 		except (AltezaException, PypageError, PypageSyntaxError) as e:
 			logging.exception(e)
 			print('\nSite build failed due to Alteza or PyPage error.')
+			return 1
 		except Exception as e:
 			logging.exception(e)
 			print('\nSite build failed.')
+			return 1
 		finally:
 			ProgressBar.close()
 
@@ -267,8 +270,9 @@ class Driver:
 			observer.stop()
 			observer.join()
 
-	def run(self) -> None:
+	def run(self) -> int:
 		if self.args.watch:
 			self.runWatchdog()
+			return 0
 		else:
-			self.makeSite()
+			return self.makeSite()
