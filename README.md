@@ -484,7 +484,7 @@ deactive # end the venv
 
 ### A bit of history
 
-The first commit to this repo was from **Dec 19, 2014**, and [that initial commit implements](https://github.com/arjun-menon/alteza/commit/d411ba12bdbce71a21245978f73d04b7c4c07673) some of the Markdown YAML front matter extraction that is still used today ([early commits list](https://github.com/arjun-menon/alteza/commits/master/?after=6388d663e20a345ff484adf08f126a95ae3d7e19+524)).
+The first commit to this repo was from **Dec 19, 2014**, and [that initial commit implements](https://github.com/arjun-menon/alteza/commit/d411ba12bdbce71a21245978f73d04b7c4c07673) some of the Markdown YAML front matter extraction that is still used today ([early commits list](https://github.com/arjun-menon/alteza/commits/master/?after=6388d663e20a345ff484adf08f126a95ae3d7e19+524)). Back then, this project was called **`pypage-site`**. The [`ideas.md`](https://github.com/arjun-menon/alteza/blob/master/ideas.md) file (for writing down & tracking ideas) was introduced in that original initial commit from 2014 as well.
 
 ### Code Style
 
