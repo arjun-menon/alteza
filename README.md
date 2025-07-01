@@ -500,28 +500,25 @@ I'm using `ruff`. To re-format the code, just run: `ruff format`.
 Fwiw, I've configured my IDE (_PyCharm_) to always auto-format with `ruff`.
 Note: ruff has been configured to use single quotes, tab characters, and a 120-character line length.
 
-### Type Checking
+### Type Checking and Linting
 
-To ensure better code quality, Alteza is type-checked with five different type checking systems: [Mypy](https://mypy-lang.org/), Meta's [Pyre](https://pyre-check.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), Google's [Pytype](https://github.com/google/pytype), and [Pyflakes](https://pypi.org/project/pyflakes/); as well as linted with [Pylint](https://pylint.pycqa.org/en/latest/index.html).
+To ensure better code quality, Alteza is type-checked with five different type checking systems: [Mypy](https://mypy-lang.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), and [Pyflakes](https://pypi.org/project/pyflakes/); as well as linted with [Pylint](https://pylint.pycqa.org/en/latest/index.html).
 
-To run some type checks:
+To run all the type checks, and test whether lints are passing, simply run:
 ```sh
 mypy alteza  # should have zero errors
-pyflakes alteza  # should have zero errors
-pyre check  # should have zero errors as well
 pyright alteza  # should have zero errors also
-pytype alteza  # should have zero errors too
-```
-Or, all at once with: `mypy alteza ; pyflakes alteza ; pyre check ; pyright alteza ; pytype alteza`. Pytype is pretty slow, so feel free to omit it.
+pyflakes alteza  # should have zero errors as well
+pylint -j 0 alteza  # should have a perfect 10.00/10 score
 
-### Linting
+# pytype alteza  # currently disabled since it does not support Python versions > 3.11
+# pyre check  # currently disabled due to too much not-so-valid flagging
+```
+To run it along with all together, just run: `mypy alteza ; pyright alteza ; pyflakes alteza ; pylint -j 0 alteza`. Or you can run the `check-types-and-lint.sh` script, which does the same thing. I run this often.
+
 Linting policy is very strict. [Pylint](https://pylint.pycqa.org/en/latest/index.html) must issue a perfect 10/10 score, otherwise the Pylint CI check will fail.  On a side note, you can see a UML diagram of the Alteza code if you click on any one of the completed workflow runs for the [Pylint CI check](https://github.com/arjun-menon/alteza/actions/workflows/pylint.yml).
 
-To test whether lints are passing, simply run:
-```
-pylint -j 0 alteza
-```
-To run it along with all the type checks (excluding `pytype`), just run: `mypy alteza ; pyre check ; pyright alteza ; pyflakes alteza ; pylint -j 0 alteza`. I run this often.
+Meta's [Pyre](https://pyre-check.org/) and Google's [Pytype](https://github.com/google/pytype) are currently disabled (for reasons noted above).
 
 Of course, when it makes sense, lints should be suppressed next to the relevant line, in code. Also, unlike typical Python code, the naming convention generally-followed in this codebase is `camelCase`. Pylint checks for names have mostly been disabled.
 

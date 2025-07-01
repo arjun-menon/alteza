@@ -1,1 +1,3 @@
-mypy alteza ; pyre check ; pyright alteza ; pyflakes alteza ; pylint -j 0 alteza
+mypy alteza ; pyright alteza ; pyflakes alteza ; pylint -j 0 alteza
+# pyre check
+# pytype alteza
