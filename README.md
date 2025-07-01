@@ -502,7 +502,7 @@ Note: ruff has been configured to use single quotes, tab characters, and a 120-c
 
 ### Type Checking and Linting
 
-To ensure better code quality, Alteza is type-checked with five different type checking systems: [Mypy](https://mypy-lang.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), and [Pyflakes](https://pypi.org/project/pyflakes/); as well as linted with [Pylint](https://pylint.pycqa.org/en/latest/index.html).
+To ensure better code quality, Alteza is type-checked with 3 different type checking systems: [Mypy](https://mypy-lang.org/), Microsoft's [Pyright](https://github.com/microsoft/pyright), and [Pyflakes](https://pypi.org/project/pyflakes/), as well as linted with [Pylint](https://pylint.pycqa.org/en/latest/index.html).
 
 To run all the type checks, and test whether lints are passing, simply run:
 ```sh
