@@ -229,7 +229,9 @@ In templates, the `dir` points to the directory that the file being processed is
 
 You can sort files and directories inside a directory by specifying either `sortKey` (for both), or `sortFilesKey`, or `sortDirsKey`.
 These fields can be specified in a directory's `__config__.py` (which would then be inherited), or directly or the `DirNode` object
-itself (which can be accessed inside the `__config__.py` for a directory via the `dir` variable) to avoid inheritance.
+itself (which can be accessed inside the `__config__.py` for a directory via the `dir` variable) to avoid inheritance. These field
+can be either a string (`str`) or a callable. If it's a callable, it's passed directly as a `list`'s `sort`'s `key`. If it's a
+string, then we grab the field with that name from the objects (whether files or directories) being sorted.
 </div>
 
 Available everywhere.
