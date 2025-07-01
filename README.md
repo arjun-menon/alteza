@@ -220,17 +220,17 @@ This object has a fields like `dir.pages`, which is a list of all the pages (a l
   4. `dir.indexPage`: A `PageNode` object of the index page, i.e. a `index.md` or a `index.html` file. If there is no index page, this is `None`.
   5. `dir.title`: A string `title` object of the index page, if the index page specifies a title, or if `dir.configTitle` is set (more on that below). If there is no index page or no title specified by it nor no `dir.configTitle`, then this is `None`.
 
-<br>
-`dir.configTitle` is used for the title shown in breadcrumbs (e.g. by calling `page.crumbs()`). Since breadcrumbs are rendered before a parent directory index page has been processed, we don't have access to the index page title. Therefore, this value can be set — it can be set in `__config__.py` either by just writing `title = '...'` or `dir.tite = '...'` (both have the same effect; both set `dir.configTitle`).
+<p>`dir.configTitle` is used for the title shown in breadcrumbs (e.g. by calling `page.crumbs()`). Since breadcrumbs are rendered before a parent directory index page has been processed, we don't have access to the index page title. Therefore, this value can be set — it can be set in `__config__.py` either by just writing `title = '...'` or `dir.tite = '...'` (both have the same effect; both set `dir.configTitle`).</p>
 
-<br>
-<b>Sorting:</b>
+In templates, the `dir` points to the directory that the file being processed is in.
+
+<div>
+<p><b>Sorting:</b></p>
 
 You can sort files and directories inside a directory by specifying either `sortKey` (for both), or `sortFilesKey`, or `sortDirsKey`.
 These fields can be specified in a directory's `__config__.py` (which would then be inherited), or directly or the `DirNode` object
 itself (which can be accessed inside the `__config__.py` for a directory via the `dir` variable) to avoid inheritance.
-
-In templates, the `dir` points to the directory that the file being processed is in.
+</div>
 
 Available everywhere.
 
