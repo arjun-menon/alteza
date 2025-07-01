@@ -223,6 +223,7 @@ This object has a fields like `dir.pages`, which is a list of all the pages (a l
 <br>
 `dir.configTitle` is used for the title shown in breadcrumbs (e.g. by calling `page.crumbs()`). Since breadcrumbs are rendered before a parent directory index page has been processed, we don't have access to the index page title. Therefore, this value can be set — it can be set in `__config__.py` either by just writing `title = '...'` or `dir.tite = '...'` (both have the same effect; both set `dir.configTitle`).
 
+<br>
 <b>Sorting:</b>
 
 You can sort files and directories inside a directory by specifying either `sortKey` (for both), or `sortFilesKey`, or `sortDirsKey`.
