@@ -294,18 +294,19 @@ class DirNode(FsNode):
 		return self.indexPage is not None
 
 	@property
-	def title(self) -> Optional[str]:
+	def title(self) -> str:
+		title: Optional[str] = None
 		if self.indexPage and 'title' in self.indexPage.env:
-			return self.indexPage.title
-		return self.configTitle
+			title = self.indexPage.title
+		if self.configTitle:
+			title = self.configTitle
+		if not title:
+			title = self.dirName
+		return title
 
 	@title.setter
 	def title(self, configTitle: str) -> None:
 		self.configTitle = configTitle
-
-	@property
-	def titleOrName(self) -> str:
-		return self.title if self.title else self.dirName
 
 	@staticmethod
 	def _displayDir(dirNode: 'DirNode', indent: int = 0) -> str:
@@ -363,9 +364,9 @@ class PyPageNode(PageNode):
 			(
 				'<span class="crumb">'
 				+ (
-					f'<a class="crumb crumb-link" href="{PyPageNode.link(parent)}">{parent.titleOrName}</a>'
+					f'<a class="crumb crumb-link" href="{PyPageNode.link(parent)}">{parent.title}</a>'
 					if parent.hasIndexPage
-					else f'<span class="crumb crumb-nolink">{parent.titleOrName}</span>'
+					else f'<span class="crumb crumb-nolink">{parent.title}</span>'
 				)
 				+ '</span>'
 			)

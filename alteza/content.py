@@ -4,7 +4,7 @@ import json
 import os
 import sys
 import types
-from typing import List, Dict, Set, Any, Union, Optional, Generator
+from typing import List, Dict, Set, Any, Union, Optional, Generator, Callable
 
 from tap import Tap
 import sh  # type: ignore
@@ -199,7 +199,7 @@ class Content:  # pylint: disable=too-many-instance-attributes
 			env = env.copy()  # Duplicate env.
 			env |= {'dir': dirNode}  # Enrich with current dir.
 			env |= self.getModuleVars(self.runConfigIfAny(dirNode, env))  # Run config.
-			skipNames = self.getSkipNames(env)  # Process `skip`.
+			skipNames = self.getSkipNames(env)  # Type check `skip`.
 
 			# Ordering Note: We must recurse into the subdirectories first.
 			for d in dirNode.subDirs:
@@ -215,6 +215,8 @@ class Content:  # pylint: disable=too-many-instance-attributes
 					self.invokePyPage(pyPageNode, env)
 				ProgressBar.increment()
 
+			self.sortDirNode(dirNode, env)
+
 			# We must process the index file last.
 			indexPage: Optional[PageNode] = dirNode.indexPage
 			if indexPage is not None and isinstance(indexPage, PyPageNode):
@@ -223,20 +225,57 @@ class Content:  # pylint: disable=too-many-instance-attributes
 
 			# TODO: Enrich dirNode with additional `env`/info from index?
 
-			# Sorting:
-			# =========
-			# Sort all by specified key string
-			# Sort all by specified key function
-			# Sort dirs by specified key string
-			# Sort dirs by specified key function
-			# Sort files by specified key string
-			# Sort files by specified key function
-
 		initial_env = self.seed | self.getBasicHelpers()
 
 		walk(self.rootDir, initial_env)
 
 		self.tracePublic()
+
+	@staticmethod
+	def sortDirNode(dirNode: DirNode, env: dict[str, Any]) -> None:
+		# Sorting:
+		# =========
+		def getField(fieldName: str) -> Optional[Union[str, Callable[[Any], Any]]]:
+			return env.get(fieldName) or getattr(dirNode, fieldName, None)
+
+		# Sort all
+		sortKey: Optional[Union[str, Callable[[Any], Any]]] = getField('sortKey')
+
+		# Sort dirs
+		fieldName = 'sortDirsKey'
+		sortDirsKey: Optional[Union[str, Callable[[Any], Any]]] = getField(fieldName)
+		if sortDirsKey is None:
+			sortDirsKey = sortKey
+			fieldName = 'sortKey'
+		if sortDirsKey is not None:
+			if callable(sortDirsKey):
+				# Sort all by specified key function
+				dirNode.subDirs.sort(key=sortDirsKey)
+			elif isinstance(sortDirsKey, str):
+				# Sort all by specified key string
+				dirNode.subDirs.sort(key=lambda d: getattr(d, sortDirsKey))
+			else:
+				raise AltezaException(
+					f'`{fieldName}` must be a string or a function, but got `{sortDirsKey}` of type `{type(sortDirsKey)}`.'
+				)
+
+		# Sort files
+		fieldName = 'sortFilesKey'
+		sortFilesKey: Optional[Union[str, Callable[[Any], Any]]] = getField(fieldName)
+		if sortFilesKey is None:
+			fieldName = 'sortKey'
+			sortFilesKey = sortKey
+		if sortFilesKey is not None:
+			if callable(sortFilesKey):
+				# Sort files by specified key function
+				dirNode.files.sort(key=sortFilesKey)
+			elif isinstance(sortFilesKey, str):
+				# Sort files by specified key string
+				dirNode.files.sort(key=lambda f: getattr(f, sortFilesKey))
+			else:
+				raise AltezaException(
+					f'`{fieldName}` must be a string or a function, but got `{sortFilesKey}` of type `{type(sortFilesKey)}`.'
+				)
 
 	def tracePublic(self) -> None:
 		"""Make all nodes reachable from public nodes public. (Called after processing.)"""

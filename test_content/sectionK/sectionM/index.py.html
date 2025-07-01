@@ -15,9 +15,9 @@ title = title_for_this_dir
 <small>
 	{% for dirNode in page.parents %}
 		{% if dirNode.hasIndexPage %}
-			<a href="{{ link(dirNode) }}">{{ dirNode.titleOrName }}</a>
+			<a href="{{ link(dirNode) }}">{{ dirNode.title }}</a>
 		{% else %}
-			{{ dirNode.titleOrName }}
+			{{ dirNode.title }}
 		{% endif %} &#9656;
 	{% endfor %}
 </small>
