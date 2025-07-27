@@ -467,12 +467,14 @@ Normal Alteza behavior for static assets is to create symlinks from your generat
 
 The `--seed` flag is a JSON string representing seed data for PyPage processing. This seed is injected into every PyPage document. The seed _is not global_, and so cannot be modified between files; it is copied into each PyPage execution environment.
 
+## Development & Testing
+
 To test against `test_content` (and generate output to `test_output`), run it like this:
 ```sh
 python -m alteza --content test_content --output test_output --clear_output_dir
 ```
 
-## Development & Testing
+To watch, add the `--watch` flag above.
 
 Feel free to send me PRs for this project.
 
