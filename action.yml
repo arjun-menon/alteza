@@ -1,8 +1,8 @@
-name: "Build Alteza Website on GitHub Pages"
+name: "Alteza"
 branding:
   icon: 'book-open'
   color: 'green'
-description: "A simple GitHub action that builds and deploys an Alteza website to GitHub pages"
+description: "Action that builds an Alteza website, and deploys it to GitHub Pages"
 author: "Arjun G. Menon"
 
 inputs:
