@@ -176,7 +176,87 @@ class Driver:
 		pr('File Tree:')
 		pr(fsCrawlResult.rootDir.displayDir())
 
+		# Store content for potential selective rebuilds
+		self.content = content
 		return content
+
+	def selectiveRebuildSingleMd(self, changedFile: str) -> bool:
+		"""Rebuild just a single Markdown file. Returns True if successful, False if fallback to full rebuild needed."""
+		try:
+			pr(f'{Fore.light_blue}Selective rebuild:{Style.reset} {changedFile}')
+
+			# Use existing content if available, otherwise process from scratch
+			if self.content is None:
+				with enterDir(self.contentDir):
+					fsCrawlResult = crawl()
+				self.analyzeGitHistory(fsCrawlResult.nameRegistry)
+				self.content = Content(self.args, fsCrawlResult)
+				# Note: We don't call content.process() here since we only want to process one file
+
+			# Find the file in the name registry
+			fileBaseName = os.path.splitext(os.path.basename(changedFile))[0]
+			try:
+				fileNode = self.content.nameRegistry.lookup(fileBaseName)
+			except AltezaException:
+				pr(f'Could not find {fileBaseName} in name registry, falling back to full rebuild')
+				return False
+
+			if not isinstance(fileNode, Md):
+				pr(f'{fileBaseName} is not a Markdown file, falling back to full rebuild')
+				return False
+
+			# Build environment by walking up the directory hierarchy
+			env = self.content.seed | Content.getBasicHelpers()
+
+			# Walk through all ancestor directories to build up environment
+			dirNode = fileNode.parentDir
+			ancestorDirs = []
+
+			# Collect all ancestor directories
+			currentDir = dirNode
+			while currentDir is not None:
+				ancestorDirs.append(currentDir)
+				currentDir = currentDir.parent
+
+			# Reverse to process from root to leaf
+			ancestorDirs.reverse()
+
+			# Process config files from root down to the file's directory
+			with enterDir(self.contentDir):
+				for ancestorDir in ancestorDirs:
+					if ancestorDir.fullPath != '.':
+						with enterDir(ancestorDir.fullPath):
+							env = env.copy()
+							env |= {'dir': ancestorDir}
+							env |= Content.getModuleVars(self.content.runConfigIfAny(ancestorDir, env))
+					else:
+						env = env.copy()
+						env |= {'dir': ancestorDir}
+						env |= Content.getModuleVars(self.content.runConfigIfAny(ancestorDir, env))
+
+			# Process the markdown file
+			with enterDir(self.contentDir):
+				self.content.invokePyPage(fileNode, env)
+
+			# Generate output for this specific file
+			with enterDir(self.outputDir):
+				# Navigate to the correct output subdirectory if needed
+				outputPath = os.path.dirname(fileNode.fullPath)
+				if outputPath and outputPath != '.':
+					# Ensure the output directory structure exists
+					os.makedirs(outputPath, exist_ok=True)
+					with enterDir(outputPath):
+						Driver.generateMd(fileNode)
+				else:
+					Driver.generateMd(fileNode)
+
+			pr(f'{Fore.light_green}Selective rebuild complete{Style.reset}')
+			return True
+
+		except Exception as e:
+			pr(f'{Fore.light_red}Selective rebuild failed:{Style.reset} {e}')
+			pr('Falling back to full rebuild')
+			return False
 
 	def makeSite(self) -> int:
 		try:
@@ -233,6 +313,20 @@ class Driver:
 			self.timeOfMostRecentEvent: Optional[int] = None
 			self.pathsOfChangedFiles: Set[str] = set()
 
+		def isOnlyOneMarkdownFileChanged(self) -> Optional[str]:
+			"""Check if only one file changed and it's a Markdown file. Returns the file path if so, None otherwise."""
+			if len(self.pathsOfChangedFiles) != 1:
+				return None
+
+			changed_file = next(iter(self.pathsOfChangedFiles))
+			# Remove leading slash if present
+			if changed_file.startswith('/'):
+				changed_file = changed_file[1:]
+
+			if changed_file.endswith('.md'):
+				return changed_file
+			return None
+
 		def on_any_event(self, event: FileSystemEvent) -> None:
 			for ignoreAbsPath in CrawlConfig.ignoreAbsPaths:
 				if ignoreAbsPath in event.src_path or ignoreAbsPath in event.dest_path:
@@ -280,6 +374,18 @@ class Driver:
 					if timeSinceMostRecentEvent > timeIntervalNs:
 						eventHandler.timeOfMostRecentEvent = None
 						pr(f'Detected a change in the following files: {eventHandler.pathsOfChangedFiles}')
+
+						# Check if we can do a selective rebuild for a single Markdown file
+						singleMdFile = eventHandler.isOnlyOneMarkdownFileChanged()
+						if singleMdFile:
+							pr('\nAttempting selective rebuild...\n')
+							success = self.selectiveRebuildSingleMd(singleMdFile)
+							if success:
+								eventHandler.pathsOfChangedFiles = set()
+								logWatching()
+								continue
+
+						# Fall back to full rebuild
 						eventHandler.pathsOfChangedFiles = set()
 						pr('\nRebuilding...\n')
 						self.makeSite()
