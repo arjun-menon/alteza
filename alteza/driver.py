@@ -5,7 +5,7 @@ import time
 import types
 import traceback
 from datetime import datetime
-from typing import Optional, Dict, Tuple
+from typing import Optional, Dict, Tuple, Set
 
 from pypage import PypageError, PypageSyntaxError  # type: ignore
 from watchdog.events import FileSystemEventHandler, FileSystemEvent, DirModifiedEvent
@@ -29,6 +29,8 @@ class Driver:
 		self.shouldCopyAssets: bool = args.copy_assets
 		self.contentDir: str = args.content
 		self.outputDir: str = args.output
+		# Content instance variable:
+		self.content: Optional[Content] = None
 		# Other instance variables:
 		self.shouldExit: bool = False
 		CrawlConfig.configFileName = Args.config
@@ -229,6 +231,7 @@ class Driver:
 		def __init__(self, contentDir: str) -> None:
 			self.contentDirAbsPath: str = os.path.abspath(contentDir)
 			self.timeOfMostRecentEvent: Optional[int] = None
+			self.pathsOfChangedFiles: Set[str] = set()
 
 		def on_any_event(self, event: FileSystemEvent) -> None:
 			for ignoreAbsPath in CrawlConfig.ignoreAbsPaths:
@@ -241,8 +244,10 @@ class Driver:
 			if isinstance(event, DirModifiedEvent) and event.src_path == self.contentDirAbsPath:
 				return
 
-			pr('Detected a change in:', event.src_path or event.dest_path)
-
+			changedPath = event.src_path or event.dest_path
+			if not os.path.isdir(changedPath):
+				changedPath = changedPath.removeprefix(self.contentDirAbsPath)
+				self.pathsOfChangedFiles.add(changedPath)
 			self.timeOfMostRecentEvent = max(self.timeOfMostRecentEvent or 0, time.time_ns())
 
 	def runWatchdog(self) -> None:
@@ -274,6 +279,8 @@ class Driver:
 					timeSinceMostRecentEvent = time.time_ns() - (eventHandler.timeOfMostRecentEvent or 0)
 					if timeSinceMostRecentEvent > timeIntervalNs:
 						eventHandler.timeOfMostRecentEvent = None
+						pr(f'Detected a change in the following files: {eventHandler.pathsOfChangedFiles}')
+						eventHandler.pathsOfChangedFiles = set()
 						pr('\nRebuilding...\n')
 						self.makeSite()
 						logWatching()

@@ -471,10 +471,12 @@ The `--seed` flag is a JSON string representing seed data for PyPage processing.
 
 To test against `test_content` (and generate output to `test_output`), run it like this:
 ```sh
-python -m alteza --content test_content --output test_output --clear_output_dir
+python -m alteza --content test_content --output test_output --clear_output_dir --watch
 ```
 
-To watch, add the `--watch` flag above.
+To only build once, remove the `--watch` flag above.
+
+For developing with VS Code, there's a `launch.json` present here.
 
 Feel free to send me PRs for this project.
 
