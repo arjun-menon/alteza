@@ -180,8 +180,8 @@ class Driver:
 		self.content = content
 		return content
 
-	def findDescendantMarkdownFiles(self, configFilePath: str) -> List[str]:
-		"""Find all Markdown files that are descendants of a config file directory."""
+	def findDescendantFiles(self, configFilePath: str) -> List[str]:
+		"""Find all files that are descendants of a config file directory."""
 		if self.content is None:
 			return []
 
@@ -190,9 +190,33 @@ class Driver:
 
 		descendant_files = []
 
-		# Find all markdown files in the name registry
+		# Find all files in the name registry
 		for linkName, fileNode in self.content.nameRegistry.allFiles.items():
-			if isinstance(fileNode, Md):
+			# Check if this file is in the config directory or a subdirectory
+			fileDir = os.path.dirname(fileNode.fullPath) if fileNode.fullPath != fileNode.fileName else '.'
+
+			# Check if fileDir is configDir or a subdirectory of configDir
+			if configDir == '.':
+				# Root config affects all files
+				descendant_files.append(fileNode.fullPath)
+			elif fileDir == configDir or fileDir.startswith(configDir + '/'):
+				descendant_files.append(fileNode.fullPath)
+
+		return descendant_files
+
+	def findDescendantPyPageFiles(self, configFilePath: str) -> List[str]:
+		"""Find all PyPage files (Markdown and .py.ext files) that are descendants of a config file directory."""
+		if self.content is None:
+			return []
+
+		# Get the directory containing the config file
+		configDir = os.path.dirname(configFilePath) if configFilePath != CrawlConfig.configFileName else '.'
+
+		descendant_files = []
+
+		# Find all PyPage files in the name registry
+		for linkName, fileNode in self.content.nameRegistry.allFiles.items():
+			if isinstance(fileNode, PyPageNode):
 				# Check if this file is in the config directory or a subdirectory
 				fileDir = os.path.dirname(fileNode.fullPath) if fileNode.fullPath != fileNode.fileName else '.'
 
@@ -220,31 +244,31 @@ class Driver:
 
 			files_to_rebuild = []
 
-			if rebuild_type == 'markdown_only':
+			if rebuild_type == 'pypage_only':
 				files_to_rebuild = rebuild_info['files']
 			elif rebuild_type == 'config_and_descendants':
-				# Add explicitly changed markdown files
-				files_to_rebuild.extend(rebuild_info.get('markdown_files', []))
+				# Add explicitly changed pypage files
+				files_to_rebuild.extend(rebuild_info.get('pypage_files', []))
 
 				# Add descendants of each changed config file
 				for config_file in rebuild_info['config_files']:
-					descendants = self.findDescendantMarkdownFiles(config_file)
+					descendants = self.findDescendantPyPageFiles(config_file)
 					files_to_rebuild.extend(descendants)
 
 				# Remove duplicates
 				files_to_rebuild = list(set(files_to_rebuild))
 
 			if not files_to_rebuild:
-				pr('No markdown files to rebuild')
+				pr('No PyPage files to rebuild')
 				return True
 
-			pr(f'  Rebuilding {len(files_to_rebuild)} files: {files_to_rebuild}')
+				pr(f'  Rebuilding {len(files_to_rebuild)} files: {files_to_rebuild}')
 
 			# Process each file
 			successful_rebuilds = 0
 			for file_path in files_to_rebuild:
 				try:
-					success = self._rebuildSingleMarkdownFile(file_path)
+					success = self._rebuildSinglePyPageFile(file_path)
 					if success:
 						successful_rebuilds += 1
 					else:
@@ -264,18 +288,26 @@ class Driver:
 			pr('Falling back to full rebuild')
 			return False
 
-	def _rebuildSingleMarkdownFile(self, file_path: str) -> bool:
-		"""Internal method to rebuild a single markdown file. Returns True if successful."""
+	def _rebuildSinglePyPageFile(self, file_path: str) -> bool:
+		"""Internal method to rebuild a single PyPage file (Markdown or .py.ext). Returns True if successful."""
 		# Find the file in the name registry
 		fileBaseName = os.path.splitext(os.path.basename(file_path))[0]
+
+		# Handle .py.ext files - need to extract the base name properly
+		if '.py.' in file_path:
+			fileName = os.path.basename(file_path)
+			pySubExtPos = fileName.find('.py.')
+			if pySubExtPos != -1:
+				fileBaseName = fileName[:pySubExtPos]
+
 		try:
 			fileNode = self.content.nameRegistry.lookup(fileBaseName)
 		except AltezaException:
 			pr(f'  Could not find {fileBaseName} in name registry')
 			return False
 
-		if not isinstance(fileNode, Md):
-			pr(f'  {fileBaseName} is not a Markdown file')
+		if not isinstance(fileNode, PyPageNode):
+			pr(f'  {fileBaseName} is not a PyPage file')
 			return False
 
 		# Build environment by walking up the directory hierarchy
@@ -307,7 +339,7 @@ class Driver:
 					env |= {'dir': ancestorDir}
 					env |= Content.getModuleVars(self.content.runConfigIfAny(ancestorDir, env))
 
-		# Process the markdown file
+		# Process the PyPage file
 		with enterDir(self.contentDir):
 			self.content.invokePyPage(fileNode, env)
 
@@ -319,9 +351,9 @@ class Driver:
 				# Ensure the output directory structure exists
 				os.makedirs(outputPath, exist_ok=True)
 				with enterDir(outputPath):
-					Driver.generateMd(fileNode)
+					Driver.generatePyPageNode(fileNode)
 			else:
-				Driver.generateMd(fileNode)
+				Driver.generatePyPageNode(fileNode)
 
 		return True
 
@@ -338,7 +370,7 @@ class Driver:
 				self.content = Content(self.args, fsCrawlResult)
 				# Note: We don't call content.process() here since we only want to process one file
 
-			success = self._rebuildSingleMarkdownFile(changedFile)
+			success = self._rebuildSinglePyPageFile(changedFile)
 			if success:
 				pr(f'{Fore.light_green}Selective rebuild complete{Style.reset}')
 				return True
@@ -399,6 +431,26 @@ class Driver:
 			else:
 				raise AltezaException(f'Path to ignore `{somePath}` does not exist.')
 
+	@staticmethod
+	def isPyPageFile(file_path: str) -> bool:
+		"""Check if a file path represents a PyPage file (.md or .py.ext pattern)."""
+		file_name = os.path.basename(file_path)
+		_, extension = os.path.splitext(file_name)
+
+		# Check for Markdown files
+		if extension == '.md':
+			return True
+
+		# Check for .py.ext pattern (NonMd PyPage files)
+		if '.py.' in file_name:
+			pySubExtPos = file_name.find('.py.')
+			remainingExt = file_name[pySubExtPos:]
+			expectedRemainingExt = '.py' + extension
+			if remainingExt == expectedRemainingExt:
+				return True
+
+		return False
+
 	class WatchdogEventHandler(FileSystemEventHandler):
 		def __init__(self, contentDir: str) -> None:
 			self.contentDirAbsPath: str = os.path.abspath(contentDir)
@@ -436,32 +488,32 @@ class Driver:
 
 			# Check for config file changes
 			config_changes = []
-			markdown_changes = []
+			pypage_changes = []
 			other_changes = []
 
 			for file_path in changed_files:
 				file_name = os.path.basename(file_path)
 				if file_name == CrawlConfig.configFileName:
 					config_changes.append(file_path)
-				elif file_path.endswith('.md'):
-					markdown_changes.append(file_path)
+				elif Driver.isPyPageFile(file_path):
+					pypage_changes.append(file_path)
 				else:
 					other_changes.append(file_path)
 
-			# If there are non-markdown, non-config changes, do full rebuild
+			# If there are non-pypage, non-config changes, do full rebuild
 			if other_changes:
 				return None
 
-			# If only markdown files changed, we can do selective rebuild
-			if config_changes == [] and markdown_changes:
-				return {'type': 'markdown_only', 'files': markdown_changes}
+			# If only pypage files changed, we can do selective rebuild
+			if config_changes == [] and pypage_changes:
+				return {'type': 'pypage_only', 'files': pypage_changes}
 
 			# If config files changed, we need to rebuild affected descendants
 			if config_changes:
 				return {
 					'type': 'config_and_descendants',
 					'config_files': config_changes,
-					'markdown_files': markdown_changes,
+					'pypage_files': pypage_changes,
 				}
 
 			return None
