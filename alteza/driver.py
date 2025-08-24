@@ -5,7 +5,7 @@ import time
 import types
 import traceback
 from datetime import datetime
-from typing import Optional, Dict, Tuple, Set
+from typing import Optional, Dict, Tuple, Set, Any, List
 
 from pypage import PypageError, PypageSyntaxError  # type: ignore
 from watchdog.events import FileSystemEventHandler, FileSystemEvent, DirModifiedEvent
@@ -180,6 +180,151 @@ class Driver:
 		self.content = content
 		return content
 
+	def findDescendantMarkdownFiles(self, configFilePath: str) -> List[str]:
+		"""Find all Markdown files that are descendants of a config file directory."""
+		if self.content is None:
+			return []
+
+		# Get the directory containing the config file
+		configDir = os.path.dirname(configFilePath) if configFilePath != CrawlConfig.configFileName else '.'
+
+		descendant_files = []
+
+		# Find all markdown files in the name registry
+		for linkName, fileNode in self.content.nameRegistry.allFiles.items():
+			if isinstance(fileNode, Md):
+				# Check if this file is in the config directory or a subdirectory
+				fileDir = os.path.dirname(fileNode.fullPath) if fileNode.fullPath != fileNode.fileName else '.'
+
+				# Check if fileDir is configDir or a subdirectory of configDir
+				if configDir == '.':
+					# Root config affects all files
+					descendant_files.append(fileNode.fullPath)
+				elif fileDir == configDir or fileDir.startswith(configDir + '/'):
+					descendant_files.append(fileNode.fullPath)
+
+		return descendant_files
+
+	def selectiveRebuildMultiple(self, rebuild_info: Dict[str, Any]) -> bool:
+		"""Rebuild multiple files based on the rebuild info. Returns True if successful, False if fallback needed."""
+		try:
+			rebuild_type = rebuild_info['type']
+			pr(f'{Fore.light_blue}Selective rebuild ({rebuild_type}):{Style.reset}')
+
+			# Use existing content if available, otherwise process from scratch
+			if self.content is None:
+				with enterDir(self.contentDir):
+					fsCrawlResult = crawl()
+				self.analyzeGitHistory(fsCrawlResult.nameRegistry)
+				self.content = Content(self.args, fsCrawlResult)
+
+			files_to_rebuild = []
+
+			if rebuild_type == 'markdown_only':
+				files_to_rebuild = rebuild_info['files']
+			elif rebuild_type == 'config_and_descendants':
+				# Add explicitly changed markdown files
+				files_to_rebuild.extend(rebuild_info.get('markdown_files', []))
+
+				# Add descendants of each changed config file
+				for config_file in rebuild_info['config_files']:
+					descendants = self.findDescendantMarkdownFiles(config_file)
+					files_to_rebuild.extend(descendants)
+
+				# Remove duplicates
+				files_to_rebuild = list(set(files_to_rebuild))
+
+			if not files_to_rebuild:
+				pr('No markdown files to rebuild')
+				return True
+
+			pr(f'  Rebuilding {len(files_to_rebuild)} files: {files_to_rebuild}')
+
+			# Process each file
+			successful_rebuilds = 0
+			for file_path in files_to_rebuild:
+				try:
+					success = self._rebuildSingleMarkdownFile(file_path)
+					if success:
+						successful_rebuilds += 1
+					else:
+						pr(f'  Failed to rebuild {file_path}')
+						return False
+				except Exception as e:
+					pr(f'  Error rebuilding {file_path}: {e}')
+					return False
+
+			pr(
+				f'{Fore.light_green}Selective rebuild complete: {successful_rebuilds}/{len(files_to_rebuild)} files{Style.reset}'
+			)
+			return True
+
+		except Exception as e:
+			pr(f'{Fore.light_red}Selective rebuild failed:{Style.reset} {e}')
+			pr('Falling back to full rebuild')
+			return False
+
+	def _rebuildSingleMarkdownFile(self, file_path: str) -> bool:
+		"""Internal method to rebuild a single markdown file. Returns True if successful."""
+		# Find the file in the name registry
+		fileBaseName = os.path.splitext(os.path.basename(file_path))[0]
+		try:
+			fileNode = self.content.nameRegistry.lookup(fileBaseName)
+		except AltezaException:
+			pr(f'  Could not find {fileBaseName} in name registry')
+			return False
+
+		if not isinstance(fileNode, Md):
+			pr(f'  {fileBaseName} is not a Markdown file')
+			return False
+
+		# Build environment by walking up the directory hierarchy
+		env = self.content.seed | Content.getBasicHelpers()
+
+		# Walk through all ancestor directories to build up environment
+		dirNode = fileNode.parentDir
+		ancestorDirs = []
+
+		# Collect all ancestor directories
+		currentDir = dirNode
+		while currentDir is not None:
+			ancestorDirs.append(currentDir)
+			currentDir = currentDir.parent
+
+		# Reverse to process from root to leaf
+		ancestorDirs.reverse()
+
+		# Process config files from root down to the file's directory
+		with enterDir(self.contentDir):
+			for ancestorDir in ancestorDirs:
+				if ancestorDir.fullPath != '.':
+					with enterDir(ancestorDir.fullPath):
+						env = env.copy()
+						env |= {'dir': ancestorDir}
+						env |= Content.getModuleVars(self.content.runConfigIfAny(ancestorDir, env))
+				else:
+					env = env.copy()
+					env |= {'dir': ancestorDir}
+					env |= Content.getModuleVars(self.content.runConfigIfAny(ancestorDir, env))
+
+		# Process the markdown file
+		with enterDir(self.contentDir):
+			self.content.invokePyPage(fileNode, env)
+
+		# Generate output for this specific file
+		with enterDir(self.outputDir):
+			# Navigate to the correct output subdirectory if needed
+			outputPath = os.path.dirname(fileNode.fullPath)
+			if outputPath and outputPath != '.':
+				# Ensure the output directory structure exists
+				os.makedirs(outputPath, exist_ok=True)
+				with enterDir(outputPath):
+					Driver.generateMd(fileNode)
+			else:
+				Driver.generateMd(fileNode)
+
+		return True
+
 	def selectiveRebuildSingleMd(self, changedFile: str) -> bool:
 		"""Rebuild just a single Markdown file. Returns True if successful, False if fallback to full rebuild needed."""
 		try:
@@ -193,65 +338,12 @@ class Driver:
 				self.content = Content(self.args, fsCrawlResult)
 				# Note: We don't call content.process() here since we only want to process one file
 
-			# Find the file in the name registry
-			fileBaseName = os.path.splitext(os.path.basename(changedFile))[0]
-			try:
-				fileNode = self.content.nameRegistry.lookup(fileBaseName)
-			except AltezaException:
-				pr(f'Could not find {fileBaseName} in name registry, falling back to full rebuild')
+			success = self._rebuildSingleMarkdownFile(changedFile)
+			if success:
+				pr(f'{Fore.light_green}Selective rebuild complete{Style.reset}')
+				return True
+			else:
 				return False
-
-			if not isinstance(fileNode, Md):
-				pr(f'{fileBaseName} is not a Markdown file, falling back to full rebuild')
-				return False
-
-			# Build environment by walking up the directory hierarchy
-			env = self.content.seed | Content.getBasicHelpers()
-
-			# Walk through all ancestor directories to build up environment
-			dirNode = fileNode.parentDir
-			ancestorDirs = []
-
-			# Collect all ancestor directories
-			currentDir = dirNode
-			while currentDir is not None:
-				ancestorDirs.append(currentDir)
-				currentDir = currentDir.parent
-
-			# Reverse to process from root to leaf
-			ancestorDirs.reverse()
-
-			# Process config files from root down to the file's directory
-			with enterDir(self.contentDir):
-				for ancestorDir in ancestorDirs:
-					if ancestorDir.fullPath != '.':
-						with enterDir(ancestorDir.fullPath):
-							env = env.copy()
-							env |= {'dir': ancestorDir}
-							env |= Content.getModuleVars(self.content.runConfigIfAny(ancestorDir, env))
-					else:
-						env = env.copy()
-						env |= {'dir': ancestorDir}
-						env |= Content.getModuleVars(self.content.runConfigIfAny(ancestorDir, env))
-
-			# Process the markdown file
-			with enterDir(self.contentDir):
-				self.content.invokePyPage(fileNode, env)
-
-			# Generate output for this specific file
-			with enterDir(self.outputDir):
-				# Navigate to the correct output subdirectory if needed
-				outputPath = os.path.dirname(fileNode.fullPath)
-				if outputPath and outputPath != '.':
-					# Ensure the output directory structure exists
-					os.makedirs(outputPath, exist_ok=True)
-					with enterDir(outputPath):
-						Driver.generateMd(fileNode)
-				else:
-					Driver.generateMd(fileNode)
-
-			pr(f'{Fore.light_green}Selective rebuild complete{Style.reset}')
-			return True
 
 		except Exception as e:
 			pr(f'{Fore.light_red}Selective rebuild failed:{Style.reset} {e}')
@@ -327,6 +419,53 @@ class Driver:
 				return changed_file
 			return None
 
+		def getSelectiveRebuildInfo(self) -> Optional[Dict[str, Any]]:
+			"""
+			Analyze changed files and determine if selective rebuild is possible.
+			Returns None if full rebuild needed, otherwise returns rebuild info dict.
+			"""
+			if len(self.pathsOfChangedFiles) == 0:
+				return None
+
+			# Clean up file paths
+			changed_files = []
+			for file_path in self.pathsOfChangedFiles:
+				if file_path.startswith('/'):
+					file_path = file_path[1:]
+				changed_files.append(file_path)
+
+			# Check for config file changes
+			config_changes = []
+			markdown_changes = []
+			other_changes = []
+
+			for file_path in changed_files:
+				file_name = os.path.basename(file_path)
+				if file_name == CrawlConfig.configFileName:
+					config_changes.append(file_path)
+				elif file_path.endswith('.md'):
+					markdown_changes.append(file_path)
+				else:
+					other_changes.append(file_path)
+
+			# If there are non-markdown, non-config changes, do full rebuild
+			if other_changes:
+				return None
+
+			# If only markdown files changed, we can do selective rebuild
+			if config_changes == [] and markdown_changes:
+				return {'type': 'markdown_only', 'files': markdown_changes}
+
+			# If config files changed, we need to rebuild affected descendants
+			if config_changes:
+				return {
+					'type': 'config_and_descendants',
+					'config_files': config_changes,
+					'markdown_files': markdown_changes,
+				}
+
+			return None
+
 		def on_any_event(self, event: FileSystemEvent) -> None:
 			for ignoreAbsPath in CrawlConfig.ignoreAbsPaths:
 				if ignoreAbsPath in event.src_path or ignoreAbsPath in event.dest_path:
@@ -375,11 +514,11 @@ class Driver:
 						eventHandler.timeOfMostRecentEvent = None
 						pr(f'Detected a change in the following files: {eventHandler.pathsOfChangedFiles}')
 
-						# Check if we can do a selective rebuild for a single Markdown file
-						singleMdFile = eventHandler.isOnlyOneMarkdownFileChanged()
-						if singleMdFile:
+						# Check if we can do a selective rebuild
+						rebuild_info = eventHandler.getSelectiveRebuildInfo()
+						if rebuild_info:
 							pr('\nAttempting selective rebuild...\n')
-							success = self.selectiveRebuildSingleMd(singleMdFile)
+							success = self.selectiveRebuildMultiple(rebuild_info)
 							if success:
 								eventHandler.pathsOfChangedFiles = set()
 								logWatching()
